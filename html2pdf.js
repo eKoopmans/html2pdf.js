@@ -13,6 +13,14 @@ function html2pdf(source, target, optPDF, margin, dpi) {
 	var optCanvas = {width: info.width - margin*2,	height: info.height - margin*2};
 	optCanvas.ratio = optCanvas.height / optCanvas.width;
 
+	// Canvas pixel height (necessary for setting canvas page height later)
+	var kpx = 72 / 96;
+	optCanvas.pxheight = optCanvas.height * (info.k / kpx) * (dpi / 96);
+
+	// Set up CSS styles
+	html2pdf_setStyle( '.pdfpage {width: ' + optCanvas.width + info.unit + '; height: ' + optCanvas.height + info.unit +
+		'; overflow: hidden;}' );
+
 	// Make the template div that will be used as a model for the canvas
 	var divs = html2pdf_makeTemplate(source, optCanvas, info);
 
@@ -71,7 +79,8 @@ function html2pdf_makePDF(canvas, target, optCanvas, optPDF) {
 
 	// Break full canvas into pages
 	var fullHeight = canvas.height;
-	var pageHeight = Math.floor(canvas.width * optCanvas.ratio);
+//	var pageHeight = Math.floor(canvas.width * optCanvas.ratio);
+	var pageHeight = optCanvas.pxheight;
 	var nPages = Math.ceil(fullHeight / pageHeight);
 
 	// Capture the full canvas image, then reduce it to one page
@@ -84,7 +93,7 @@ function html2pdf_makePDF(canvas, target, optCanvas, optPDF) {
 		ctx.fillStyle = '#FFFFFF';
 //		ctx.fillRect(0, 0, canvas.width, canvas.height);
 		ctx.fillRect(-10, -10, canvas.width+20, canvas.height+20);
-		ctx.putImageData(imgFull, 0, -page*pageHeight-1);
+		ctx.putImageData(imgFull, 0, -page*pageHeight);
 
 		// Add the page to the PDF
 		if (page)	pdf.addPage();
@@ -94,6 +103,20 @@ function html2pdf_makePDF(canvas, target, optCanvas, optPDF) {
 
 	// Complete the PDF
 	pdf.save( target );
+}
+
+function html2pdf_setStyle(css) {
+	var head = document.head || document.getElementsByTagName('head')[0],
+		style = document.createElement('style');
+
+	style.type = 'text/css';
+	if (style.styleSheet){
+		style.styleSheet.cssText = css;
+	} else {
+		style.appendChild(document.createTextNode(css));
+	}
+
+	head.appendChild(style);
 }
 
 function jsPDF_getSize(orientation, unit, format) {
@@ -189,6 +212,6 @@ function jsPDF_getSize(orientation, unit, format) {
 	}
 
 	// Return information
-	var info = { 'width': pageWidth, 'height': pageHeight, 'unit': unit };
+	var info = { 'width': pageWidth, 'height': pageHeight, 'unit': unit, 'k': k };
 	return info;
 }
