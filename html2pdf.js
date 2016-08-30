@@ -1,4 +1,9 @@
 function html2pdf(source, target, optPDF, margin, dpi) {
+	// Source may be an HTML string or a DOM element.
+	// html2pdf_makeTemplate draws the Source onto an overlay on-screen.
+	// html2canvas turns that into a canvas.
+	// html2pdf_makePDF uses that canvas to make a PDF.
+
 	// Default options
 	if (!source)	return;
 	target = target || 'file.pdf';
@@ -6,30 +11,24 @@ function html2pdf(source, target, optPDF, margin, dpi) {
 	if (typeof margin !== 'number')	margin = 1;
 	dpi = dpi || 144;
 
-	// Parse the jsPDF information
+	// Get info (page width, height, and units) that will be used by jsPDF
 	var info = jsPDF_getSize(optPDF);
 
 	// Calculate the div size (without margin) and aspect ratio
 	var optCanvas = {width: info.width - margin*2,	height: info.height - margin*2};
 	optCanvas.ratio = optCanvas.height / optCanvas.width;
 
-	// Canvas pixel height (necessary for setting canvas page height later)
-	var kpx = 72 / 96;
-	optCanvas.pxheight = optCanvas.height * (info.k / kpx) * (dpi / 96);
-
-	// Set up CSS styles
-	html2pdf_setStyle( '.pdfpage {width: ' + optCanvas.width + info.unit + '; height: ' + optCanvas.height + info.unit +
-		'; overflow: hidden;}' );
-
 	// Make the template div that will be used as a model for the canvas
 	var divs = html2pdf_makeTemplate(source, optCanvas, info);
 
 	// Make the canvas, which will make the PDF once it's rendered
 	var canvasOptions = {
+		letterRendering: true,
 		dpi: dpi,
 		onrendered: function(canvas) {
-			for (var key in divs)	document.body.removeChild(divs[key]);
-			html2pdf_makePDF(canvas, target, optCanvas, optPDF);
+//			for (var key in divs)	document.body.removeChild(divs[key]);
+			document.body.removeChild['overlay'];
+			html2pdf_makePDF(canvas, target, optCanvas, optPDF, margin);
 		}
 	};
 	html2canvas(divs.template, canvasOptions);
@@ -51,6 +50,17 @@ function html2pdf_makeTemplate(source, optCanvas, info) {
 		left: 0,	right: 0,	top: 0,
 		margin: 'auto',	width: optCanvas.width + info.unit };
 
+	// Set the overlay and template to be invisible
+	overlayCSS.overflow = 'hidden';
+	overlayCSS.visibility = 'hidden';
+	//templateCSS.visibility = 'hidden';
+
+	// 2016-08-30:
+	// Attempts to increase the canvas *drawing* resolution (dpi isn't solving the problem)
+	// Transform: scale doesn't work with html2canvas		//templateCSS.transform = 'scale(2)';
+	// Zoom 200% (below) seems to help a bit
+	templateCSS.zoom = '200%';
+
 	// Create the template div that will be used as a model for the canvas
 	if (typeof source === 'string') {
 		var template = document.createElement('div');
@@ -65,22 +75,23 @@ function html2pdf_makeTemplate(source, optCanvas, info) {
 	setStyle(template, templateCSS);
 
 	// Attach template and overlay to the document
+	overlay.appendChild(template);
 	document.body.appendChild(overlay);
-	document.body.appendChild(template);
+	//document.body.appendChild(template);
 
+	// Return handles to the created divs
 	var divs = {overlay: overlay,	template: template};
 	return divs;
 }
 
-function html2pdf_makePDF(canvas, target, optCanvas, optPDF) {
+function html2pdf_makePDF(canvas, target, optCanvas, optPDF, margin) {
 	// Make the PDF and get canvas context
 	var pdf = new jsPDF(optPDF);
 	var ctx = canvas.getContext('2d');
 
 	// Break full canvas into pages
 	var fullHeight = canvas.height;
-//	var pageHeight = Math.floor(canvas.width * optCanvas.ratio);
-	var pageHeight = optCanvas.pxheight;
+	var pageHeight = Math.floor(canvas.width * optCanvas.ratio);
 	var nPages = Math.ceil(fullHeight / pageHeight);
 
 	// Capture the full canvas image, then reduce it to one page
@@ -93,33 +104,25 @@ function html2pdf_makePDF(canvas, target, optCanvas, optPDF) {
 		ctx.fillStyle = '#FFFFFF';
 //		ctx.fillRect(0, 0, canvas.width, canvas.height);
 		ctx.fillRect(-10, -10, canvas.width+20, canvas.height+20);
-		ctx.putImageData(imgFull, 0, -page*pageHeight);
+		ctx.putImageData(imgFull, 0, -page*pageHeight-1);
 
 		// Add the page to the PDF
 		if (page)	pdf.addPage();
 		var imgData = canvas.toDataURL('image/jpeg', 0.95);
 		pdf.addImage(imgData, 'JPEG', margin, margin, optCanvas.width, optCanvas.height);
+
+		// ALTERNATIVE: Using PNG instead of JPG
+		// var imgData = canvas.toDataURL('image/png');
+		// pdf.addImage(imgData, 'png', margin, margin, optCanvas.width, optCanvas.height);
 	}
 
 	// Complete the PDF
 	pdf.save( target );
 }
 
-function html2pdf_setStyle(css) {
-	var head = document.head || document.getElementsByTagName('head')[0],
-		style = document.createElement('style');
-
-	style.type = 'text/css';
-	if (style.styleSheet){
-		style.styleSheet.cssText = css;
-	} else {
-		style.appendChild(document.createTextNode(css));
-	}
-
-	head.appendChild(style);
-}
-
 function jsPDF_getSize(orientation, unit, format) {
+	// Erik Koopmans: Adapted from jsPDF
+
 	var options = {};
 
 	// Decode options object
@@ -212,6 +215,6 @@ function jsPDF_getSize(orientation, unit, format) {
 	}
 
 	// Return information
-	var info = { 'width': pageWidth, 'height': pageHeight, 'unit': unit, 'k': k };
+	var info = { 'width': pageWidth, 'height': pageHeight, 'unit': unit };
 	return info;
 }
