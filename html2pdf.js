@@ -26,8 +26,7 @@ function html2pdf(source, target, optPDF, margin, dpi) {
 		letterRendering: true,
 		dpi: dpi,
 		onrendered: function(canvas) {
-//			for (var key in divs)	document.body.removeChild(divs[key]);
-			document.body.removeChild['overlay'];
+			document.body.removeChild(divs.overlay);
 			html2pdf_makePDF(canvas, target, optCanvas, optPDF, margin);
 		}
 	};
@@ -53,7 +52,6 @@ function html2pdf_makeTemplate(source, optCanvas, info) {
 	// Set the overlay and template to be invisible
 	overlayCSS.overflow = 'hidden';
 	overlayCSS.visibility = 'hidden';
-	//templateCSS.visibility = 'hidden';
 
 	// 2016-08-30:
 	// Attempts to increase the canvas *drawing* resolution (dpi isn't solving the problem)
@@ -77,7 +75,6 @@ function html2pdf_makeTemplate(source, optCanvas, info) {
 	// Attach template and overlay to the document
 	overlay.appendChild(template);
 	document.body.appendChild(overlay);
-	//document.body.appendChild(template);
 
 	// Return handles to the created divs
 	var divs = {overlay: overlay,	template: template};
@@ -100,11 +97,10 @@ function html2pdf_makePDF(canvas, target, optCanvas, optPDF, margin) {
 
 	// Loop through each page
 	for (var page=0; page<nPages; page++) {
-		// Display the page
+		// Display the page (fill with white a bit past the render edge just in case)
 		ctx.fillStyle = '#FFFFFF';
-//		ctx.fillRect(0, 0, canvas.width, canvas.height);
 		ctx.fillRect(-10, -10, canvas.width+20, canvas.height+20);
-		ctx.putImageData(imgFull, 0, -page*pageHeight-1);
+		ctx.putImageData(imgFull, 0, -page*pageHeight);
 
 		// Add the page to the PDF
 		if (page)	pdf.addPage();
@@ -123,11 +119,9 @@ function html2pdf_makePDF(canvas, target, optCanvas, optPDF, margin) {
 function jsPDF_getSize(orientation, unit, format) {
 	// Erik Koopmans: Adapted from jsPDF
 
-	var options = {};
-
 	// Decode options object
 	if (typeof orientation === 'object') {
-		options = orientation;
+		var options = orientation;
 
 		orientation = options.orientation;
 		unit = options.unit || unit;
@@ -214,7 +208,7 @@ function jsPDF_getSize(orientation, unit, format) {
 		throw('Invalid orientation: ' + orientation);
 	}
 
-	// Return information
-	var info = { 'width': pageWidth, 'height': pageHeight, 'unit': unit };
+	// Return information (k is the unit conversion ratio from pts)
+	var info = { 'width': pageWidth, 'height': pageHeight, 'unit': unit, 'k': k };
 	return info;
 }
