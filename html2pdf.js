@@ -51,7 +51,8 @@ function html2pdf_makeTemplate(source, optCanvas, info) {
 
 	// Set the overlay and template to be invisible
 	overlayCSS.overflow = 'hidden';
-	overlayCSS.visibility = 'hidden';
+	// overlayCSS.visibility = 'hidden';
+    overlayCSS.opacity = 0;
 
 	// 2016-08-30:
 	// Attempts to increase the canvas *drawing* resolution (dpi isn't solving the problem)
