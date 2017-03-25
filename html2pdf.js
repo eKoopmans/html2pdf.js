@@ -46,19 +46,20 @@ function html2pdf_makeTemplate(source, optCanvas, info) {
 		left: 0,	right: 0,	bottom: 0,	top: 0 };
 	templateCSS = {
 		position: 'absolute',	backgroundColor: 'white',		zIndex: 1001,
-		left: 0,	right: 0,	top: 0,
+		left: 0,	right: 0,	top: 0,		height: 'auto',
 		margin: 'auto',	width: optCanvas.width + info.unit };
 
 	// Set the overlay and template to be invisible
 	overlayCSS.overflow = 'hidden';
-	// overlayCSS.visibility = 'hidden';
-    overlayCSS.opacity = 0;
+	// overlayCSS.fontVariantLigatures = 'no-common-ligatures';
+	overlayCSS.fontFeatureSettings = '"liga" 0';
+	overlayCSS.opacity = 0;
 
 	// 2016-08-30:
 	// Attempts to increase the canvas *drawing* resolution (dpi isn't solving the problem)
 	// Transform: scale doesn't work with html2canvas		//templateCSS.transform = 'scale(2)';
 	// Zoom 200% (below) seems to help a bit
-	templateCSS.zoom = '200%';
+	//templateCSS.zoom = '200%';
 
 	// Create the template div that will be used as a model for the canvas
 	if (typeof source === 'string') {
@@ -73,6 +74,10 @@ function html2pdf_makeTemplate(source, optCanvas, info) {
 	setStyle(overlay, overlayCSS);
 	setStyle(template, templateCSS);
 
+	// Set overlay/template classes
+	overlay.className = 'html2pdf__overlay';
+	template.className += ' html2pdf__template';
+
 	// Attach template and overlay to the document
 	overlay.appendChild(template);
 	document.body.appendChild(overlay);
@@ -83,6 +88,8 @@ function html2pdf_makeTemplate(source, optCanvas, info) {
 }
 
 function html2pdf_makePDF(canvas, target, optCanvas, optPDF, margin) {
+//	return document.body.appendChild(canvas);
+
 	// Make the PDF and get canvas context
 	var pdf = new jsPDF(optPDF);
 	var ctx = canvas.getContext('2d');
