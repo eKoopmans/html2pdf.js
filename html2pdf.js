@@ -8,14 +8,24 @@ function html2pdf(source, target, optPDF, margin, dpi) {
 	if (!source)	return;
 	target = target || 'file.pdf';
 	optPDF = optPDF || {};
-	if (typeof margin !== 'number')	margin = 1;
-	dpi = dpi || 144;
+	margin = margin || 1;
+	dpi = dpi || 96*2;
+
+	if (margin.constructor !== Array) {
+		margin = [margin, margin, margin, margin];
+	} else if (margin.length === 2) {
+		// Top, Left, Bottom, Right
+		margin = [margin[0], margin[1], margin[0], margin[1]];
+	}
 
 	// Get info (page width, height, and units) that will be used by jsPDF
 	var info = jsPDF_getSize(optPDF);
 
 	// Calculate the div size (without margin) and aspect ratio
-	var optCanvas = {width: info.width - margin*2,	height: info.height - margin*2};
+	var optCanvas = {
+		width:	info.width - margin[1] - margin[3],
+		height: info.height - margin[0] - margin[2]
+	};
 	optCanvas.ratio = optCanvas.height / optCanvas.width;
 
 	// Make the template div that will be used as a model for the canvas
@@ -113,7 +123,7 @@ function html2pdf_makePDF(canvas, target, optCanvas, optPDF, margin) {
 		// Add the page to the PDF
 		if (page)	pdf.addPage();
 		var imgData = canvas.toDataURL('image/jpeg', 0.95);
-		pdf.addImage(imgData, 'JPEG', margin, margin, optCanvas.width, optCanvas.height);
+		pdf.addImage(imgData, 'JPEG', margin[1], margin[0], optCanvas.width, optCanvas.height);
 
 		// ALTERNATIVE: Using PNG instead of JPG
 		// var imgData = canvas.toDataURL('image/png');
