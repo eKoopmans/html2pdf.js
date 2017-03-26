@@ -62,7 +62,7 @@ function html2pdf_makeTemplate(source, optCanvas, info) {
 	// Set the overlay and template to be invisible
 	overlayCSS.overflow = 'hidden';
 	// overlayCSS.fontVariantLigatures = 'no-common-ligatures';
-	overlayCSS.fontFeatureSettings = '"liga" 0';
+	// overlayCSS.fontFeatureSettings = '"liga" 0';
 	overlayCSS.opacity = 0;
 
 	// 2016-08-30:
