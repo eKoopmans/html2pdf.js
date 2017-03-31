@@ -53,6 +53,18 @@ var html2pdf = (function(html2canvas, jsPDF) {
     var container = html2pdf.makeContainer(source, pageSize);
     var overlay = container.parentElement;
 
+    // Get the locations of all hyperlinks.
+    if (opt.enableLinks) {
+      var links = container.querySelectorAll('a');
+      var containerRect = unitConvert(container.getBoundingClientRect(), pageSize.k);
+      opt.links = Array.prototype.map.call(links, function(link) {
+        var clientRect = unitConvert(link.getBoundingClientRect(), pageSize.k);
+        clientRect.left -= containerRect.left;
+        clientRect.top -= containerRect.top;
+        return { el: link, clientRect: clientRect };
+      });
+    }
+
     // Render the canvas and pass the result to makePDF.
     var onRendered = opt.html2canvas.onrendered || function() {};
     opt.html2canvas.onrendered = function(canvas) {
@@ -81,6 +93,7 @@ var html2pdf = (function(html2canvas, jsPDF) {
     opt.jsPDF = opt.jsPDF || {};
     opt.html2canvas = opt.html2canvas || {};
     opt.filename = opt.filename && objType(opt.filename) === 'string' ? opt.filename : 'file.pdf';
+    opt.enableLinks = opt.hasOwnProperty('enableLinks') ? opt.enableLinks : true;
     opt.image = opt.image || {};
     opt.image.type = opt.image.type || 'jpeg';
     opt.image.quality = opt.image.quality || 0.95;
@@ -148,11 +161,11 @@ var html2pdf = (function(html2canvas, jsPDF) {
 
     // Break the full canvas into pages, then reduce it to one page.
     var ctx = canvas.getContext('2d');
-    var fullHeight = canvas.height;
-    var pageHeight = Math.floor(canvas.width * pageSize.inner.ratio);
-    var nPages = Math.ceil(fullHeight / pageHeight);
+    var pxFullHeight = canvas.height;
+    var pxPageHeight = Math.floor(canvas.width * pageSize.inner.ratio);
+    var nPages = Math.ceil(pxFullHeight / pxPageHeight);
     var imgFull = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    canvas.height = pageHeight;
+    canvas.height = pxPageHeight;
 
     // Initialize the PDF.
     var pdf = new jsPDF(opt.jsPDF);
@@ -161,13 +174,25 @@ var html2pdf = (function(html2canvas, jsPDF) {
       // Display the page (fill with white a bit past the render edge just in case).
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(-10, -10, canvas.width+20, canvas.height+20);
-      ctx.putImageData(imgFull, 0, -page*pageHeight);
+      ctx.putImageData(imgFull, 0, -page*pxPageHeight);
 
       // Add the page to the PDF.
       if (page)  pdf.addPage();
       var imgData = canvas.toDataURL('image/' + opt.image.type, opt.image.quality);
       pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0],
                    pageSize.inner.width, pageSize.inner.height);
+
+      // Add hyperlinks.
+      if (opt.enableLinks) {
+        var pageTop = page * pageSize.inner.height;
+        opt.links.forEach(function(link) {
+          if (link.clientRect.top > pageTop && link.clientRect.top < pageTop + pageSize.inner.height) {
+            var left = opt.margin[1] + link.clientRect.left;
+            var top = opt.margin[0] + link.clientRect.top - pageTop;
+            pdf.link(left, top, link.clientRect.width, link.clientRect.height, { url: link.el.href });
+          }
+        });
+      }
     }
 
     // Finish the PDF.
@@ -197,6 +222,15 @@ var html2pdf = (function(html2canvas, jsPDF) {
       el.style[key] = opt.style[key];
     }
     return el;
+  };
+
+  // Convert units using the conversion value 'k' from jsPDF.
+  var unitConvert = function(obj, k) {
+    var newObj = {};
+    for (var key in obj) {
+      newObj[key] = obj[key] * 72 / 96 / k;
+    }
+    return newObj;
   };
 
   // Get dimensions of a PDF page, as determined by jsPDF.
