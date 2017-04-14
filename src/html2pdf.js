@@ -80,9 +80,7 @@ var html2pdf = (function(html2canvas, jsPDF) {
     if (!source) {
       throw 'Missing source element or string.';
     } else if (objType(source) === 'string') {
-      var htmlStr = source;
-      source = document.createElement('div');
-      source.innerHTML = htmlStr;
+      source = createElement('div', { innerHTML: source });
     } else if (objType(source) === 'element') {
       source = source.cloneNode(true);
     } else {
@@ -217,7 +215,13 @@ var html2pdf = (function(html2canvas, jsPDF) {
   var createElement = function(tagName, opt) {
     var el = document.createElement(tagName);
     if (opt.className)  el.className = opt.className;
-    if (opt.innerHTML)  el.innerHTML = opt.innerHTML;
+    if (opt.innerHTML) {
+      el.innerHTML = opt.innerHTML;
+      var scripts = el.getElementsByTagName('script');
+      for (var i = scripts.length; i-- > 0; null) {
+        scripts[i].parentNode.removeChild(scripts[i]);
+      }
+    }
     for (var key in opt.style) {
       el.style[key] = opt.style[key];
     }
