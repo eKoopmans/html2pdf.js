@@ -48,8 +48,22 @@ The `opt` parameter has the following optional fields:
 |filename    |string          |'file.pdf'                    |The default filename of the exported PDF.                                                    |
 |image       |object          |{type: 'jpeg', quality: 0.95} |The image type used to generate the PDF. It must have two fields: 'type', the image type ('jpeg'/'png'); and 'quality', the image quality (0-1). See [here](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL) for more info (do not include 'image/' in the 'type' field).|
 |enableLinks |boolean         |true                          |If enabled, PDF hyperlinks are automatically added ontop of all anchor tags.                 |
-|html2canvas |object          |{ }                           |Configuration options sent directly to `html2canvas` ([see here](https://github.com/niklasvh/html2canvas) for usage).|
-|jsPDF       |object          |{ }                           |Configuration options sent directly to `jsPDF` ([see here](https://github.com/MrRio/jsPDF) for usage.                |
+|html2canvas |object          |{ }                           |Configuration options sent directly to `html2canvas` ([see here](https://html2canvas.hertzen.com/documentation.html#available-options) for usage).|
+|jsPDF       |object          |{ }                           |Configuration options sent directly to `jsPDF` ([see here](http://rawgit.com/MrRio/jsPDF/master/docs/jsPDF.html) for usage.|
+
+### Extra features
+
+#### Page-breaks
+
+You may add `html2pdf`-specific page-breaks to your document by adding the CSS class `html2pdf__page-break` to any element (normally an empty `div`). During PDF creation, these elements will be given a height calculated to fill the remainder of the PDF page that they are on. Example usage:
+
+```html
+<div id="element-to-print">
+  <span>I'm on page 1!</span>
+  <div class="html2pdf__page-break"></div>
+  <span>I'm on page 2!</span>
+</div>
+```
 
 ## Dependencies
 
