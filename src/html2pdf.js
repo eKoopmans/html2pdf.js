@@ -55,13 +55,20 @@ var html2pdf = (function(html2canvas, jsPDF) {
 
     // Get the locations of all hyperlinks.
     if (opt.enableLinks) {
+      // Find all anchor tags and get the container's bounds for reference.
+      opt.links = [];
       var links = container.querySelectorAll('a');
       var containerRect = unitConvert(container.getBoundingClientRect(), pageSize.k);
-      opt.links = Array.prototype.map.call(links, function(link) {
-        var clientRect = unitConvert(link.getBoundingClientRect(), pageSize.k);
-        clientRect.left -= containerRect.left;
-        clientRect.top -= containerRect.top;
-        return { el: link, clientRect: clientRect };
+
+      // Treat each client rect as a separate link (for text-wrapping).
+      links.forEach(function(link) {
+        var clientRects = link.getClientRects();
+        for (var i=0; i<clientRects.length; i++) {
+          var clientRect = unitConvert(clientRects[i], pageSize.k);
+          clientRect.left -= containerRect.left;
+          clientRect.top -= containerRect.top;
+          opt.links.push({ el: link, clientRect: clientRect });
+        }
       });
     }
 
