@@ -46,10 +46,10 @@ The `opt` parameter has the following optional fields:
 |------------|----------------|------------------------------|---------------------------------------------------------------------------------------------|
 |margin      |number or array |1                             |PDF margin. Array can be either [vMargin, hMargin] or [top, left, bottom, right].            |
 |filename    |string          |'file.pdf'                    |The default filename of the exported PDF.                                                    |
-|image       |object          |{type: 'jpeg', quality: 0.95} |The image type used to generate the PDF. It must have two fields: 'type', the image type ('jpeg'/'png'); and 'quality', the image quality (0-1). See [here](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL) for more info (do not include 'image/' in the 'type' field).|
+|image       |object          |{type: 'jpeg', quality: 0.95} |The image type and quality used to generate the PDF. See the Extra Features section below.   |
 |enableLinks |boolean         |true                          |If enabled, PDF hyperlinks are automatically added ontop of all anchor tags.                 |
 |html2canvas |object          |{ }                           |Configuration options sent directly to `html2canvas` ([see here](https://html2canvas.hertzen.com/documentation.html#available-options) for usage).|
-|jsPDF       |object          |{ }                           |Configuration options sent directly to `jsPDF` ([see here](http://rawgit.com/MrRio/jsPDF/master/docs/jsPDF.html) for usage.|
+|jsPDF       |object          |{ }                           |Configuration options sent directly to `jsPDF` ([see here](http://rawgit.com/MrRio/jsPDF/master/docs/jsPDF.html) for usage).|
 
 ### Extra features
 
@@ -64,6 +64,17 @@ You may add `html2pdf`-specific page-breaks to your document by adding the CSS c
   <span>I'm on page 2!</span>
 </div>
 ```
+
+#### Image type and quality
+
+You may customize the image type and quality exported from the canvas by setting the `image` option. This must be an object with the following fields:
+
+|Name        |Type            |Default                       |Description                                                                                  |
+|------------|----------------|------------------------------|---------------------------------------------------------------------------------------------|
+|type        |string          |'jpeg'                        |The image type. HTMLCanvasElement only supports 'png', 'jpeg', and 'webp' (on Chrome).       |
+|quality     |number          |0.95                          |The image quality, from 0 to 1. This setting is only used for jpeg/webp (not png).           |
+
+These options are limited to the available settings for [HTMLCanvasElement.toDataURL()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL), which ignores quality settings for 'png' images. To enable png image compression, try using the [canvas-png-compression shim](https://github.com/ShyykoSerhiy/canvas-png-compression), which should be an in-place solution to enable png compression via the `quality` option.
 
 ## Dependencies
 
