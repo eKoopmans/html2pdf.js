@@ -82,6 +82,16 @@ html2pdf depends on the external packages [`html2canvas`](https://github.com/nik
 
 For best results, use [this custom build](https://github.com/eKoopmans/html2canvas/tree/develop) of `html2canvas`, which adds support for box-shadows and custom resolutions (via the `dpi`/`scale` options), and [this build](https://github.com/eKoopmans/html2pdf/blob/master/vendor/jspdf.min.js) of jsPDF, which contains a hotfix for hyperlinks.
 
+## Contributing
+
+### Issues
+
+When submitting an issue, please provide reproducible code that highlights the issue, preferably by creating a fork of [this template jsFiddle](https://jsfiddle.net/o0kL8zkk/) (which has html2canvas and its dependencies already included as external resources). Remember that html2pdf uses [html2canvas](https://github.com/niklasvh/html2canvas) and [jsPDF](https://github.com/MrRio/jsPDF) as dependencies, so it's a good idea to check each of those repositories' issue trackers to see if your problem has already been addressed.
+
+### Pull requests
+
+Right now, html2pdf is a single source file located in `/src/`. If you want to create a new feature or bugfix, feel free to fork and submit a pull request!
+
 ## Credits
 
 [Erik Koopmans](https://github.com/eKoopmans)
