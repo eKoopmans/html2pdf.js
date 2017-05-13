@@ -151,7 +151,7 @@ var html2pdf = (function(html2canvas, jsPDF) {
     // Enable page-breaks.
     var pageBreaks = source.querySelectorAll('.html2pdf__page-break');
     var pxPageHeight = pageSize.inner.height * pageSize.k / 72 * 96;
-    pageBreaks.forEach(function(el) {
+    Array.prototype.forEach.call(pageBreaks, function(el) {
       el.style.display = 'block';
       var clientRect = el.getBoundingClientRect();
       el.style.height = pxPageHeight - (clientRect.top % pxPageHeight) + 'px';
