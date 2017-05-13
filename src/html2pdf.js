@@ -61,7 +61,7 @@ var html2pdf = (function(html2canvas, jsPDF) {
       var containerRect = unitConvert(container.getBoundingClientRect(), pageSize.k);
 
       // Treat each client rect as a separate link (for text-wrapping).
-      links.forEach(function(link) {
+      Array.prototype.forEach.call(links, function(link) {
         var clientRects = link.getClientRects();
         for (var i=0; i<clientRects.length; i++) {
           var clientRect = unitConvert(clientRects[i], pageSize.k);
