@@ -44,7 +44,7 @@ The `opt` parameter has the following optional fields:
 
 |Name        |Type            |Default                       |Description                                                                                  |
 |------------|----------------|------------------------------|---------------------------------------------------------------------------------------------|
-|margin      |number or array |1                             |PDF margin. Array can be either [vMargin, hMargin] or [top, left, bottom, right].            |
+|margin      |number or array |0                             |PDF margin. Array can be either [vMargin, hMargin] or [top, left, bottom, right].            |
 |filename    |string          |'file.pdf'                    |The default filename of the exported PDF.                                                    |
 |image       |object          |{type: 'jpeg', quality: 0.95} |The image type and quality used to generate the PDF. See the Extra Features section below.   |
 |enableLinks |boolean         |true                          |If enabled, PDF hyperlinks are automatically added ontop of all anchor tags.                 |

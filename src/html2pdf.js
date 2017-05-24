@@ -106,7 +106,7 @@ var html2pdf = (function(html2canvas, jsPDF) {
     // Parse the margin property of the opt object.
     switch (objType(opt.margin)) {
       case 'undefined':
-        opt.margin = 1;
+        opt.margin = 0;
       case 'number':
         opt.margin = [opt.margin, opt.margin, opt.margin, opt.margin];
         break;
