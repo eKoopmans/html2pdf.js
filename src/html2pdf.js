@@ -162,30 +162,35 @@ var html2pdf = (function(html2canvas, jsPDF) {
   };
 
   html2pdf.makePDF = function(canvas, pageSize, opt) {
-    // return document.body.appendChild(canvas);
-
-    // Break the full canvas into pages, then reduce it to one page.
+    // Calculate the number of pages and get the full canvas image.
     var ctx = canvas.getContext('2d');
     var pxFullHeight = canvas.height;
     var pxPageHeight = Math.floor(canvas.width * pageSize.inner.ratio);
     var nPages = Math.ceil(pxFullHeight / pxPageHeight);
     var imgFull = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    canvas.height = pxPageHeight;
+
+    // Create a one-page canvas to split up the full image.
+    var pageCanvas = document.createElement('canvas');
+    var pageCtx = pageCanvas.getContext('2d');
+    pageCanvas.width = canvas.width;
+    pageCanvas.height = pxPageHeight;
 
     // Initialize the PDF.
     var pdf = new jsPDF(opt.jsPDF);
 
     for (var page=0; page<nPages; page++) {
+      // Trim the final page to reduce file size.
+      if (page === nPages-1)  pageCanvas.height = pxFullHeight % pxPageHeight;
+
       // Display the page (fill with white a bit past the render edge just in case).
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(-10, -10, canvas.width+20, canvas.height+20);
-      ctx.putImageData(imgFull, 0, -page*pxPageHeight);
+      pageCtx.fillStyle = '#FFFFFF';
+      pageCtx.fillRect(-10, -10, pageCanvas.width+20, pageCanvas.height+20);
+      pageCtx.putImageData(imgFull, 0, -page*pxPageHeight);
 
       // Add the page to the PDF.
       if (page)  pdf.addPage();
-      var imgData = canvas.toDataURL('image/' + opt.image.type, opt.image.quality);
-      pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0],
-                   pageSize.inner.width, pageSize.inner.height);
+      var imgData = pageCanvas.toDataURL('image/' + opt.image.type, opt.image.quality);
+      pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0]);
 
       // Add hyperlinks.
       if (opt.enableLinks) {
