@@ -162,12 +162,11 @@ var html2pdf = (function(html2canvas, jsPDF) {
   };
 
   html2pdf.makePDF = function(canvas, pageSize, opt) {
-    // Calculate the number of pages and get the full canvas image.
+    // Calculate the number of pages.
     var ctx = canvas.getContext('2d');
     var pxFullHeight = canvas.height;
     var pxPageHeight = Math.floor(canvas.width * pageSize.inner.ratio);
     var nPages = Math.ceil(pxFullHeight / pxPageHeight);
-    var imgFull = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
     // Create a one-page canvas to split up the full image.
     var pageCanvas = document.createElement('canvas');
@@ -182,10 +181,12 @@ var html2pdf = (function(html2canvas, jsPDF) {
       // Trim the final page to reduce file size.
       if (page === nPages-1)  pageCanvas.height = pxFullHeight % pxPageHeight;
 
-      // Display the page (fill with white a bit past the render edge just in case).
-      pageCtx.fillStyle = '#FFFFFF';
-      pageCtx.fillRect(-10, -10, pageCanvas.width+20, pageCanvas.height+20);
-      pageCtx.putImageData(imgFull, 0, -page*pxPageHeight);
+      // Display the page.
+      var w = pageCanvas.width;
+      var h = pageCanvas.height;
+      pageCtx.fillStyle = 'white';
+      pageCtx.fillRect(0, 0, w, h);
+      pageCtx.drawImage(canvas, 0, page*pxPageHeight, w, h, 0, 0, w, h);
 
       // Add the page to the PDF.
       if (page)  pdf.addPage();
