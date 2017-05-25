@@ -171,6 +171,7 @@ var html2pdf = (function(html2canvas, jsPDF) {
     // Create a one-page canvas to split up the full image.
     var pageCanvas = document.createElement('canvas');
     var pageCtx = pageCanvas.getContext('2d');
+    var pageHeight = pageSize.inner.height;
     pageCanvas.width = canvas.width;
     pageCanvas.height = pxPageHeight;
 
@@ -179,7 +180,10 @@ var html2pdf = (function(html2canvas, jsPDF) {
 
     for (var page=0; page<nPages; page++) {
       // Trim the final page to reduce file size.
-      if (page === nPages-1)  pageCanvas.height = pxFullHeight % pxPageHeight;
+      if (page === nPages-1) {
+        pageCanvas.height = pxFullHeight % pxPageHeight;
+        pageHeight = pageCanvas.height * pageSize.inner.width / pageCanvas.width;
+      }
 
       // Display the page.
       var w = pageCanvas.width;
@@ -191,7 +195,8 @@ var html2pdf = (function(html2canvas, jsPDF) {
       // Add the page to the PDF.
       if (page)  pdf.addPage();
       var imgData = pageCanvas.toDataURL('image/' + opt.image.type, opt.image.quality);
-      pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0]);
+      pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0],
+                   pageSize.inner.width, pageHeight);
 
       // Add hyperlinks.
       if (opt.enableLinks) {
