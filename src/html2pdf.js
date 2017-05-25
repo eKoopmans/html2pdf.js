@@ -83,17 +83,6 @@ var html2pdf = (function(html2canvas, jsPDF) {
   };
 
   html2pdf.parseInput = function(source, opt) {
-    // Parse the source element/string.
-    if (!source) {
-      throw 'Missing source element or string.';
-    } else if (objType(source) === 'string') {
-      source = createElement('div', { innerHTML: source });
-    } else if (objType(source) === 'element') {
-      source = source.cloneNode(true);
-    } else {
-      throw 'Invalid source - please specify an HTML Element or string.';
-    }
-
     // Parse the opt object.
     opt.jsPDF = opt.jsPDF || {};
     opt.html2canvas = opt.html2canvas || {};
@@ -119,6 +108,17 @@ var html2pdf = (function(html2canvas, jsPDF) {
         }
       default:
         throw 'Invalid margin array.';
+    }
+
+    // Parse the source element/string.
+    if (!source) {
+      throw 'Missing source element or string.';
+    } else if (objType(source) === 'string') {
+      source = createElement('div', { innerHTML: source });
+    } else if (objType(source) === 'element') {
+      source = cloneNode(source, opt.html2canvas.javascriptEnabled);
+    } else {
+      throw 'Invalid source - please specify an HTML Element or string.';
     }
 
     // Return the parsed input (opt is modified in-place, no need to return).
@@ -245,6 +245,37 @@ var html2pdf = (function(html2canvas, jsPDF) {
     }
     return el;
   };
+
+  // Deep-clone a node and preserve contents/properties.
+  var cloneNode = function(node, javascriptEnabled) {
+    // Recursively clone the node.
+    var clone = node.nodeType === 3 ? document.createTextNode(node.nodeValue) : node.cloneNode(false);
+    for (var child = node.firstChild; child; child = child.nextSibling) {
+      if (javascriptEnabled === true || child.nodeType !== 1 || child.nodeName !== 'SCRIPT') {
+        clone.appendChild(cloneNode(child, javascriptEnabled));
+      }
+    }
+
+    if (node.nodeType === 1) {
+      // Preserve contents/properties of special nodes.
+      if (node.nodeName === 'CANVAS') {
+        clone.width = node.width;
+        clone.height = node.height;
+        clone.getContext('2d').drawImage(node, 0, 0);
+      } else if (node.nodeName === 'TEXTAREA' || node.nodeName === 'SELECT') {
+        clone.value = node.value;
+      }
+
+      // Preserve the node's scroll position when it loads.
+      clone.addEventListener('load', function() {
+        clone.scrollTop = node.scrollTop;
+        clone.scrollLeft = node.scrollLeft;
+      }, true);
+    }
+
+    // Return the cloned node.
+    return clone;
+  }
 
   // Convert units using the conversion value 'k' from jsPDF.
   var unitConvert = function(obj, k) {
