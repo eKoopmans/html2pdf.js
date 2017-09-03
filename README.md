@@ -14,7 +14,7 @@ html2pdf converts any webpage or element into a printable PDF entirely client-si
 <script src="html2pdf.js"></script>
 ```
 
-**Note:** For best results, use the custom builds of `html2canvas` and `jsPDF` found in the `vendor` folder, which contain added features and hotfixes.
+**Note:** For best results, use the custom build of `html2canvas` found in the `vendor` folder, which contains added features and hotfixes.
 
 ## Usage
 
@@ -80,7 +80,7 @@ These options are limited to the available settings for [HTMLCanvasElement.toDat
 
 html2pdf depends on the external packages [`html2canvas`](https://github.com/niklasvh/html2canvas) and [`jsPDF`](https://github.com/MrRio/jsPDF).
 
-For best results, use [this custom build](https://github.com/eKoopmans/html2canvas/tree/develop) of `html2canvas`, which adds support for box-shadows and custom resolutions (via the `dpi`/`scale` options), and [this build](https://github.com/eKoopmans/html2pdf/blob/master/vendor/jspdf.min.js) of jsPDF, which contains a hotfix for hyperlinks.
+For best results, use [this custom build](https://github.com/eKoopmans/html2canvas/tree/develop) of `html2canvas`, which includes bugfixes and adds support for box-shadows and custom resolutions (via the `dpi`/`scale` options).
 
 ## Contributing
 
