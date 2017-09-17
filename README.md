@@ -8,7 +8,7 @@ html2pdf converts any webpage or element into a printable PDF entirely client-si
 2. Fetch the dependencies `html2canvas` and `jsPDF`, which can be found in the `vendor` folder.
 3. Include the files in your HTML document (**order is important**, otherwise `jsPDF` will override `html2canvas` with its own internal implementation):
 
-```js
+```html
 <script src="jspdf.min.js"></script>
 <script src="html2canvas.min.js"></script>
 <script src="html2pdf.js"></script>
