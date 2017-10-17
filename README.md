@@ -55,7 +55,7 @@ The `opt` parameter has the following optional fields:
 
 #### Page-breaks
 
-You may add `html2pdf`-specific page-breaks to your document by adding the CSS class `html2pdf__page-break` to any element (normally an empty `div`). During PDF creation, these elements will be given a height calculated to fill the remainder of the PDF page that they are on. Example usage:
+You may add `html2pdf`-specific page-breaks to your document by adding the CSS class `html2pdf__page-break` to any element (normally an empty `div`). For React elements, use `className=html2pdf__page-break`. During PDF creation, these elements will be given a height calculated to fill the remainder of the PDF page that they are on. Example usage:
 
 ```html
 <div id="element-to-print">
