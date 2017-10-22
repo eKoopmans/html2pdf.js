@@ -38,12 +38,12 @@ var html2pdf = (function (html2canvas, jsPDF) {
 
         var html2pdf = function (source, opt) {
             // Handle input.
-            opt = objType(opt) === 'object' ? opt : {};
+            opt        = objType(opt) === 'object' ? opt : {};
             var source = html2pdf.parseInput(source, opt);
 
             // Determine the PDF page size.
-            var pageSize = jsPDF.getPageSize(opt.jsPDF);
-            pageSize.inner = {
+            var pageSize         = jsPDF.getPageSize(opt.jsPDF);
+            pageSize.inner       = {
                 width: pageSize.width - opt.margin[1] - opt.margin[3],
                 height: pageSize.height - opt.margin[0] - opt.margin[2]
             };
@@ -51,13 +51,13 @@ var html2pdf = (function (html2canvas, jsPDF) {
 
             // Copy the source element into a PDF-styled container div.
             var container = html2pdf.makeContainer(source, pageSize);
-            var overlay = container.parentElement;
+            var overlay   = container.parentElement;
 
             // Get the locations of all hyperlinks.
             if (opt.enableLinks) {
                 // Find all anchor tags and get the container's bounds for reference.
-                opt.links = [];
-                var links = container.querySelectorAll('a');
+                opt.links         = [];
+                var links         = container.querySelectorAll('a');
                 var containerRect = unitConvert(container.getBoundingClientRect(), pageSize.k);
 
                 // Treat each client rect as a separate link (for text-wrapping).
@@ -67,13 +67,13 @@ var html2pdf = (function (html2canvas, jsPDF) {
                         var clientRect = unitConvert(clientRects[i], pageSize.k);
                         clientRect.left -= containerRect.left;
                         clientRect.top -= containerRect.top;
-                        opt.links.push({el: link, clientRect: clientRect});
+                        opt.links.push({ el: link, clientRect: clientRect });
                     }
                 });
             }
 
             // Render the canvas and pass the result to makePDF.
-            var onRendered = opt.html2canvas.onrendered || function () {
+            var onRendered             = opt.html2canvas.onrendered || function () {
             };
             opt.html2canvas.onrendered = function (canvas) {
                 onRendered(canvas);
@@ -85,12 +85,12 @@ var html2pdf = (function (html2canvas, jsPDF) {
 
         html2pdf.parseInput = function (source, opt) {
             // Parse the opt object.
-            opt.jsPDF = opt.jsPDF || {};
-            opt.html2canvas = opt.html2canvas || {};
-            opt.filename = opt.filename && objType(opt.filename) === 'string' ? opt.filename : 'file.pdf';
-            opt.enableLinks = opt.hasOwnProperty('enableLinks') ? opt.enableLinks : true;
-            opt.image = opt.image || {};
-            opt.image.type = opt.image.type || 'jpeg';
+            opt.jsPDF         = opt.jsPDF || {};
+            opt.html2canvas   = opt.html2canvas || {};
+            opt.filename      = opt.filename && objType(opt.filename) === 'string' ? opt.filename : 'file.pdf';
+            opt.enableLinks   = opt.hasOwnProperty('enableLinks') ? opt.enableLinks : true;
+            opt.image         = opt.image || {};
+            opt.image.type    = opt.image.type || 'jpeg';
             opt.image.quality = opt.image.quality || 0.95;
 
             // Parse the margin property of the opt object.
@@ -115,7 +115,7 @@ var html2pdf = (function (html2canvas, jsPDF) {
             if (!source) {
                 throw 'Missing source element or string.';
             } else if (objType(source) === 'string') {
-                source = createElement('div', {innerHTML: source});
+                source = createElement('div', { innerHTML: source });
             } else if (objType(source) === 'element') {
                 source = cloneNode(source, opt.html2canvas.javascriptEnabled);
             } else {
@@ -128,7 +128,7 @@ var html2pdf = (function (html2canvas, jsPDF) {
 
         html2pdf.makeContainer = function (source, pageSize) {
             // Define the CSS styles for the container and its overlay parent.
-            var overlayCSS = {
+            var overlayCSS   = {
                 position: 'fixed', overflow: 'hidden', zIndex: 1000,
                 left: 0, right: 0, bottom: 0, top: 0,
                 backgroundColor: 'rgba(0,0,0,0.8)'
@@ -143,82 +143,98 @@ var html2pdf = (function (html2canvas, jsPDF) {
             overlayCSS.opacity = 0;
 
             // Create and attach the elements.
-            var overlay = createElement('div', {className: 'html2pdf__overlay', style: overlayCSS});
-            var container = createElement('div', {className: 'html2pdf__container', style: containerCSS});
+            var overlay   = createElement('div', { className: 'html2pdf__overlay', style: overlayCSS });
+            var container = createElement('div', { className: 'html2pdf__container', style: containerCSS });
             container.appendChild(source);
             overlay.appendChild(container);
             document.body.appendChild(overlay);
 
             // Enable page-breaks.
-            var pageBreaks = source.querySelectorAll('.html2pdf__page-break');
+            var pageBreaks   = source.querySelectorAll('.html2pdf__page-break');
             var pxPageHeight = pageSize.inner.height * pageSize.k / 72 * 96;
             Array.prototype.forEach.call(pageBreaks, function (el) {
                 el.style.display = 'block';
-                var clientRect = el.getBoundingClientRect();
-                el.style.height = pxPageHeight - (clientRect.top % pxPageHeight) + 'px';
+                var clientRect   = el.getBoundingClientRect();
+                el.style.height  = pxPageHeight - (clientRect.top % pxPageHeight) + 'px';
             }, this);
 
             // Return the container.
             return container;
         };
 
+        /**
+         * this function gets canvas data array, and will return if the row is white
+         * @param canvasRowArr
+         */
+        html2pdf.isCanvasRowWhite = function(canvasRowArr) {
+            var numberOfAllowedBlacks = 1;
+            var origValsArr = [];
+            var whiteColorLevel = 150;
+            var minVal, minValInx
+            for(var ii = 0; ii < numberOfAllowedBlacks; ii++) {
+                minVal = Math.min.apply(null, canvasRowArr);
+                minValInx = canvasRowArr.indexOf(minVal);
+                origValsArr.push({dataIndex: minValInx, dataValue: minVal});
+                canvasRowArr[minValInx] = 255;
+            }
+            var minValToCheck = Math.min.apply(null, canvasRowArr);
+            for(var kk = 0; kk < numberOfAllowedBlacks; kk++) {
+                canvasRowArr[origValsArr[kk].dataIndex] = origValsArr[kk].dataValue;
+            }
+
+            return (minValToCheck > whiteColorLevel) || true;
+        };
+
+        /**
+         * @desc (ilan 16/10/2017) - added support to cut the pages on white rows and now on text. added on page break check for the row that gonna be broken, and if the row isn't white - will check for the closest white row above.
+         * @param canvas
+         * @param pageSize
+         * @param opt
+         */
         html2pdf.makePDF = function (canvas, pageSize, opt) {
             // Calculate the number of pages.
-            var ctx = canvas.getContext('2d');
+            var ctx          = canvas.getContext('2d');
             var pxFullHeight = canvas.height;
             var pxPageHeight = Math.floor(canvas.width * pageSize.inner.ratio);
-            var nPages = Math.ceil(pxFullHeight / pxPageHeight);
-            var pageModulus = pxFullHeight % pxPageHeight;
+            var nPages       = Math.ceil(pxFullHeight / pxPageHeight);
+            var pageModulus  = pxFullHeight % pxPageHeight;
 
             // Create a one-page canvas to split up the full image.
-            var pageCanvas = document.createElement('canvas');
-            var pageCtx = pageCanvas.getContext('2d');
-            var pageHeight = pageSize.inner.height;
-            pageCanvas.width = canvas.width;
+            var pageCanvas    = document.createElement('canvas');
+            var pageCtx       = pageCanvas.getContext('2d');
+            var pageHeight    = pageSize.inner.height;
+            pageCanvas.width  = canvas.width;
             pageCanvas.height = pxPageHeight;
 
             // Initialize the PDF.
             var pdf = new jsPDF(opt.jsPDF);
 
-            /**
-             * added support for page split only on white "rows".
-             * check if pixel is not "white" if it is less than whiteColorLevel value for the rgb values
-             * if the row isn't "white" - will go one pixel up and test that row, up to max. number of maxPixelToGoUp rows up
-             *
-             */
-            var whiteColorLevel = 150;
-            var maxPixelToGoUp = 150;
             var pageStartPos = 0;
+            var maxPixelToGoUp = 150;
             for (var page = 0; page < nPages; page++) {
                 // Trim the final page to reduce file size.
                 if (page === nPages - 1) {
                     pageCanvas.height = pageModulus;
-                    pageHeight = pageCanvas.height * pageSize.inner.width / pageCanvas.width;
+                    pageHeight        = pageCanvas.height * pageSize.inner.width / pageCanvas.width;
                 }
                 // Display the page.
-                var w = pageCanvas.width;
+                var w              = pageCanvas.width;
                 var heightDrawBack = 0;
                 do {
 
-                    var h = pageCanvas.height - heightDrawBack;
-                    var whiteRow = true;
-                    var wPix = 0;
-                    var bPixCount = 0;
-
-                    while (wPix < w && whiteRow) {
-                        var pixelData = ctx.getImageData(wPix, pageStartPos + h, 1, 1).data;
-                        if (pixelData[0] < whiteColorLevel || pixelData[1] < whiteColorLevel || pixelData[2] < whiteColorLevel) {
-                            bPixCount++;
-                            if (bPixCount > 1) {
-                                whiteRow = false;
-                            }
-                        }
-                        wPix++;
-                    }
+                    var h         = pageCanvas.height - heightDrawBack;
+                    var pixelRow = ctx.getImageData(0, pageStartPos+h, w, 1).data;
+                    var whiteRow = html2pdf.isCanvasRowWhite(pixelRow);
                     heightDrawBack++;
                 }
                 while (!whiteRow && heightDrawBack < maxPixelToGoUp) ;
-                heightDrawBack--;
+                if(heightDrawBack === maxPixelToGoUp) {
+                    heightDrawBack = 0;
+                    h = pageCanvas.height;
+                }
+                else {
+                    heightDrawBack--;
+                }
                 pageModulus += heightDrawBack;
                 if (pageModulus >= pxPageHeight) {
                     nPages++;
@@ -228,7 +244,7 @@ var html2pdf = (function (html2canvas, jsPDF) {
                 pageCtx.fillRect(0, 0, w, h);
                 pageCtx.drawImage(canvas, 0, pageStartPos, w, h, 0, 0, w, h);
 
-                if (heightDrawBack) pageCtx.fillRect(0, h, w, heightDrawBack);
+                if(heightDrawBack) pageCtx.fillRect(0, h, w, heightDrawBack);
 
                 // Add the page to the PDF.
                 if (page) pdf.addPage();
@@ -243,15 +259,20 @@ var html2pdf = (function (html2canvas, jsPDF) {
                     opt.links.forEach(function (link) {
                         if (link.clientRect.top > pageTop && link.clientRect.top < pageTop + pageSize.inner.height) {
                             var left = opt.margin[1] + link.clientRect.left;
-                            var top = opt.margin[0] + link.clientRect.top - pageTop;
-                            pdf.link(left, top, link.clientRect.width, link.clientRect.height, {url: link.el.href});
+                            var top  = opt.margin[0] + link.clientRect.top - pageTop;
+                            pdf.link(left, top, link.clientRect.width, link.clientRect.height, { url: link.el.href });
                         }
                     });
                 }
             }
 
             // Finish the PDF.
-            pdf.save(opt.filename);
+            if (typeof opt.downloadPDF === 'undefined' || opt.downloadPDF) {
+                pdf.save(opt.filename);
+            }
+            if (typeof opt.callback === 'function') {
+                opt.callback(pdf);
+            }
         }
 
 
@@ -274,7 +295,7 @@ var html2pdf = (function (html2canvas, jsPDF) {
             if (opt.className) el.className = opt.className;
             if (opt.innerHTML) {
                 el.innerHTML = opt.innerHTML;
-                var scripts = el.getElementsByTagName('script');
+                var scripts  = el.getElementsByTagName('script');
                 for (var i = scripts.length; i-- > 0; null) {
                     scripts[i].parentNode.removeChild(scripts[i]);
                 }
@@ -298,7 +319,7 @@ var html2pdf = (function (html2canvas, jsPDF) {
             if (node.nodeType === 1) {
                 // Preserve contents/properties of special nodes.
                 if (node.nodeName === 'CANVAS') {
-                    clone.width = node.width;
+                    clone.width  = node.width;
                     clone.height = node.height;
                     clone.getContext('2d').drawImage(node, 0, 0);
                 } else if (node.nodeName === 'TEXTAREA' || node.nodeName === 'SELECT') {
@@ -307,7 +328,7 @@ var html2pdf = (function (html2canvas, jsPDF) {
 
                 // Preserve the node's scroll position when it loads.
                 clone.addEventListener('load', function () {
-                    clone.scrollTop = node.scrollTop;
+                    clone.scrollTop  = node.scrollTop;
                     clone.scrollLeft = node.scrollLeft;
                 }, true);
             }
@@ -331,14 +352,14 @@ var html2pdf = (function (html2canvas, jsPDF) {
             if (typeof orientation === 'object') {
                 var options = orientation;
                 orientation = options.orientation;
-                unit = options.unit || unit;
-                format = options.format || format;
+                unit        = options.unit || unit;
+                format      = options.format || format;
             }
 
             // Default options
-            unit = unit || 'mm';
-            format = format || 'a4';
-            orientation = ('' + (orientation || 'P')).toLowerCase();
+            unit                 = unit || 'mm';
+            format               = format || 'a4';
+            orientation          = ('' + (orientation || 'P')).toLowerCase();
             var format_as_string = ('' + format).toLowerCase();
 
             // Size in pt of various paper formats
@@ -402,11 +423,11 @@ var html2pdf = (function (html2canvas, jsPDF) {
             // Dimensions are stored as user units and converted to points on output
             if (pageFormats.hasOwnProperty(format_as_string)) {
                 pageHeight = pageFormats[format_as_string][1] / k;
-                pageWidth = pageFormats[format_as_string][0] / k;
+                pageWidth  = pageFormats[format_as_string][0] / k;
             } else {
                 try {
                     pageHeight = format[1];
-                    pageWidth = format[0];
+                    pageWidth  = format[0];
                 } catch (err) {
                     throw new Error('Invalid format: ' + format);
                 }
@@ -416,15 +437,15 @@ var html2pdf = (function (html2canvas, jsPDF) {
             if (orientation === 'p' || orientation === 'portrait') {
                 orientation = 'p';
                 if (pageWidth > pageHeight) {
-                    tmp = pageWidth;
-                    pageWidth = pageHeight;
+                    tmp        = pageWidth;
+                    pageWidth  = pageHeight;
                     pageHeight = tmp;
                 }
             } else if (orientation === 'l' || orientation === 'landscape') {
                 orientation = 'l';
                 if (pageHeight > pageWidth) {
-                    tmp = pageWidth;
-                    pageWidth = pageHeight;
+                    tmp        = pageWidth;
+                    pageWidth  = pageHeight;
                     pageHeight = tmp;
                 }
             } else {
@@ -432,7 +453,7 @@ var html2pdf = (function (html2canvas, jsPDF) {
             }
 
             // Return information (k is the unit conversion ratio from pts)
-            var info = {'width': pageWidth, 'height': pageHeight, 'unit': unit, 'k': k};
+            var info = { 'width': pageWidth, 'height': pageHeight, 'unit': unit, 'k': k };
             return info;
         };
 
