@@ -170,7 +170,7 @@ var html2pdf = (function (html2canvas, jsPDF) {
             var numberOfAllowedBlacks = 1;
             var origValsArr = [];
             var whiteColorLevel = 150;
-            var minVal, minValInx
+            var minVal, minValInx;
             for(var ii = 0; ii < numberOfAllowedBlacks; ii++) {
                 minVal = Math.min.apply(null, canvasRowArr);
                 minValInx = canvasRowArr.indexOf(minVal);
@@ -182,7 +182,7 @@ var html2pdf = (function (html2canvas, jsPDF) {
                 canvasRowArr[origValsArr[kk].dataIndex] = origValsArr[kk].dataValue;
             }
 
-            return (minValToCheck > whiteColorLevel) || true;
+            return (minValToCheck > whiteColorLevel);
         };
 
         /**
