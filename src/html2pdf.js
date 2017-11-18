@@ -31,12 +31,14 @@
  * @param {Object=} opt An object of optional settings: 'margin', 'filename',
  *    'image' ('type' and 'quality'), and 'html2canvas' / 'jspdf', which are
  *    sent as settings to their corresponding functions.
+ * @param {function()} notifyFn define this function if you want to be notifyed
+ *    when process is done. E.g. html2pdf(source, opt, () => { console.log('done.'); });
  */
 var html2pdf = (function(html2canvas, jsPDF) {
 
   /* ---------- MAIN FUNCTION ---------- */
 
-  var html2pdf = function(source, opt) {
+  var html2pdf = function(source, opt, notifyFn) {
     // Handle input.
     opt = objType(opt) === 'object' ? opt : {};
     var source = html2pdf.parseInput(source, opt);
@@ -78,6 +80,9 @@ var html2pdf = (function(html2canvas, jsPDF) {
       onRendered(canvas);
       document.body.removeChild(overlay);
       html2pdf.makePDF(canvas, pageSize, opt);
+	  if (notifyFn) {
+		notifyFn();
+	  }
     }
     html2canvas(container, opt.html2canvas);
   };
