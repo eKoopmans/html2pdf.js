@@ -24,6 +24,8 @@
  * SOFTWARE.
  */
 
+import { objType, createElement, cloneNode, unitConvert } from './utils.js';
+
 /**
  * Generate a PDF from an HTML element or string using html2canvas and jsPDF.
  *

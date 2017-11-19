@@ -1,5 +1,5 @@
 // Determine the type of a variable/object.
-var objType = function(obj) {
+export const objType = function(obj) {
   if (typeof obj === 'undefined')                             return 'undefined';
   else if (typeof obj === 'string' || obj instanceof String)  return 'string';
   else if (typeof obj === 'number' || obj instanceof Number)  return 'number';
@@ -10,7 +10,7 @@ var objType = function(obj) {
 };
 
 // Create an HTML element with optional className, innerHTML, and style.
-var createElement = function(tagName, opt) {
+export const createElement = function(tagName, opt) {
   var el = document.createElement(tagName);
   if (opt.className)  el.className = opt.className;
   if (opt.innerHTML) {
@@ -27,7 +27,7 @@ var createElement = function(tagName, opt) {
 };
 
 // Deep-clone a node and preserve contents/properties.
-var cloneNode = function(node, javascriptEnabled) {
+export const cloneNode = function(node, javascriptEnabled) {
   // Recursively clone the node.
   var clone = node.nodeType === 3 ? document.createTextNode(node.nodeValue) : node.cloneNode(false);
   for (var child = node.firstChild; child; child = child.nextSibling) {
@@ -58,7 +58,7 @@ var cloneNode = function(node, javascriptEnabled) {
 }
 
 // Convert units using the conversion value 'k' from jsPDF.
-var unitConvert = function(obj, k) {
+export const unitConvert = function(obj, k) {
   var newObj = {};
   for (var key in obj) {
     newObj[key] = obj[key] * 72 / 96 / k;
