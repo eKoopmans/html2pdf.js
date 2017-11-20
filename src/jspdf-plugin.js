@@ -1,3 +1,6 @@
+// Import dependencies.
+import jsPDF from 'jspdf';
+
 // Get dimensions of a PDF page, as determined by jsPDF.
 jsPDF.getPageSize = function(orientation, unit, format) {
   // Decode options object
@@ -92,3 +95,5 @@ jsPDF.getPageSize = function(orientation, unit, format) {
   var info = { 'width': pageWidth, 'height': pageHeight, 'unit': unit, 'k': k };
   return info;
 };
+
+export default jsPDF;
