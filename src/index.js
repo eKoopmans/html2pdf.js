@@ -24,10 +24,10 @@
  * SOFTWARE.
  */
 
-// Import dependencies.
+import 'es6-promise/auto';
 import jsPDF from 'jspdf';
-import './jspdf-plugin.js';
 import html2canvas from 'html2canvas';
+import './jspdf-plugin.js';
 import { objType, createElement, cloneNode, unitConvert } from './utils.js';
 
 /**

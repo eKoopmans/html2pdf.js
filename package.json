@@ -28,7 +28,8 @@
   "homepage": "https://github.com/eKoopmans/html2pdf",
   "dependencies": {
     "html2canvas": "https://github.com/eKoopmans/html2canvas/tarball/develop",
-    "jspdf": "^1.3.5"
+    "jspdf": "^1.3.5",
+    "es6-promise": "^4.1.1"
   },
   "devDependencies": {
     "rollup": "^0.51.8",
