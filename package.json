@@ -41,7 +41,6 @@
     "build": "rollup -c",
     "clean": "rimraf dist",
     "test": "echo \"Error: no test specified\" && exit 1",
-
     "prebuild": "npm install && npm run clean"
   }
 }
