@@ -2,13 +2,12 @@
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 import pkg from './package.json';
-import fs from 'fs';
 
 function banner() {
   var text = pkg.name + ' v' + pkg.version + '\n';
   text += 'Copyright (c) ' + (new Date).getFullYear() + ' Erik Koopmans\n';
-  text += 'Released under the ' + pkg.license + ' License';
-  text = '/**\n * ' + text.replace(/\n/g, '\n * ') + '\n */\n';
+  text += 'Released under the ' + pkg.license + ' License.';
+  text = '/**\n * ' + text.replace(/\n/g, '\n * ') + '\n */';
   return { banner: text };
 }
 function license(filename) {
