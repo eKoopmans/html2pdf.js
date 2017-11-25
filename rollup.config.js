@@ -4,6 +4,13 @@ import commonjs from 'rollup-plugin-commonjs';
 import pkg from './package.json';
 import fs from 'fs';
 
+function banner() {
+  var text = pkg.name + ' v' + pkg.version + '\n';
+  text += 'Copyright (c) ' + (new Date).getFullYear() + ' Erik Koopmans\n';
+  text += 'Released under the ' + pkg.license + ' License';
+  text = '/**\n * ' + text.replace(/\n/g, '\n * ') + '\n */\n';
+  return { banner: text };
+}
 function license(filename) {
   filename = filename || './LICENSE';
   var data = fs.readFileSync(filename).toString();
@@ -25,7 +32,8 @@ export default [
     },
     plugins: [
       resolve(),
-      commonjs()
+      commonjs(),
+      banner()
     ]
   },
   // Un-bundled builds.
@@ -48,7 +56,8 @@ export default [
     },
     plugins: [
       resolve(),
-      commonjs()
+      commonjs(),
+      banner()
     ]
   }
 ];
