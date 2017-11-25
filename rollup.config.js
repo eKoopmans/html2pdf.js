@@ -2,6 +2,7 @@
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 import babel from 'rollup-plugin-babel';
+import uglify from 'rollup-plugin-uglify';
 import pkg from './package.json';
 
 function banner() {
@@ -60,6 +61,51 @@ export default [
       commonjs(),
       babel({ exclude: 'node_modules/**' }),
       banner()
+    ]
+  },
+  // Bundled builds (minified).
+  {
+    name: 'html2pdf',
+    input: 'src/index.js',
+    output: [
+      { file: pkg.browser.replace(/js$/, 'bundle.min.js'), format: 'umd' }
+    ],
+    globals: {
+      jspdf: 'jsPDF',
+      html2canvas: 'html2canvas'
+    },
+    plugins: [
+      resolve(),
+      commonjs(),
+      babel({ exclude: 'node_modules/**' }),
+      uglify({
+        output: { preamble: banner().banner }
+      })
+    ]
+  },
+  // Un-bundled builds (minified).
+  {
+    name: 'html2pdf',
+    input: 'src/index.js',
+    output: [
+      { file: pkg.browser.replace(/js$/, 'min.js'), format: 'umd' }
+    ],
+    external: [
+      'jspdf',
+      'html2canvas',
+      'es6-promise/auto'
+    ],
+    globals: {
+      jspdf: 'jsPDF',
+      html2canvas: 'html2canvas'
+    },
+    plugins: [
+      resolve(),
+      commonjs(),
+      babel({ exclude: 'node_modules/**' }),
+      uglify({
+        output: { preamble: banner().banner }
+      })
     ]
   }
 ];
