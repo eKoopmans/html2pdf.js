@@ -2,6 +2,16 @@
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 import pkg from './package.json';
+import fs from 'fs';
+
+function license(filename) {
+  filename = filename || './LICENSE';
+  var data = fs.readFileSync(filename).toString();
+  console.log(data);
+  console.log(typeof data);
+  data = '/**\n * @license\n * ' + data.trim().replace(/\n/g, '\n * ') + '\n */\n';
+  return { banner: data };
+}
 
 export default [
   // Bundled builds.
@@ -17,7 +27,8 @@ export default [
     },
     plugins: [
       resolve(),
-      commonjs()
+      commonjs(),
+      license('./LICENSE')
     ]
   },
   // Un-bundled builds.
@@ -40,7 +51,8 @@ export default [
     },
     plugins: [
       resolve(),
-      commonjs()
+      commonjs(),
+      license('./LICENSE')
     ]
   }
 ];
