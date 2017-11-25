@@ -7,8 +7,6 @@ import fs from 'fs';
 function license(filename) {
   filename = filename || './LICENSE';
   var data = fs.readFileSync(filename).toString();
-  console.log(data);
-  console.log(typeof data);
   data = '/**\n * @license\n * ' + data.trim().replace(/\n/g, '\n * ') + '\n */\n';
   return { banner: data };
 }
@@ -27,8 +25,7 @@ export default [
     },
     plugins: [
       resolve(),
-      commonjs(),
-      license('./LICENSE')
+      commonjs()
     ]
   },
   // Un-bundled builds.
@@ -51,8 +48,7 @@ export default [
     },
     plugins: [
       resolve(),
-      commonjs(),
-      license('./LICENSE')
+      commonjs()
     ]
   }
 ];
