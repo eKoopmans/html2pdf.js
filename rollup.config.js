@@ -1,6 +1,7 @@
 // Import dependencies.
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
+import babel from 'rollup-plugin-babel';
 import pkg from './package.json';
 
 function banner() {
@@ -32,6 +33,7 @@ export default [
     plugins: [
       resolve(),
       commonjs(),
+      babel({ exclude: 'node_modules/**' }),
       banner()
     ]
   },
@@ -56,6 +58,7 @@ export default [
     plugins: [
       resolve(),
       commonjs(),
+      babel({ exclude: 'node_modules/**' }),
       banner()
     ]
   }
