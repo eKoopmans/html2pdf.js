@@ -32,7 +32,7 @@
     "es6-promise": "^4.1.1"
   },
   "devDependencies": {
-    "gulp": "3.9.1",
+    "gulp": "^3.9.1",
     "rimraf": "^2.6.2",
     "rollup": "^0.51.8",
     "rollup-plugin-commonjs": "^8.2.6",
