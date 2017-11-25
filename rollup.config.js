@@ -20,24 +20,6 @@ function license(filename) {
 }
 
 export default [
-  // Bundled builds.
-  {
-    name: 'html2pdf',
-    input: 'src/index.js',
-    output: [
-      { file: pkg.browser.replace(/js$/, 'bundle.js'), format: 'umd' }
-    ],
-    globals: {
-      jspdf: 'jsPDF',
-      html2canvas: 'html2canvas'
-    },
-    plugins: [
-      resolve(),
-      commonjs(),
-      babel({ exclude: 'node_modules/**' }),
-      banner()
-    ]
-  },
   // Un-bundled builds.
   {
     name: 'html2pdf',
@@ -63,12 +45,17 @@ export default [
       banner()
     ]
   },
-  // Bundled builds (minified).
+  // Un-bundled builds (minified).
   {
     name: 'html2pdf',
     input: 'src/index.js',
     output: [
-      { file: pkg.browser.replace(/js$/, 'bundle.min.js'), format: 'umd' }
+      { file: pkg.browser.replace(/js$/, 'min.js'), format: 'umd' }
+    ],
+    external: [
+      'jspdf',
+      'html2canvas',
+      'es6-promise/auto'
     ],
     globals: {
       jspdf: 'jsPDF',
@@ -83,17 +70,30 @@ export default [
       })
     ]
   },
-  // Un-bundled builds (minified).
+  // Bundled builds.
   {
     name: 'html2pdf',
     input: 'src/index.js',
     output: [
-      { file: pkg.browser.replace(/js$/, 'min.js'), format: 'umd' }
+      { file: pkg.browser.replace(/js$/, 'bundle.js'), format: 'umd' }
     ],
-    external: [
-      'jspdf',
-      'html2canvas',
-      'es6-promise/auto'
+    globals: {
+      jspdf: 'jsPDF',
+      html2canvas: 'html2canvas'
+    },
+    plugins: [
+      resolve(),
+      commonjs(),
+      babel({ exclude: 'node_modules/**' }),
+      banner()
+    ]
+  },
+  // Bundled builds (minified).
+  {
+    name: 'html2pdf',
+    input: 'src/index.js',
+    output: [
+      { file: pkg.browser.replace(/js$/, 'bundle.min.js'), format: 'umd' }
     ],
     globals: {
       jspdf: 'jsPDF',
