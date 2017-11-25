@@ -7,11 +7,14 @@ var fs = require('fs');
 
 // Fetch command-line arguments.
 var args = minimist(process.argv.slice(2), {
+  string: ['env', 'newversion', 'tagmessage'],
   default: {
     env: process.env.NODE_ENV || 'production',
-    newversion: 'patch'
+    newversion: 'patch',
+    tagmessage: ''
   }
 });
+args.newversion = args.newversion || 'patch';
 
 /* ----- REUSABLE TASKS ----- */
 
