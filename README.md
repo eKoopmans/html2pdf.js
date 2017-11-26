@@ -6,8 +6,10 @@ html2pdf converts any webpage or element into a printable PDF entirely client-si
 
 There are two ways to install html2pdf:
 
-1. **NPM:** Use `npm install --save html2pdf` to add html2pdf and its dependencies to your project. *Note: html2pdf **will not** run in Node.js, it must be run in a browser.*
-2. **HTML:** Download `dist/html2pdf.bundle.min.js` to your project folder and include it in your HTML with `<script src="html2pdf.bundle.min.js"></script>`.
+1. **NPM:** Use `npm install --save html2pdf` to add html2pdf and its dependencies to your project.
+2. **HTML:** Download `dist/html2pdf.bundle.min.js` to your project folder and include it in your HTML with:
+
+   `<script src="html2pdf.bundle.min.js"></script>`.
 
 Once installed, html2pdf is ready to use. This command will generate a PDF of `#element-to-print` and prompt the user to save the result:
 
@@ -16,11 +18,13 @@ var element = document.getElementById('element-to-print');
 html2pdf(element);
 ```
 
+**Note:** html2pdf **will not run in Node.js**, it must be run in a browser.
+
 *[Click here](#dependencies) for more information about using the unbundled version `dist/html2canvas.min.js`.*
 
 ## Options
 
-The PDF can be configured using an optional `opt` parameter:
+html2pdf can be configured using an optional `opt` parameter:
 
 ```js
 var element = document.getElementById('element-to-print');
@@ -69,9 +73,9 @@ These options are limited to the available settings for [HTMLCanvasElement.toDat
 
 ## Dependencies
 
-html2pdf depends on the external packages [`html2canvas`](https://github.com/niklasvh/html2canvas) and [`jsPDF`](https://github.com/MrRio/jsPDF). These dependencies are automatically loaded when using NPM or the bundled package.
+html2pdf depends on the external packages [html2canvas](https://github.com/niklasvh/html2canvas) and [jsPDF](https://github.com/MrRio/jsPDF). These dependencies are automatically loaded when using NPM or the bundled package.
 
-If using the un-bundled `dist/html2pdf.min.js` (or its un-minified version), you must also include each dependency. Order is important, otherwise html2canvas will be overridden by jsPDF's own internal implementation:
+If using the unbundled `dist/html2pdf.min.js` (or its un-minified version), you must also include each dependency. Order is important, otherwise html2canvas will be overridden by jsPDF's own internal implementation:
 
 ```html
 <script src="jspdf.min.js"></script>
