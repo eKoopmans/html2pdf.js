@@ -1,5 +1,5 @@
 {
-  "name": "html2pdf",
+  "name": "html2pdf.js",
   "version": "0.8.0",
   "description": "Client-side HTML-to-PDF rendering using pure JS",
   "main": "dist/require/html2pdf.cjs.js",

@@ -6,7 +6,7 @@ html2pdf converts any webpage or element into a printable PDF entirely client-si
 
 There are two ways to install html2pdf:
 
-1. **NPM:** Use `npm install --save html2pdf` to add html2pdf and its dependencies to your project.
+1. **NPM:** Use `npm install --save html2pdf.js` to add html2pdf and its dependencies to your project.
 2. **HTML:** Download `dist/html2pdf.bundle.min.js` to your project folder and include it in your HTML with: `<script src="html2pdf.bundle.min.js"></script>`.
 
 Once installed, html2pdf is ready to use. This command will generate a PDF of `#element-to-print` and prompt the user to save the result:
