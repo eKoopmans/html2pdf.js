@@ -1,5 +1,5 @@
 /**
- * html2pdf v0.8.0
+ * html2pdf.js v0.8.0
  * Copyright (c) 2017 Erik Koopmans
  * Released under the MIT License.
  */
@@ -5065,7 +5065,7 @@ jspdf_min.getPageSize = function (orientation, unit, format) {
 
 // Determine the type of a variable/object.
 var objType = function objType(obj) {
-  if (typeof obj === 'undefined') return 'undefined';else if (typeof obj === 'string' || obj instanceof String) return 'string';else if (typeof obj === 'number' || obj instanceof Number) return 'number';else if (!!obj && obj.constructor === Array) return 'array';else if (obj && obj.nodeType === 1) return 'element';else if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) === 'object') return 'object';else return 'unknown';
+  if (typeof obj === 'undefined') return 'undefined';else if (typeof obj === 'string' || obj instanceof String) return 'string';else if (typeof obj === 'number' || obj instanceof Number) return 'number';else if (type === 'function' || obj instanceof Function) return 'function';else if (!!obj && obj.constructor === Array) return 'array';else if (obj && obj.nodeType === 1) return 'element';else if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) === 'object') return 'object';else return 'unknown';
 };
 
 // Create an HTML element with optional className, innerHTML, and style.
@@ -5308,7 +5308,11 @@ html2pdf.makePDF = function (canvas, pageSize, opt) {
   }
 
   // Finish the PDF.
-  pdf.save(opt.filename);
+  if (objType(opt.pdfCallback) === 'function') {
+    opt.pdfCallback(pdf);
+  } else {
+    pdf.save(opt.filename);
+  }
 };
 
 return html2pdf;
