@@ -188,7 +188,11 @@ html2pdf.makePDF = function(canvas, pageSize, opt) {
   }
 
   // Finish the PDF.
-  pdf.save( opt.filename );
+  if (objType(opt.pdfCallback) === 'function') {
+    opt.pdfCallback(pdf);
+  } else {
+    pdf.save(opt.filename);
+  }
 }
 
 
