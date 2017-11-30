@@ -6,7 +6,7 @@ html2pdf converts any webpage or element into a printable PDF entirely client-si
 
 There are two ways to install html2pdf:
 
-1. **NPM:** Use `npm install --save html2pdf` to add html2pdf and its dependencies to your project.
+1. **NPM:** Use `npm install --save html2pdf.js` to add html2pdf and its dependencies to your project.
 2. **HTML:** Download `dist/html2pdf.bundle.min.js` to your project folder and include it in your HTML with: `<script src="html2pdf.bundle.min.js"></script>`.
 
 Once installed, html2pdf is ready to use. This command will generate a PDF of `#element-to-print` and prompt the user to save the result:
@@ -87,7 +87,7 @@ html2pdf currently uses [this fork](https://github.com/eKoopmans/html2canvas/tre
 
 ### Issues
 
-When submitting an issue, please provide reproducible code that highlights the issue, preferably by creating a fork of [this template jsFiddle](https://jsfiddle.net/o0kL8zkk/) (which has html2canvas and its dependencies already included as external resources). Remember that html2pdf uses [html2canvas](https://github.com/niklasvh/html2canvas) and [jsPDF](https://github.com/MrRio/jsPDF) as dependencies, so it's a good idea to check each of those repositories' issue trackers to see if your problem has already been addressed.
+When submitting an issue, please provide reproducible code that highlights the issue, preferably by creating a fork of [this template jsFiddle](https://jsfiddle.net/u6o6ne41/) (which has html2pdf already loaded). Remember that html2pdf uses [html2canvas](https://github.com/niklasvh/html2canvas) and [jsPDF](https://github.com/MrRio/jsPDF) as dependencies, so it's a good idea to check each of those repositories' issue trackers to see if your problem has already been addressed.
 
 ### Pull requests
 
