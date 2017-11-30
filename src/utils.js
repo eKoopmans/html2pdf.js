@@ -1,12 +1,13 @@
 // Determine the type of a variable/object.
 export const objType = function(obj) {
-  if (typeof obj === 'undefined')                             return 'undefined';
-  else if (typeof obj === 'string' || obj instanceof String)  return 'string';
-  else if (typeof obj === 'number' || obj instanceof Number)  return 'number';
+  var type = typeof obj;
+  if (type === 'undefined')                                   return 'undefined';
+  else if (type === 'string' || obj instanceof String)        return 'string';
+  else if (type === 'number' || obj instanceof Number)        return 'number';
   else if (type === 'function' || obj instanceof Function)    return 'function';
   else if (!!obj && obj.constructor === Array)                return 'array';
   else if (obj && obj.nodeType === 1)                         return 'element';
-  else if (typeof obj === 'object')                           return 'object';
+  else if (type === 'object')                                 return 'object';
   else                                                        return 'unknown';
 };
 
