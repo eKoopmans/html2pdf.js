@@ -47,15 +47,19 @@ var html2pdf = function(source, opt) {
       }
     });
   }
-
+  var promisedPDF = new Promise(function(resolve, reject){
   // Render the canvas and pass the result to makePDF.
   var onRendered = opt.html2canvas.onrendered || function() {};
   opt.html2canvas.onrendered = function(canvas) {
     onRendered(canvas);
     document.body.removeChild(overlay);
-    html2pdf.makePDF(canvas, pageSize, opt);
+    var pdfOutput = html2pdf.makePDF(canvas, pageSize, opt);
+    resolve(pdfOutput);
   }
   html2canvas(container, opt.html2canvas);
+  });
+  
+  return promisedPDF;
 };
 
 html2pdf.parseInput = function(source, opt) {
@@ -187,8 +191,12 @@ html2pdf.makePDF = function(canvas, pageSize, opt) {
     }
   }
 
-  // Finish the PDF.
-  pdf.save( opt.filename );
+  if(opt.pdfOutputFormat) {
+    return pdf.output(opt.pdfOutputFormat)
+  } else {
+    // Finish the PDF.
+    pdf.save( opt.filename );
+  }
 }
 
 
