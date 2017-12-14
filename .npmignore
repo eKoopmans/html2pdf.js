@@ -1,0 +1,5 @@
+node_modules/
+.archive/
+.devel/
+dist/*.bundle*.js
+dist/**/*.min.js

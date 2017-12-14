@@ -1,6 +1,6 @@
 {
   "name": "html2pdf.js",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Client-side HTML-to-PDF rendering using pure JS",
   "main": "dist/require/html2pdf.cjs.js",
   "module": "dist/include/html2pdf.es.js",
@@ -49,6 +49,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "stage-release": "gulp stage-release --newversion",
     "release": "gulp release --tagmessage",
+    "publish": "npm publish",
     "prebuild": "npm install && npm run clean"
   }
 }
