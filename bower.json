@@ -1,0 +1,28 @@
+{
+  "name": "html2pdf.js",
+  "description": "Client-side HTML-to-PDF rendering using pure JS",
+  "main": "dist/html2pdf.bundle.js",
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "authors": [
+    "Erik Koopmans <erik@erik-koopmans.com>"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "javascript",
+    "pdf-generation",
+    "html",
+    "client-side",
+    "canvas"
+  ],
+  "homepage": "https://github.com/eKoopmans/html2pdf",
+  "ignore": [
+    "node_modules/",
+    "bower_components/",
+    ".archive/",
+    ".devel/"
+  ]
+}
