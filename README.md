@@ -71,11 +71,12 @@ These options are limited to the available settings for [HTMLCanvasElement.toDat
 
 ## Dependencies
 
-html2pdf depends on the external packages [html2canvas](https://github.com/niklasvh/html2canvas) and [jsPDF](https://github.com/MrRio/jsPDF). These dependencies are automatically loaded when using NPM or the bundled package.
+html2pdf depends on the external packages [html2canvas](https://github.com/niklasvh/html2canvas), [jsPDF](https://github.com/MrRio/jsPDF), and [es6-promise](https://github.com/stefanpenner/es6-promise). These dependencies are automatically loaded when using NPM or the bundled package.
 
 If using the unbundled `dist/html2pdf.min.js` (or its un-minified version), you must also include each dependency. Order is important, otherwise html2canvas will be overridden by jsPDF's own internal implementation:
 
 ```html
+<script src="es6-promise.auto.min.js"></script>
 <script src="jspdf.min.js"></script>
 <script src="html2canvas.min.js"></script>
 <script src="html2pdf.min.js"></script>
