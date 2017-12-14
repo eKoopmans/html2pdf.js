@@ -4,21 +4,34 @@ html2pdf converts any webpage or element into a printable PDF entirely client-si
 
 ## Getting started
 
-There are two ways to install html2pdf:
+### HTML
 
-1. **NPM:** Use `npm install --save html2pdf.js` to add html2pdf and its dependencies to your project.
-2. **HTML:** Download `dist/html2pdf.bundle.min.js` to your project folder and include it in your HTML with: `<script src="html2pdf.bundle.min.js"></script>`.
+The simplest way to use html2pdf is to download `dist/html2pdf.bundle.min.js` to your project folder and include it in your HTML with:
 
-Once installed, html2pdf is ready to use. This command will generate a PDF of `#element-to-print` and prompt the user to save the result:
+```html
+<script src="html2pdf.bundle.min.js"></script>
+```
+
+*[Click here](#dependencies) for more information about using the unbundled version `dist/html2canvas.min.js`.*
+
+### NPM
+
+Install html2pdf and its dependencies using NPM with `npm install --save html2pdf.js` (make sure to include `.js` in the package name).
+
+*Note: You can use NPM to create your project, but html2pdf **will not run in Node.js**, it must be run in a browser.*
+
+### Bower
+
+Install html2pdf and its dependencies using Bower with `bower install --save html2pdf.js` (make sure to include `.js` in the package name).
+
+## Usage
+
+Once installed, html2pdf is ready to use. The following command will generate a PDF of `#element-to-print` and prompt the user to save the result:
 
 ```js
 var element = document.getElementById('element-to-print');
 html2pdf(element);
 ```
-
-*Note: html2pdf **will not run in Node.js**, it must be run in a browser.*
-
-*[Click here](#dependencies) for more information about using the unbundled version `dist/html2canvas.min.js`.*
 
 ## Options
 
