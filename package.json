@@ -49,6 +49,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "stage-release": "gulp stage-release --newversion",
     "release": "gulp release --tagmessage",
+    "publish": "npm publish",
     "prebuild": "npm install && npm run clean"
   }
 }
