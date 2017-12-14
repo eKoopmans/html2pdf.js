@@ -4,7 +4,7 @@ html2pdf converts any webpage or element into a printable PDF entirely client-si
 
 ## Getting started
 
-### HTML
+#### HTML
 
 The simplest way to use html2pdf is to download `dist/html2pdf.bundle.min.js` to your project folder and include it in your HTML with:
 
@@ -12,15 +12,15 @@ The simplest way to use html2pdf is to download `dist/html2pdf.bundle.min.js` to
 <script src="html2pdf.bundle.min.js"></script>
 ```
 
-*[Click here](#dependencies) for more information about using the unbundled version `dist/html2canvas.min.js`.*
+*Note: [Click here](#dependencies) for more information about using the unbundled version `dist/html2canvas.min.js`.*
 
-### NPM
+#### NPM
 
 Install html2pdf and its dependencies using NPM with `npm install --save html2pdf.js` (make sure to include `.js` in the package name).
 
 *Note: You can use NPM to create your project, but html2pdf **will not run in Node.js**, it must be run in a browser.*
 
-### Bower
+#### Bower
 
 Install html2pdf and its dependencies using Bower with `bower install --save html2pdf.js` (make sure to include `.js` in the package name).
 
