@@ -1,5 +1,5 @@
 /**
- * html2pdf v0.8.0
+ * html2pdf.js v0.8.1
  * Copyright (c) 2017 Erik Koopmans
  * Released under the MIT License.
  */
@@ -119,7 +119,8 @@ jsPDF.getPageSize = function (orientation, unit, format) {
 
 // Determine the type of a variable/object.
 var objType = function objType(obj) {
-  if (typeof obj === 'undefined') return 'undefined';else if (typeof obj === 'string' || obj instanceof String) return 'string';else if (typeof obj === 'number' || obj instanceof Number) return 'number';else if (!!obj && obj.constructor === Array) return 'array';else if (obj && obj.nodeType === 1) return 'element';else if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) === 'object') return 'object';else return 'unknown';
+  var type = typeof obj === 'undefined' ? 'undefined' : _typeof(obj);
+  if (type === 'undefined') return 'undefined';else if (type === 'string' || obj instanceof String) return 'string';else if (type === 'number' || obj instanceof Number) return 'number';else if (type === 'function' || obj instanceof Function) return 'function';else if (!!obj && obj.constructor === Array) return 'array';else if (obj && obj.nodeType === 1) return 'element';else if (type === 'object') return 'object';else return 'unknown';
 };
 
 // Create an HTML element with optional className, innerHTML, and style.
