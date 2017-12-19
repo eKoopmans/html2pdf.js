@@ -1,5 +1,5 @@
 /**
- * html2pdf.js v0.8.1
+ * html2pdf.js v0.8.2
  * Copyright (c) 2017 Erik Koopmans
  * Released under the MIT License.
  */
@@ -231,12 +231,13 @@ var html2pdf = function html2pdf(source, opt) {
 
   // Render the canvas and pass the result to makePDF.
   var onRendered = opt.html2canvas.onrendered || function () {};
-  opt.html2canvas.onrendered = function (canvas) {
+  delete opt.html2canvas.onrendered;
+  var done = function done(canvas) {
     onRendered(canvas);
     document.body.removeChild(overlay);
     html2pdf.makePDF(canvas, pageSize, opt);
   };
-  html2canvas(container, opt.html2canvas);
+  html2canvas(container, opt.html2canvas).then(done);
 };
 
 html2pdf.parseInput = function (source, opt) {
