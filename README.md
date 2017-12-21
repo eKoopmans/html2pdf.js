@@ -16,13 +16,13 @@ The simplest way to use html2pdf is to download `dist/html2pdf.bundle.min.js` to
 
 #### NPM
 
-Install html2pdf and its dependencies using NPM with `npm install --save jeffraux/html2pdf`.
+Install html2pdf and its dependencies using NPM with `npm install --save html2pdf.js` (make sure to include `.js` in the package name).
 
 *Note: You can use NPM to create your project, but html2pdf **will not run in Node.js**, it must be run in a browser.*
 
 #### Bower
 
-Install html2pdf and its dependencies using Bower with `bower install --save jeffraux/html2pdf`.
+Install html2pdf and its dependencies using Bower with `bower install --save html2pdf.js` (make sure to include `.js` in the package name).
 
 ## Usage
 
@@ -42,10 +42,10 @@ var element = document.getElementById('element-to-print');
 html2pdf(element, {
   margin:       1,
   filename:     'myfile.pdf',
-  output:       { mode: 'save', container: '#iframeId', height: 800 },
   image:        { type: 'jpeg', quality: 0.98 },
   html2canvas:  { dpi: 192, letterRendering: true },
-  jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+  jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
+  output:       { mode: 'display', container: '#iframeId', height: 800 }
 });
 ```
 
@@ -55,11 +55,11 @@ The `opt` parameter has the following optional fields:
 |------------|----------------|------------------------------|------------------------------------------------------------------------------------------------------------|
 |margin      |number or array |0                             |PDF margin (in jsPDF units). Can be a single number, `[vMargin, hMargin]`, or `[top, left, bottom, right]`. |
 |filename    |string          |'file.pdf'                    |The default filename of the exported PDF.                                                                   |
-|output      |object          |{ }                           |Configuration options for saving or displaying the pdf. `mode`: `save` or `display`. `container`: Iframe element id on where you want to display the PDF. `height`: Display height of the iframe. |
 |image       |object          |{type: 'jpeg', quality: 0.95} |The image type and quality used to generate the PDF. See the Extra Features section below.                  |
 |enableLinks |boolean         |true                          |If enabled, PDF hyperlinks are automatically added ontop of all anchor tags.                                |
 |html2canvas |object          |{ }                           |Configuration options sent directly to `html2canvas` ([see here](https://html2canvas.hertzen.com/documentation.html#available-options) for usage).|
 |jsPDF       |object          |{ }                           |Configuration options sent directly to `jsPDF` ([see here](http://rawgit.com/MrRio/jsPDF/master/docs/jsPDF.html) for usage).|
+|output      |object          |{ }                           |Configuration options for saving or displaying the pdf. `mode`: `save` or `display`. `container`: Iframe element id on where you want to display the PDF. `height`: Display height of the iframe. |
 
 ### Page-breaks
 
