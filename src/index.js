@@ -188,8 +188,29 @@ html2pdf.makePDF = function(canvas, pageSize, opt) {
     }
   }
 
-  // Finish the PDF.
-  pdf.save( opt.filename );
+  // Finish the PDF based on the output option
+  if (opt.output) {
+    var mode = opt.output.mode || 'save';
+    var container = opt.output.container || '';
+    var height = opt.output.height || 300;
+
+    switch (mode) {
+      case 'save':
+        pdf.save(opt.filename);
+        break;
+      case 'display':
+        {
+          if (height) {
+            $(container).attr('height', height);
+          }
+
+          $(container).attr('src', pdf.output('datauristring'));
+        }
+        break;
+    }
+  } else {
+    pdf.save(opt.filename);
+  }
 }
 
 
