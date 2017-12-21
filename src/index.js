@@ -63,6 +63,7 @@ html2pdf.parseInput = function(source, opt) {
   // Parse the opt object.
   opt.jsPDF = opt.jsPDF || {};
   opt.html2canvas = opt.html2canvas || {};
+  opt.output = opt.output || {};
   opt.filename = opt.filename && objType(opt.filename) === 'string' ? opt.filename : 'file.pdf';
   opt.enableLinks = opt.hasOwnProperty('enableLinks') ? opt.enableLinks : true;
   opt.image = opt.image || {};

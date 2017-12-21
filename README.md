@@ -55,7 +55,7 @@ The `opt` parameter has the following optional fields:
 |------------|----------------|------------------------------|------------------------------------------------------------------------------------------------------------|
 |margin      |number or array |0                             |PDF margin (in jsPDF units). Can be a single number, `[vMargin, hMargin]`, or `[top, left, bottom, right]`. |
 |filename    |string          |'file.pdf'                    |The default filename of the exported PDF.                                                                   |
-|output      |object          |{ }                           |Configuration options for saving or displaying the pdf. `mode`: `save` or `display` |
+|output      |object          |{ }                           |Configuration options for saving or displaying the pdf. `mode`: `save` or `display`. `container`: Iframe element id on where you want to display the PDF. `height`: Display height of the iframe. |
 |image       |object          |{type: 'jpeg', quality: 0.95} |The image type and quality used to generate the PDF. See the Extra Features section below.                  |
 |enableLinks |boolean         |true                          |If enabled, PDF hyperlinks are automatically added ontop of all anchor tags.                                |
 |html2canvas |object          |{ }                           |Configuration options sent directly to `html2canvas` ([see here](https://html2canvas.hertzen.com/documentation.html#available-options) for usage).|
