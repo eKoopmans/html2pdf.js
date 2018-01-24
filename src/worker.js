@@ -28,7 +28,7 @@ import { objType, createElement, cloneNode, unitConvert } from './utils.js';
 /* ----- CONSTRUCTOR ----- */
 
 var Worker = function Worker(opt) {
-  var self = Worker.convert(Promise.resolve(null), Worker.template);
+  var self = Worker.convert(Promise.resolve(), Worker.template);
 
   self.set(opt);
   self.setProgress(1, Worker, 1, [Worker]);
