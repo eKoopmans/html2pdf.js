@@ -28,13 +28,22 @@ import { objType, createElement, cloneNode, unitConvert } from './utils.js';
 /* ----- CONSTRUCTOR ----- */
 
 var Worker = function Worker(opt) {
-  // NOTE: Promise.resolve(this) doesn't actually resolve, using null for now.
-  //  -> research this further!
-  Object.assign(this, Worker.template);
-  this.ready = Promise.resolve(null);
+  var self = Worker.convert(Promise.resolve(null), Worker.template);
 
-  this.set(opt);
-  this.setProgress(1, Worker, 1, [Worker]);
+  self.set(opt);
+  self.setProgress(1, Worker, 1, [Worker]);
+  return self;
+};
+
+// Boilerplate for subclassing Promise.
+Worker.prototype = Object.create(Promise.prototype);
+Worker.prototype.constructor = Worker;
+
+// Converts/casts promises into Workers.
+Worker.convert = function convert(promise, props) {
+  // TODO: May want to deep-copy props before attaching them to the new object.
+  promise.__proto__ = Worker.prototype;
+  return props ? Object.assign(promise, props) : promise;
 };
 
 Worker.template = {
@@ -44,6 +53,12 @@ Worker.template = {
   canvas: null,
   img: null,
   pdf: null,
+  progress: {
+    val: 0,
+    state: null,
+    n: 0,
+    stack: []
+  },
   opt: {
     filename: 'file.pdf',
     margin: 0,
@@ -62,7 +77,7 @@ Worker.prototype.from = function from(src, type) {
     return isCanvas(src) ? 'canvas' : isDom(src) ? 'html' : isString(src) ? 'string' : 'unknown';
   }
 
-  return this.thenInternal(function() {
+  return this.then(function() {
     type = type || getType(src);
     switch (type) {
       case 'string':  return this.set({ src: createElement('div', {innerHTML: src}) });
@@ -74,7 +89,7 @@ Worker.prototype.from = function from(src, type) {
   });
   /*
   // TODO HERE: Change each case to use the 'setter' functions.
-  return this.thenInternal(function(val) {
+  return this.then(function(val) {
     if (type === 'img') {
       this.img = src;
     } else if (type === 'canvas' || !type && isCanvas(src)) {
@@ -94,8 +109,8 @@ Worker.prototype.from = function from(src, type) {
 
 Worker.prototype.to = function to(target) {
   // Route the 'to' request to the appropriate method.
-  // NOTE: thenInternal is necessary for the catch...
-  return this.thenInternal(function() {
+  // NOTE: then is necessary for the catch...
+  return this.then(function() {
     switch (target) {
       case 'container':
         return this.toContainer();
@@ -117,9 +132,9 @@ Worker.prototype.toContainer = function toContainer() {
     [this.src, function() { throw 'Cannot duplicate - no source HTML Element or string provided.'; }]
   ];
 
-  return this.thenInternal(function() {
+  return this.then(function() {
     return prereq(reqs);
-  }).thenInternal(function() {
+  }).then(function() {
     // Define the CSS styles for the container and its overlay parent.
     var overlayCSS = {
       position: 'fixed', overflow: 'hidden', zIndex: 1000,
@@ -164,11 +179,11 @@ Worker.prototype.toCanvas = function toCanvas() {
   ];
 
   // Fulfill prereqs then create the canvas.
-  return this.thenInternal(function() {
+  return this.then(function() {
     return prereq(reqs);
-  }).thenInternal(function() {
+  }).then(function() {
     return html2canvas(this.src, this.opt.html2canvas);
-  }).thenInternal(function(canvas) {
+  }).then(function(canvas) {
     this.canvas = canvas;
   });
 };
@@ -180,9 +195,9 @@ Worker.prototype.toImg = function toImg() {
   ];
 
   // Fulfill prereqs then create the image.
-  return this.thenInternal(function() {
+  return this.then(function() {
     return prereq(reqs);
-  }).thenInternal(function() {
+  }).then(function() {
     var imgData = this.canvas.toDataURL('image/' + opt.image.type, opt.image.quality);
     this.img = document.createElement('img');
     this.img.src = imgData;
@@ -196,9 +211,9 @@ Worker.prototype.toPdf = function toPdf() {
   ];
 
   // Fulfill prereqs then create the image.
-  return this.thenInternal(function() {
+  return this.then(function() {
     return prereq(reqs);
-  }).thenInternal(function() {
+  }).then(function() {
     // TODO: Transfer PDF code from index.js.
   });
 };
@@ -207,7 +222,7 @@ Worker.prototype.toPdf = function toPdf() {
 /* ----- EXPORT / SAVE ----- */
 
 Worker.prototype.export = function export(type) {
-  return this.thenInternal(function() {
+  return this.then(function() {
     // TODO HERE: Program all the different export options.
   });
 }
@@ -219,11 +234,11 @@ Worker.prototype.save = function save(filename) {
   ];
 
   // Fulfill prereqs, update the filename (if provided), and save the PDF.
-  return this.thenInternal(function() {
+  return this.then(function() {
     return prereq(reqs);
   }).set(
     filename ? { filename: filename } : null
-  ).thenInternal(function() {
+  ).then(function() {
     this.pdf.save(this.opt.filename);
   });
 }
@@ -233,7 +248,7 @@ Worker.prototype.save = function save(filename) {
 Worker.prototype.set = function set(opt) {
   // TODO: Test null/undefined input to this function.
   // TODO: Implement ordered pairs?
-  return this.thenInternal(function() {
+  return this.then(function() {
     for (var key in opt) {
       if (key in Worker.template) {
         // Set root-level properties.
@@ -264,11 +279,11 @@ Worker.prototype.set = function set(opt) {
 };
 
 Worker.prototype.get = function get(key, cbk) {
-  // Allow either callback or promise-based use.
-  return this.callbackOrPromise(cbk, function() {
+  return this.then(function() {
     // Fetch the requested property, either as a root prop or in opt.
-    return (key in Worker.template) ? this[key] : this.opt[key];
-  }.bind(this));
+    var val = (key in Worker.template) ? this[key] : this.opt[key];
+    return cbk ? cbk(val) : val;
+  });
 };
 
 Worker.prototype.setProgress = function setProgress(val, state, n, stack) {
@@ -295,46 +310,46 @@ Worker.prototype.updateProgress = function updateProgress(val, state, n, stack) 
 
 /* ----- PROMISE MAPPING ----- */
 
-Worker.prototype.then = function then(fn) {
-  // TODO: Look up how `this` is bound generally.
-  //  -> i.e. for html2pdf().from(myDiv).to('canvas').then(function() {... return this;}).to('pdf');
-  return this.ready.then(fn);
-};
-
-Worker.prototype.catch = function catch(fn) {
-  return this.ready['catch'](fn);
-};
-
-Worker.prototype.thenInternal = function thenInternal(fn) {
-  // Wrap 'this' for the encapsulated function.
+Worker.prototype.then = function then(onFulfilled, onRejected) {
+  // Wrap `this` for encapsulation and bind it to the promise handlers.
   var self = this;
+  if (onFulfilled)  { onFulfilled = onFulfilled.bind(self); }
+  if (onRejected)   { onRejected = onRejected.bind(self); }
 
-  // Update progress when queuing, calling, and resolving the function.
-  self.updateProgress(null, null, 1, [fn]);
-  self.ready = self.ready.then(function(val) {
-    self.updateProgress.call(self, null, fn);
-    return fn.call(self, val);
-  }).then(function(val) {
-    self.updateProgress.call(self, 1);
+  // Update progress while queuing, calling, and resolving `then`.
+  self.updateProgress(null, null, 1, [onFulfilled]);
+  var returnVal = Promise.prototype.then.call(self, function(val) {
+    self.updateProgress(null, onFulfilled);
+    return val;
+  }).then(onFulfilled, onRejected).then(function(val) {
+    self.updateProgress(1);
     return val;
   });
 
-  // Internal thens always return 'this' (instead of a promise).
-  return self;
+  // Return the promise, after casting it into a Worker and preserving props.
+  return Worker.convert(returnVal, self);
 };
 
-Worker.prototype.callbackOrPromise = function callbackOrPromise(cbk, valFn) {
-  // Compute the value and send to callback (via thenInternal) or return as promise.
-  function task() {
-    var value = valFn();
-    return cbk ? cbk(value) : value;
-  }
-  return cbk ? this.thenInternal(task) : this.then(task);
+Worker.prototype['catch'] = function (onRejected) {
+  // Bind `this` to the promise handler, call `catch`, and return a Worker.
+  if (onRejected)   { onRejected = onRejected.bind(this); }
+  var returnVal = Promise.prototype['catch'].call(this, onRejected);
+  return Worker.convert(returnVal, this);
 };
+
+Worker.prototype.thenExternal = function thenExternal(onFulfilled, onRejected) {
+  // Call `then` and return a standard promise (exits the Worker chain).
+  return Promise.prototype.then.call(this, onFulfilled, onRejected);
+}
+
+Worker.prototype.catchExternal = function catchExternal(onRejected) {
+  // Call `catch` and return a standard promise (exits the Worker chain).
+  return Promise.prototype['catch'].call(this, onRejected);
+}
 
 /* ----- ALIASES ----- */
 
 Worker.prototype.using = Worker.prototype.set;
 Worker.prototype.saveAs = Worker.prototype.save;
 Worker.prototype.output = Worker.prototype.export;
-Worker.prototype.run = Worker.prototype.thenInternal;
+Worker.prototype.run = Worker.prototype.then;
