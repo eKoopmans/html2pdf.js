@@ -87,24 +87,6 @@ Worker.prototype.from = function from(src, type) {
       default:        throw 'Unknown source type.';
     }
   });
-  /*
-  // TODO HERE: Change each case to use the 'setter' functions.
-  return this.then(function(val) {
-    if (type === 'img') {
-      this.img = src;
-    } else if (type === 'canvas' || !type && isCanvas(src)) {
-      this.canvas = src;
-    } else if (type === 'container') {
-      this.container = src;
-    } else if (type === 'html' || !type && isDom(src)) {
-      this.src = src;
-    } else if (type === 'string' || !type && isString(src)) {
-      this.src = createElement('div', {innerHTML: src});
-    } else {
-      throw 'Unknown source type.';
-    }
-  });
-  */
 };
 
 Worker.prototype.to = function to(target) {
