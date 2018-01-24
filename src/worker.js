@@ -73,8 +73,11 @@ Worker.template = {
 
 Worker.prototype.from = function from(src, type) {
   function getType(src) {
-    // TODO: Implement `isCanvas`, `isDom`, `isString`, etc. (just internally in this function, using objType)
-    return isCanvas(src) ? 'canvas' : isDom(src) ? 'html' : isString(src) ? 'string' : 'unknown';
+    switch (objType(src)) {
+      case 'string':  return 'string';
+      case 'element': return src.nodeName.toLowerCase === 'canvas' ? 'canvas' : 'html';
+      default:        return 'unknown';
+    }
   }
 
   return this.then(function() {
