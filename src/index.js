@@ -13,10 +13,6 @@ import { objType, createElement, cloneNode, unitConvert } from './utils.js';
  *    sent as settings to their corresponding functions.
  */
 var html2pdf = function(source, opt) {
-  // Handle input.
-  opt = objType(opt) === 'object' ? opt : {};
-  var source = html2pdf.parseInput(source, opt);
-
   // Determine the PDF page size.
   var pageSize = jsPDF.getPageSize(opt.jsPDF);
   pageSize.inner = {
@@ -59,72 +55,7 @@ var html2pdf = function(source, opt) {
   html2canvas(container, opt.html2canvas).then(done);
 };
 
-html2pdf.parseInput = function(source, opt) {
-  // Parse the opt object.
-  opt.jsPDF = opt.jsPDF || {};
-  opt.html2canvas = opt.html2canvas || {};
-  opt.filename = opt.filename && objType(opt.filename) === 'string' ? opt.filename : 'file.pdf';
-  opt.enableLinks = opt.hasOwnProperty('enableLinks') ? opt.enableLinks : true;
-  opt.image = opt.image || {};
-  opt.image.type = opt.image.type || 'jpeg';
-  opt.image.quality = opt.image.quality || 0.95;
-
-  // Parse the margin property of the opt object.
-  switch (objType(opt.margin)) {
-    case 'undefined':
-      opt.margin = 0;
-    case 'number':
-      opt.margin = [opt.margin, opt.margin, opt.margin, opt.margin];
-      break;
-    case 'array':
-      if (opt.margin.length === 2) {
-        opt.margin = [opt.margin[0], opt.margin[1], opt.margin[0], opt.margin[1]];
-      }
-      if (opt.margin.length === 4) {
-        break;
-      }
-    default:
-      throw 'Invalid margin array.';
-  }
-
-  // Parse the source element/string.
-  if (!source) {
-    throw 'Missing source element or string.';
-  } else if (objType(source) === 'string') {
-    source = createElement('div', { innerHTML: source });
-  } else if (objType(source) === 'element') {
-    source = cloneNode(source, opt.html2canvas.javascriptEnabled);
-  } else {
-    throw 'Invalid source - please specify an HTML Element or string.';
-  }
-
-  // Return the parsed input (opt is modified in-place, no need to return).
-  return source;
-};
-
 html2pdf.makeContainer = function(source, pageSize) {
-  // Define the CSS styles for the container and its overlay parent.
-  var overlayCSS = {
-    position: 'fixed', overflow: 'hidden', zIndex: 1000,
-    left: 0, right: 0, bottom: 0, top: 0,
-    backgroundColor: 'rgba(0,0,0,0.8)'
-  };
-  var containerCSS = {
-    position: 'absolute', width: pageSize.inner.width + pageSize.unit,
-    left: 0, right: 0, top: 0, height: 'auto', margin: 'auto',
-    backgroundColor: 'white'
-  };
-
-  // Set the overlay to hidden (could be changed in the future to provide a print preview).
-  overlayCSS.opacity = 0;
-
-  // Create and attach the elements.
-  var overlay = createElement('div',   { className: 'html2pdf__overlay', style: overlayCSS });
-  var container = createElement('div', { className: 'html2pdf__container', style: containerCSS });
-  container.appendChild(source);
-  overlay.appendChild(container);
-  document.body.appendChild(overlay);
-
   // Enable page-breaks.
   var pageBreaks = source.querySelectorAll('.html2pdf__page-break');
   var pxPageHeight = pageSize.inner.height * pageSize.k / 72 * 96;
@@ -133,9 +64,6 @@ html2pdf.makeContainer = function(source, pageSize) {
     var clientRect = el.getBoundingClientRect();
     el.style.height = pxPageHeight - (clientRect.top % pxPageHeight) + 'px';
   }, this);
-
-  // Return the container.
-  return container;
 };
 
 html2pdf.makePDF = function(canvas, pageSize, opt) {
