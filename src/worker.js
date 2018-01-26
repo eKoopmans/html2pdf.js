@@ -231,36 +231,38 @@ Worker.prototype.save = function save(filename) {
 /* ----- SET / GET ----- */
 
 Worker.prototype.set = function set(opt) {
+  // Set properties immediately.
+  //    NOTE: Don't need to worry about race conditions (with .then) because
+  //    each promise is unique. So anything set here will override the
+  //    prototype, even if an earlier .then resolves after this.
   // TODO: Test null/undefined input to this function.
   // TODO: Implement ordered pairs?
-  return this.then(function() {
-    for (var key in opt) {
-      if (key in Worker.template) {
-        // Set root-level properties.
-        this[key] = opt[key];
-      } else if (key === 'margin') {
-        // Parse the margin property.
-        var margin = opt.margin;
-        switch (objType(margin)) {
-          case 'number':
-            margin = [margin, margin, margin, margin];
-          case 'array':
-            if (margin.length === 2) {
-              margin = [margin[0], margin[1], margin[0], margin[1]];
-            }
-            if (margin.length === 4) {
-              break;
-            }
-          default:
-            throw 'Invalid margin array.';
-        }
-        this.opt.margin = margin;
-      } else {
-        // Set any other properties in opt.
-        this.opt[key] = opt[key];
+  for (var key in opt) {
+    if (key in Worker.template) {
+      // Set root-level properties.
+      this[key] = opt[key];
+    } else if (key === 'margin') {
+      // Parse the margin property.
+      var margin = opt.margin;
+      switch (objType(margin)) {
+        case 'number':
+          margin = [margin, margin, margin, margin];
+        case 'array':
+          if (margin.length === 2) {
+            margin = [margin[0], margin[1], margin[0], margin[1]];
+          }
+          if (margin.length === 4) {
+            break;
+          }
+        default:
+          throw 'Invalid margin array.';
       }
+      this.opt.margin = margin;
+    } else {
+      // Set any other properties in opt.
+      this.opt[key] = opt[key];
     }
-  });
+  }
 };
 
 Worker.prototype.get = function get(key, cbk) {
