@@ -210,7 +210,7 @@ Worker.prototype.export = function export(type) {
   return this.then(function() {
     // TODO HERE: Program all the different export options.
   });
-}
+};
 
 Worker.prototype.save = function save(filename) {
   // Set up function prerequisites.
@@ -226,7 +226,7 @@ Worker.prototype.save = function save(filename) {
   ).then(function() {
     this.pdf.save(this.opt.filename);
   });
-}
+};
 
 /* ----- SET / GET ----- */
 
@@ -327,12 +327,12 @@ Worker.prototype['catch'] = function (onRejected) {
 Worker.prototype.thenExternal = function thenExternal(onFulfilled, onRejected) {
   // Call `then` and return a standard promise (exits the Worker chain).
   return Promise.prototype.then.call(this, onFulfilled, onRejected);
-}
+};
 
 Worker.prototype.catchExternal = function catchExternal(onRejected) {
   // Call `catch` and return a standard promise (exits the Worker chain).
   return Promise.prototype['catch'].call(this, onRejected);
-}
+};
 
 Worker.prototype.error = function error(msg) {
   // Throw the error in the Promise chain.
