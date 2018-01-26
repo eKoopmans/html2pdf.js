@@ -255,7 +255,7 @@ Worker.prototype.set = function set(opt) {
             break;
           }
         default:
-          throw 'Invalid margin array.';
+          this.error('Invalid margin array.');
       }
       this.opt.margin = margin;
     } else {
@@ -333,6 +333,13 @@ Worker.prototype.catchExternal = function catchExternal(onRejected) {
   // Call `catch` and return a standard promise (exits the Worker chain).
   return Promise.prototype['catch'].call(this, onRejected);
 }
+
+Worker.prototype.error = function error(msg) {
+  // Throw the error in the Promise chain.
+  return this.then(function() {
+    throw msg;
+  });
+};
 
 /* ----- ALIASES ----- */
 
