@@ -40,10 +40,10 @@ Worker.prototype = Object.create(Promise.prototype);
 Worker.prototype.constructor = Worker;
 
 // Converts/casts promises into Workers.
-Worker.convert = function convert(promise, props) {
-  // TODO: May want to deep-copy props before attaching them to the new object.
-  promise.__proto__ = Worker.prototype;
-  return props ? Object.assign(promise, props) : promise;
+Worker.convert = function convert(promise, inherit) {
+  // Uses prototypal inheritance to receive changes made to ancestors' properties.
+  promise.__proto__ = inherit || Worker.prototype;
+  return promise;
 };
 
 Worker.template = {
