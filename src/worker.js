@@ -216,7 +216,7 @@ Worker.prototype.toPdf = function toPdf() {
     pageCanvas.height = pxPageHeight;
 
     // Initialize the PDF.
-    var this.pdf = new jsPDF(opt.jsPDF);
+    var pdf = new jsPDF(opt.jsPDF);
 
     for (var page=0; page<nPages; page++) {
       // Trim the final page to reduce file size.
@@ -233,24 +233,14 @@ Worker.prototype.toPdf = function toPdf() {
       pageCtx.drawImage(canvas, 0, page*pxPageHeight, w, h, 0, 0, w, h);
 
       // Add the page to the PDF.
-      if (page)  this.pdf.addPage();
+      if (page)  pdf.addPage();
       var imgData = pageCanvas.toDataURL('image/' + opt.image.type, opt.image.quality);
-      this.pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0],
+      pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0],
                    this.pageSize.inner.width, pageHeight);
-
-      // Add hyperlinks.
-      if (opt.enableLinks) {
-        var pageTop = page * this.pageSize.inner.height;
-        opt.links.forEach(function(link) {
-          if (link.clientRect.top > pageTop &&
-              link.clientRect.top < pageTop + this.pageSize.inner.height) {
-            var left = opt.margin[1] + link.clientRect.left;
-            var top = opt.margin[0] + link.clientRect.top - pageTop;
-            this.pdf.link(left, top, link.clientRect.width, link.clientRect.height, { url: link.el.href });
-          }
-        });
-      }
     }
+
+    // Attach pdf to this.
+    this.pdf = pdf;
   });
 };
 
@@ -366,7 +356,7 @@ Worker.prototype.setPageSize = function setPageSize(pageSize) {
     pageSize.inner.ratio = pageSize.inner.height / pageSize.inner.width;
   }
 
-  // Update this.pageSize.
+  // Attach pageSize to this.
   this.pageSize = pageSize;
 
   // Return this for command chaining.
