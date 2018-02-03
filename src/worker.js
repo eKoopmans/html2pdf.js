@@ -87,7 +87,7 @@ Worker.prototype.from = function from(src, type) {
       case 'html':    return this.set({ src: src });
       case 'canvas':  return this.set({ canvas: src });
       case 'img':     return this.set({ img: src });
-      default:        throw 'Unknown source type.';
+      default:        return this.error('Unknown source type.');
     }
   });
 };
@@ -104,7 +104,7 @@ Worker.prototype.to = function to(target) {
     case 'pdf':
       return this.toPdf();
     default:
-      this.error('Invalid target.');
+      return this.error('Invalid target.');
   }
 };
 
@@ -252,7 +252,7 @@ Worker.prototype.set = function set(opt) {
             break;
           }
         default:
-          this.error('Invalid margin array.');
+          return this.error('Invalid margin array.');
       }
       this.opt.margin = margin;
     } else {
@@ -260,6 +260,9 @@ Worker.prototype.set = function set(opt) {
       this.opt[key] = opt[key];
     }
   }
+
+  // Return this for command chaining.
+  return this;
 };
 
 Worker.prototype.get = function get(key, cbk) {
