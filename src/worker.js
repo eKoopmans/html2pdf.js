@@ -94,21 +94,18 @@ Worker.prototype.from = function from(src, type) {
 
 Worker.prototype.to = function to(target) {
   // Route the 'to' request to the appropriate method.
-  // NOTE: then is necessary for the catch...
-  return this.then(function() {
-    switch (target) {
-      case 'container':
-        return this.toContainer();
-      case 'canvas':
-        return this.toCanvas();
-      case 'img':
-        return this.toImg();
-      case 'pdf':
-        return this.toPdf();
-      default:
-        throw 'Invalid target.';
-    }
-  });
+  switch (target) {
+    case 'container':
+      return this.toContainer();
+    case 'canvas':
+      return this.toCanvas();
+    case 'img':
+      return this.toImg();
+    case 'pdf':
+      return this.toPdf();
+    default:
+      this.error('Invalid target.');
+  }
 };
 
 Worker.prototype.toContainer = function toContainer() {
