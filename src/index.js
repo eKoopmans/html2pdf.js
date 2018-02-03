@@ -43,60 +43,6 @@ var html2pdf = function(source, opt) {
   html2canvas(container, opt.html2canvas).then(done);
 };
 
-html2pdf.makePDF = function(canvas, pageSize, opt) {
-  // Calculate the number of pages.
-  var ctx = canvas.getContext('2d');
-  var pxFullHeight = canvas.height;
-  var pxPageHeight = Math.floor(canvas.width * pageSize.inner.ratio);
-  var nPages = Math.ceil(pxFullHeight / pxPageHeight);
-
-  // Create a one-page canvas to split up the full image.
-  var pageCanvas = document.createElement('canvas');
-  var pageCtx = pageCanvas.getContext('2d');
-  var pageHeight = pageSize.inner.height;
-  pageCanvas.width = canvas.width;
-  pageCanvas.height = pxPageHeight;
-
-  // Initialize the PDF.
-  var pdf = new jsPDF(opt.jsPDF);
-
-  for (var page=0; page<nPages; page++) {
-    // Trim the final page to reduce file size.
-    if (page === nPages-1) {
-      pageCanvas.height = pxFullHeight % pxPageHeight;
-      pageHeight = pageCanvas.height * pageSize.inner.width / pageCanvas.width;
-    }
-
-    // Display the page.
-    var w = pageCanvas.width;
-    var h = pageCanvas.height;
-    pageCtx.fillStyle = 'white';
-    pageCtx.fillRect(0, 0, w, h);
-    pageCtx.drawImage(canvas, 0, page*pxPageHeight, w, h, 0, 0, w, h);
-
-    // Add the page to the PDF.
-    if (page)  pdf.addPage();
-    var imgData = pageCanvas.toDataURL('image/' + opt.image.type, opt.image.quality);
-    pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0],
-                 pageSize.inner.width, pageHeight);
-
-    // Add hyperlinks.
-    if (opt.enableLinks) {
-      var pageTop = page * pageSize.inner.height;
-      opt.links.forEach(function(link) {
-        if (link.clientRect.top > pageTop && link.clientRect.top < pageTop + pageSize.inner.height) {
-          var left = opt.margin[1] + link.clientRect.left;
-          var top = opt.margin[0] + link.clientRect.top - pageTop;
-          pdf.link(left, top, link.clientRect.width, link.clientRect.height, { url: link.el.href });
-        }
-      });
-    }
-  }
-
-  // Finish the PDF.
-  pdf.save( opt.filename );
-}
-
 
 // Expose the html2pdf function.
 export default html2pdf;

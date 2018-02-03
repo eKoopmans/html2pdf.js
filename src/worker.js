@@ -180,7 +180,7 @@ Worker.prototype.toImg = function toImg() {
   return this.then(function() {
     return prereq(reqs);
   }).then(function() {
-    var imgData = this.canvas.toDataURL('image/' + opt.image.type, opt.image.quality);
+    var imgData = this.canvas.toDataURL('image/' + this.opt.image.type, this.opt.image.quality);
     this.img = document.createElement('img');
     this.img.src = imgData;
   });
@@ -196,7 +196,61 @@ Worker.prototype.toPdf = function toPdf() {
   return this.then(function() {
     return prereq(reqs);
   }).then(function() {
-    // TODO: Transfer PDF code from index.js.
+    // Create local copies of frequently used properties.
+    var canvas = this.canvas;
+    var opt = this.opt;
+
+    // Calculate the number of pages.
+    var ctx = canvas.getContext('2d');
+    var pxFullHeight = canvas.height;
+    var pxPageHeight = Math.floor(canvas.width * this.pageSize.inner.ratio);
+    var nPages = Math.ceil(pxFullHeight / pxPageHeight);
+
+    // Define pageHeight separately so it can be trimmed on the final page.
+    var pageHeight = this.pageSize.inner.height;
+
+    // Create a one-page canvas to split up the full image.
+    var pageCanvas = document.createElement('canvas');
+    var pageCtx = pageCanvas.getContext('2d');
+    pageCanvas.width = canvas.width;
+    pageCanvas.height = pxPageHeight;
+
+    // Initialize the PDF.
+    var this.pdf = new jsPDF(opt.jsPDF);
+
+    for (var page=0; page<nPages; page++) {
+      // Trim the final page to reduce file size.
+      if (page === nPages-1) {
+        pageCanvas.height = pxFullHeight % pxPageHeight;
+        pageHeight = pageCanvas.height * this.pageSize.inner.width / pageCanvas.width;
+      }
+
+      // Display the page.
+      var w = pageCanvas.width;
+      var h = pageCanvas.height;
+      pageCtx.fillStyle = 'white';
+      pageCtx.fillRect(0, 0, w, h);
+      pageCtx.drawImage(canvas, 0, page*pxPageHeight, w, h, 0, 0, w, h);
+
+      // Add the page to the PDF.
+      if (page)  this.pdf.addPage();
+      var imgData = pageCanvas.toDataURL('image/' + opt.image.type, opt.image.quality);
+      this.pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0],
+                   this.pageSize.inner.width, pageHeight);
+
+      // Add hyperlinks.
+      if (opt.enableLinks) {
+        var pageTop = page * this.pageSize.inner.height;
+        opt.links.forEach(function(link) {
+          if (link.clientRect.top > pageTop &&
+              link.clientRect.top < pageTop + this.pageSize.inner.height) {
+            var left = opt.margin[1] + link.clientRect.left;
+            var top = opt.margin[0] + link.clientRect.top - pageTop;
+            this.pdf.link(left, top, link.clientRect.width, link.clientRect.height, { url: link.el.href });
+          }
+        });
+      }
+    }
   });
 };
 
