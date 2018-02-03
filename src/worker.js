@@ -50,9 +50,11 @@ Worker.template = {
   ready: null,
   src: null,
   container: null,
+  overlay: null,
   canvas: null,
   img: null,
   pdf: null,
+  pageSize: null,
   progress: {
     val: 0,
     state: null,
@@ -111,7 +113,8 @@ Worker.prototype.to = function to(target) {
 Worker.prototype.toContainer = function toContainer() {
   // Set up function prerequisites.
   var reqs = [
-    [this.src, function() { throw 'Cannot duplicate - no source HTML Element or string provided.'; }]
+    [this.src, this.error.bind(this, 'Cannot duplicate - no source HTML Element or string .')],
+    [this.pageSize, this.setPageSize.bind(this)]
   ];
 
   return this.then(function() {
@@ -124,7 +127,7 @@ Worker.prototype.toContainer = function toContainer() {
       backgroundColor: 'rgba(0,0,0,0.8)'
     };
     var containerCSS = {
-      position: 'absolute', width: pageSize.inner.width + pageSize.unit,
+      position: 'absolute', width: this.pageSize.inner.width + this.pageSize.unit,
       left: 0, right: 0, top: 0, height: 'auto', margin: 'auto',
       backgroundColor: 'white'
     };
@@ -140,17 +143,14 @@ Worker.prototype.toContainer = function toContainer() {
     this.overlay.appendChild(this.container);
     document.body.appendChild(this.overlay);
 
-    // TODO HERE: Finish adapting the code in here from index.js.
-    /*
     // Enable page-breaks.
     var pageBreaks = source.querySelectorAll('.html2pdf__page-break');
-    var pxPageHeight = pageSize.inner.height * pageSize.k / 72 * 96;
+    var pxPageHeight = this.pageSize.inner.px.height;
     Array.prototype.forEach.call(pageBreaks, function(el) {
       el.style.display = 'block';
       var clientRect = el.getBoundingClientRect();
       el.style.height = pxPageHeight - (clientRect.top % pxPageHeight) + 'px';
     }, this);
-    */
   });
 };
 
@@ -238,26 +238,20 @@ Worker.prototype.set = function set(opt) {
     if (key in Worker.template) {
       // Set root-level properties.
       this[key] = opt[key];
-    } else if (key === 'margin') {
-      // Parse the margin property.
-      var margin = opt.margin;
-      switch (objType(margin)) {
-        case 'number':
-          margin = [margin, margin, margin, margin];
-        case 'array':
-          if (margin.length === 2) {
-            margin = [margin[0], margin[1], margin[0], margin[1]];
-          }
-          if (margin.length === 4) {
-            break;
-          }
-        default:
-          return this.error('Invalid margin array.');
-      }
-      this.opt.margin = margin;
     } else {
-      // Set any other properties in opt.
-      this.opt[key] = opt[key];
+      switch (key) {
+        case 'margin':
+          this.setMargin(opt.margin);
+          break;
+        case 'jsPDF':
+          this.jsPDF = opt.jsPDF;
+        case 'pageSize':
+          this.setPageSize(opt.pageSize);
+          break;
+        default:
+          // Set any other properties in opt.
+          this.opt[key] = opt[key];
+      }
     }
   }
 
@@ -272,6 +266,58 @@ Worker.prototype.get = function get(key, cbk) {
     return cbk ? cbk(val) : val;
   });
 };
+
+Worker.prototype.setMargin = function setMargin(margin) {
+  // Parse the margin property.
+  switch (objType(margin)) {
+    case 'number':
+      margin = [margin, margin, margin, margin];
+    case 'array':
+      if (margin.length === 2) {
+        margin = [margin[0], margin[1], margin[0], margin[1]];
+      }
+      if (margin.length === 4) {
+        break;
+      }
+    default:
+      return this.error('Invalid margin array.');
+  }
+  this.opt.margin = margin;
+
+  // Update pageSize with the new margin.
+  this.setPageSize();
+
+  // Return this for command chaining.
+  return this;
+}
+
+Worker.prototype.setPageSize = function setPageSize(pageSize) {
+  function toPx(val, k) {
+    return Math.floor(val * k / 72 * 96);
+  }
+
+  // Retrieve page-size based on jsPDF settings, if not explicitly provided.
+  pageSize = pageSize || jsPDF.getPageSize(this.opt.jsPDF);
+
+  // Add 'inner' field if not present.
+  if (!pageSize.hasOwnProperty('inner')) {
+    pageSize.inner = {
+      width:  pageSize.width - this.opt.margin[1] - this.opt.margin[3],
+      height: pageSize.height - this.opt.margin[0] - this.opt.margin[2]
+    };
+    pageSize.inner.px = {
+      width:  toPx(pageSize.inner.width, pageSize.k),
+      height: toPx(pageSize.inner.height, pageSize.k)
+    };
+    pageSize.inner.ratio = pageSize.inner.height / pageSize.inner.width;
+  }
+
+  // Update this.pageSize.
+  this.pageSize = pageSize;
+
+  // Return this for command chaining.
+  return this;
+}
 
 Worker.prototype.setProgress = function setProgress(val, state, n, stack) {
   // Immediately update all progress values.

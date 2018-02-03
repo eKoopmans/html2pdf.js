@@ -13,18 +13,6 @@ import { objType, createElement, cloneNode, unitConvert } from './utils.js';
  *    sent as settings to their corresponding functions.
  */
 var html2pdf = function(source, opt) {
-  // Determine the PDF page size.
-  var pageSize = jsPDF.getPageSize(opt.jsPDF);
-  pageSize.inner = {
-    width:  pageSize.width - opt.margin[1] - opt.margin[3],
-    height: pageSize.height - opt.margin[0] - opt.margin[2]
-  };
-  pageSize.inner.ratio = pageSize.inner.height / pageSize.inner.width;
-
-  // Copy the source element into a PDF-styled container div.
-  var container = html2pdf.makeContainer(source, pageSize);
-  var overlay = container.parentElement;
-
   // Get the locations of all hyperlinks.
   if (opt.enableLinks) {
     // Find all anchor tags and get the container's bounds for reference.
@@ -53,17 +41,6 @@ var html2pdf = function(source, opt) {
     html2pdf.makePDF(canvas, pageSize, opt);
   };
   html2canvas(container, opt.html2canvas).then(done);
-};
-
-html2pdf.makeContainer = function(source, pageSize) {
-  // Enable page-breaks.
-  var pageBreaks = source.querySelectorAll('.html2pdf__page-break');
-  var pxPageHeight = pageSize.inner.height * pageSize.k / 72 * 96;
-  Array.prototype.forEach.call(pageBreaks, function(el) {
-    el.style.display = 'block';
-    var clientRect = el.getBoundingClientRect();
-    el.style.height = pxPageHeight - (clientRect.top % pxPageHeight) + 'px';
-  }, this);
 };
 
 html2pdf.makePDF = function(canvas, pageSize, opt) {
