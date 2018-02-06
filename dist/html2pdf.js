@@ -369,7 +369,11 @@ html2pdf.makePDF = function (canvas, pageSize, opt) {
   }
 
   // Finish the PDF.
-  pdf.save(opt.filename);
+  if (opt.save) {
+    opt.save(pdf);
+  } else {
+    pdf.save(opt.filename);
+  }
 };
 
 return html2pdf;
