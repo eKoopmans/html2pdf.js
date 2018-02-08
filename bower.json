@@ -8,17 +8,20 @@
     "node"
   ],
   "authors": [
-    "Erik Koopmans <erik@erik-koopmans.com>"
+    "Erik Koopmans <erik@erik-koopmans.com>",
+    "Jefferson Aux <https://github.com/jeffraux>"
   ],
   "license": "MIT",
   "keywords": [
     "javascript",
     "pdf-generation",
+    "pdf-display",
+    "iframe",
     "html",
     "client-side",
     "canvas"
   ],
-  "homepage": "https://github.com/eKoopmans/html2pdf",
+  "homepage": "https://github.com/jeffraux/html2pdf",
   "ignore": [
     "node_modules/",
     "bower_components/",

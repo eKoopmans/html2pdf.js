@@ -44,7 +44,8 @@ html2pdf(element, {
   filename:     'myfile.pdf',
   image:        { type: 'jpeg', quality: 0.98 },
   html2canvas:  { dpi: 192, letterRendering: true },
-  jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+  jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
+  output:       { mode: 'display', container: '#iframeId', height: 800 }
 });
 ```
 
@@ -58,6 +59,7 @@ The `opt` parameter has the following optional fields:
 |enableLinks |boolean         |true                          |If enabled, PDF hyperlinks are automatically added ontop of all anchor tags.                                |
 |html2canvas |object          |{ }                           |Configuration options sent directly to `html2canvas` ([see here](https://html2canvas.hertzen.com/configuration) for usage).|
 |jsPDF       |object          |{ }                           |Configuration options sent directly to `jsPDF` ([see here](http://rawgit.com/MrRio/jsPDF/master/docs/jsPDF.html) for usage).|
+|output      |object          |{ }                           |Configuration options for saving or displaying the pdf. `mode`: `save` or `display`. `container`: Iframe element id on where you want to display the PDF. `height`: Display height of the iframe. |
 
 ### Page-breaks
 
@@ -109,10 +111,11 @@ If you want to create a new feature or bugfix, please feel free to fork and subm
 
 ## Credits
 
+[Jefferson Aux](https://github.com/jeffraux)
 [Erik Koopmans](https://github.com/eKoopmans)
 
 ## License
 
 [The MIT License](http://opensource.org/licenses/MIT)
 
-Copyright (c) 2017 Erik Koopmans <[http://www.erik-koopmans.com/](http://www.erik-koopmans.com/)>
+Copyright (c) 2017 Jefferson Aux

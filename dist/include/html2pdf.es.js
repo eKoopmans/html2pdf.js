@@ -239,6 +239,7 @@ html2pdf.parseInput = function (source, opt) {
   // Parse the opt object.
   opt.jsPDF = opt.jsPDF || {};
   opt.html2canvas = opt.html2canvas || {};
+  opt.output = opt.output || {};
   opt.filename = opt.filename && objType(opt.filename) === 'string' ? opt.filename : 'file.pdf';
   opt.enableLinks = opt.hasOwnProperty('enableLinks') ? opt.enableLinks : true;
   opt.image = opt.image || {};
@@ -363,8 +364,29 @@ html2pdf.makePDF = function (canvas, pageSize, opt) {
     }
   }
 
-  // Finish the PDF.
-  pdf.save(opt.filename);
+  // Finish the PDF based on the output option
+  if (opt.output) {
+    var mode = opt.output.mode || 'save';
+    var container = opt.output.container || '';
+    var height = opt.output.height || 300;
+
+    switch (mode) {
+      case 'save':
+        pdf.save(opt.filename);
+        break;
+      case 'display':
+        {
+          if (height) {
+            $(container).attr('height', height);
+          }
+
+          $(container).attr('src', pdf.output('datauristring'));
+        }
+        break;
+    }
+  } else {
+    pdf.save(opt.filename);
+  }
 };
 
 export default html2pdf;
