@@ -87,14 +87,12 @@ Worker.prototype.to = function to(target) {
 
 Worker.prototype.toContainer = function toContainer() {
   // Set up function prerequisites.
-  var reqs = [
-    [this.src, this.error.bind(this, 'Cannot duplicate - no source HTML Element or string .')],
-    [this.pageSize, this.setPageSize.bind(this)]
+  var prereqs = [
+    function() { return this.src || this.error('Cannot duplicate - no source HTML.')); },
+    function() { return this.pageSize || this.setPageSize(); }
   ];
 
-  return this.then(function() {
-    return prereq(reqs);
-  }).then(function() {
+  return this.thenList(prereqs).then(function() {
     // Define the CSS styles for the container and its overlay parent.
     var overlayCSS = {
       position: 'fixed', overflow: 'hidden', zIndex: 1000,
@@ -131,14 +129,12 @@ Worker.prototype.toContainer = function toContainer() {
 
 Worker.prototype.toCanvas = function toCanvas() {
   // Set up function prerequisites.
-  var reqs = [
-    [document.body.contains(this.container), this.toContainer.bind(this)]
+  var prereqs = [
+    function() { return document.body.contains(this.container) || this.toContainer(); }
   ];
 
   // Fulfill prereqs then create the canvas.
-  return this.then(function() {
-    return prereq(reqs);
-  }).then(function() {
+  return this.thenList(prereqs).then(function() {
     // Handle old-fashioned 'onrendered' argument.
     var options = Object.assign({}, this.opt.html2canvas);
     delete options.onrendered;
@@ -156,14 +152,12 @@ Worker.prototype.toCanvas = function toCanvas() {
 
 Worker.prototype.toImg = function toImg() {
   // Set up function prerequisites.
-  var reqs = [
-    [this.canvas, this.toCanvas.bind(this)]
+  var prereqs = [
+    function() { return this.canvas || this.toCanvas(); }
   ];
 
   // Fulfill prereqs then create the image.
-  return this.then(function() {
-    return prereq(reqs);
-  }).then(function() {
+  return this.thenList(prereqs).then(function() {
     var imgData = this.canvas.toDataURL('image/' + this.opt.image.type, this.opt.image.quality);
     this.img = document.createElement('img');
     this.img.src = imgData;
@@ -172,14 +166,12 @@ Worker.prototype.toImg = function toImg() {
 
 Worker.prototype.toPdf = function toPdf() {
   // Set up function prerequisites.
-  var reqs = [
-    [this.canvas, this.toCanvas.bind(this)]
+  var prereqs = [
+    function() { return this.canvas || this.toCanvas(); }
   ];
 
   // Fulfill prereqs then create the image.
-  return this.then(function() {
-    return prereq(reqs);
-  }).then(function() {
+  return this.thenList(prereqs).then(function() {
     // Create local copies of frequently used properties.
     var canvas = this.canvas;
     var opt = this.opt;
@@ -240,13 +232,11 @@ Worker.prototype.export = function export(type) {
 Worker.prototype.save = function save(filename) {
   // Set up function prerequisites.
   var reqs = [
-    [this.pdf, this.toPdf.bind(this)]
+    function() { return this.pdf || this.toPdf(); }
   ];
 
   // Fulfill prereqs, update the filename (if provided), and save the PDF.
-  return this.then(function() {
-    return prereq(reqs);
-  }).set(
+  return this.thenList(prereqs).set(
     filename ? { filename: filename } : null
   ).then(function() {
     this.pdf.save(this.opt.filename);
@@ -391,6 +381,19 @@ Worker.prototype.then = function then(onFulfilled, onRejected) {
   return Worker.convert(returnVal, self);
 };
 
+Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected) {
+  // Core version of then, with no updates to progress.
+
+  // Wrap `this` for encapsulation and bind it to the promise handlers.
+  var self = this;
+  if (onFulfilled)  { onFulfilled = onFulfilled.bind(self); }
+  if (onRejected)   { onRejected = onRejected.bind(self); }
+
+  // Return the promise, after casting it into a Worker and preserving props.
+  var returnVal = Promise.prototype.then.call(self, onFulfilled, onRejected);
+  return Worker.convert(returnVal, self);
+};
+
 Worker.prototype['catch'] = function (onRejected) {
   // Bind `this` to the promise handler, call `catch`, and return a Worker.
   if (onRejected)   { onRejected = onRejected.bind(this); }
@@ -406,6 +409,15 @@ Worker.prototype.thenExternal = function thenExternal(onFulfilled, onRejected) {
 Worker.prototype.catchExternal = function catchExternal(onRejected) {
   // Call `catch` and return a standard promise (exits the Worker chain).
   return Promise.prototype['catch'].call(this, onRejected);
+};
+
+Worker.prototype.thenList = function thenList(fns) {
+  // Queue a series of promise 'factories' into the promise chain.
+  var self = this;
+  fns.forEach(function(fn) {
+    self = self.thenCore(fn);
+  });
+  return self;
 };
 
 Worker.prototype.error = function error(msg) {
