@@ -228,7 +228,7 @@ Worker.prototype.export = function export(type) {
 
 Worker.prototype.save = function save(filename) {
   // Set up function prerequisites.
-  var reqs = [
+  var prereqs = [
     function() { return this.pdf || this.toPdf(); }
   ];
 
