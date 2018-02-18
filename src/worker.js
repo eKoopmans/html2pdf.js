@@ -132,16 +132,25 @@ Worker.prototype.toContainer = function toContainer() {
 Worker.prototype.toCanvas = function toCanvas() {
   // Set up function prerequisites.
   var reqs = [
-    [this.container, this.toContainer.bind(this)]
+    [document.body.contains(this.container), this.toContainer.bind(this)]
   ];
 
   // Fulfill prereqs then create the canvas.
   return this.then(function() {
     return prereq(reqs);
   }).then(function() {
-    return html2canvas(this.src, this.opt.html2canvas);
+    // Handle old-fashioned 'onrendered' argument.
+    var options = Object.assign({}, this.opt.html2canvas);
+    delete options.onrendered;
+
+    return html2canvas(this.container, options);
   }).then(function(canvas) {
+    // Handle old-fashioned 'onrendered' argument.
+    var onRendered = this.opt.html2canvas.onrendered || function() {};
+    onRendered(canvas);
+
     this.canvas = canvas;
+    document.body.removeChild(this.overlay);
   });
 };
 

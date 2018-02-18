@@ -27,17 +27,5 @@ var html2pdf = function html2pdf(src, opt) {
 }
 html2pdf.Worker = Worker;
 
-var html2pdf = function(source, opt) {
-  // Render the canvas and pass the result to makePDF.
-  var onRendered = opt.html2canvas.onrendered || function() {};
-  delete opt.html2canvas.onrendered;
-  var done = function(canvas) {
-    onRendered(canvas);
-    document.body.removeChild(overlay);
-    html2pdf.makePDF(canvas, pageSize, opt);
-  };
-  html2canvas(container, opt.html2canvas).then(done);
-};
-
 // Expose the html2pdf function.
 export default html2pdf;
