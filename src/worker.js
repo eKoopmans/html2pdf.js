@@ -192,7 +192,7 @@ Worker.prototype.toPdf = function toPdf() {
     pageCanvas.height = pxPageHeight;
 
     // Initialize the PDF.
-    var pdf = new jsPDF(opt.jsPDF);
+    this.pdf = this.pdf || new jsPDF(opt.jsPDF);
 
     for (var page=0; page<nPages; page++) {
       // Trim the final page to reduce file size.
@@ -209,14 +209,11 @@ Worker.prototype.toPdf = function toPdf() {
       pageCtx.drawImage(canvas, 0, page*pxPageHeight, w, h, 0, 0, w, h);
 
       // Add the page to the PDF.
-      if (page)  pdf.addPage();
+      if (page)  this.pdf.addPage();
       var imgData = pageCanvas.toDataURL('image/' + opt.image.type, opt.image.quality);
-      pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0],
-                   this.pageSize.inner.width, pageHeight);
+      this.pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0],
+                        this.pageSize.inner.width, pageHeight);
     }
-
-    // Attach pdf to this.
-    this.pdf = pdf;
   });
 };
 
