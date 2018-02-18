@@ -218,11 +218,56 @@ Worker.prototype.toPdf = function toPdf() {
 };
 
 
-/* ----- EXPORT / SAVE ----- */
+/* ----- OUTPUT / SAVE ----- */
 
-Worker.prototype.export = function export(type) {
-  return this.then(function() {
-    // TODO HERE: Program all the different export options.
+Worker.prototype.output = function output(type, options, src) {
+  // Redirect requests to the correct function (outputPdf / outputImg).
+  src = src || 'pdf';
+  if (src.toLowerCase() === 'img' || src.toLowerCase() === 'image') {
+    return this.outputImg(type, options);
+  } else {
+    return this.outputPdf(type, options);
+  }
+};
+
+Worker.prototype.outputPdf = function outputPdf(type, options) {
+  // Set up function prerequisites.
+  var prereqs = [
+    function() { return this.pdf || this.toPdf(); }
+  ];
+
+  // Fulfill prereqs then perform the appropriate output.
+  return this.thenList(prereqs).then(function() {
+    /* Currently implemented output types:
+     *    https://rawgit.com/MrRio/jsPDF/master/docs/jspdf.js.html#line992
+     *  save(options), arraybuffer, blob, bloburi/bloburl,
+     *  datauristring/dataurlstring, dataurlnewwindow, datauri/dataurl
+     */
+    return this.pdf.output(type, options);
+  });
+};
+
+Worker.prototype.outputImg = function outputImg(type, options) {
+  // Set up function prerequisites.
+  var prereqs = [
+    function() { return this.img || this.toImg(); }
+  ];
+
+  // Fulfill prereqs then perform the appropriate output.
+  return this.thenList(prereqs).then(function() {
+    switch (type) {
+      case undefined:
+      case 'img':
+        return this.img;
+      case 'datauristring':
+      case 'dataurlstring':
+        return this.img.src;
+      case 'datauri':
+      case 'dataurl':
+        return document.location.href = this.img.src;
+      default:
+        throw 'Image output type "' + type + '" is not supported.';
+    }
   });
 };
 
@@ -429,7 +474,7 @@ Worker.prototype.error = function error(msg) {
 
 Worker.prototype.using = Worker.prototype.set;
 Worker.prototype.saveAs = Worker.prototype.save;
-Worker.prototype.output = Worker.prototype.export;
+Worker.prototype.export = Worker.prototype.output;
 Worker.prototype.run = Worker.prototype.then;
 
 
