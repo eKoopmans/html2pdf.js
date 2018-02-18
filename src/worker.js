@@ -1,28 +1,3 @@
-/* ----- BELOW CODE BELONGS IN INDEX.JS ----- */
-
-import Worker from './worker.js';
-
-var html2pdf = function html2pdf(src, opt) {
-  // opt = src ? Object.assign(opt || {}, {src: src}) : opt;
-  var worker = new html2pdf.Worker(opt);
-
-  if (src) {
-    // If src is specified, perform the traditional 'simple' operation.
-    worker.from(src).save();
-  } else {
-    // Otherwise, return the worker for new Promise-based operation.
-    return worker;
-  }
-}
-html2pdf.Worker = Worker;
-
-/* ----- ABOVE CODE BELONGS IN INDEX.JS ----- */
-
-
-
-
-
-
 import { objType, createElement, cloneNode, unitConvert } from './utils.js';
 
 /* ----- CONSTRUCTOR ----- */
@@ -431,9 +406,16 @@ Worker.prototype.error = function error(msg) {
   });
 };
 
+
 /* ----- ALIASES ----- */
 
 Worker.prototype.using = Worker.prototype.set;
 Worker.prototype.saveAs = Worker.prototype.save;
 Worker.prototype.output = Worker.prototype.export;
 Worker.prototype.run = Worker.prototype.then;
+
+
+/* ----- FINISHING ----- */
+
+// Expose the Worker class.
+export default Worker;
