@@ -1,9 +1,11 @@
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import { objType, createElement, cloneNode, unitConvert } from './utils.js';
 
 /* ----- CONSTRUCTOR ----- */
 
 var Worker = function Worker(opt) {
-  var self = Worker.convert(Promise.resolve(), Worker.template);
+  var self = Object.assign(Worker.convert(Promise.resolve()), Worker.template);
 
   self.set(opt);
   self.setProgress(1, Worker, 1, [Worker]);
@@ -88,7 +90,7 @@ Worker.prototype.to = function to(target) {
 Worker.prototype.toContainer = function toContainer() {
   // Set up function prerequisites.
   var prereqs = [
-    function() { return this.src || this.error('Cannot duplicate - no source HTML.')); },
+    function() { return this.src || this.error('Cannot duplicate - no source HTML.'); },
     function() { return this.pageSize || this.setPageSize(); }
   ];
 

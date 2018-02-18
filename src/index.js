@@ -1,9 +1,8 @@
 import 'es6-promise/auto';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 
 import Worker from './worker.js';
 import './plugin/jspdf-plugin.js';
+import './plugin/hyperlinks.js';
 
 /**
  * Generate a PDF from an HTML element or string using html2canvas and jsPDF.

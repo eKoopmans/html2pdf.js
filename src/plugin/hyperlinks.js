@@ -1,5 +1,5 @@
 import Worker from '../worker.js';
-import { objType, createElement, cloneNode, unitConvert } from './utils.js';
+import { unitConvert } from '../utils.js';
 
 var orig = {
   toPdf: Worker.prototype.toPdf,
@@ -36,5 +36,5 @@ Worker.prototype.toPdf = function toPdf() {
       var nPages = this.pdf.putTotalPages().internal.getNumberOfPages();
       this.pdf.setPage(nPages);
     }
-  };
+  });
 };
