@@ -45,7 +45,7 @@ Worker.template = {
   },
   opt: {
     filename: 'file.pdf',
-    margin: 0,
+    margin: [0,0,0,0],
     image: { type: 'jpeg', quality: 0.95 },
     enableLinks: true,
     html2canvas: {},
