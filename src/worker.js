@@ -301,16 +301,16 @@ Worker.prototype.set = function set(opt) {
   // TODO: Test null/undefined input to this function.
   // TODO: Implement ordered pairs?
   for (var key in opt) {
-    if (key in Worker.template) {
-      // Set root-level properties.
-      this[key] = opt[key];
+    if (key in Worker.template.prop) {
+      // Set pre-defined properties.
+      this.prop[key] = opt[key];
     } else {
       switch (key) {
         case 'margin':
           this.setMargin(opt.margin);
           break;
         case 'jsPDF':
-          this.jsPDF = opt.jsPDF;
+          this.opt.jsPDF = opt.jsPDF;
         case 'pageSize':
           this.setPageSize(opt.pageSize);
           break;
