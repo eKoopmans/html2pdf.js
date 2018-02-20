@@ -24,14 +24,15 @@ Worker.convert = function convert(promise, inherit) {
 };
 
 Worker.template = {
-  ready: null,
-  src: null,
-  container: null,
-  overlay: null,
-  canvas: null,
-  img: null,
-  pdf: null,
-  pageSize: null,
+  prop: {
+    src: null,
+    container: null,
+    overlay: null,
+    canvas: null,
+    img: null,
+    pdf: null,
+    pageSize: null
+  },
   progress: {
     val: 0,
     state: null,
@@ -90,8 +91,8 @@ Worker.prototype.to = function to(target) {
 Worker.prototype.toContainer = function toContainer() {
   // Set up function prerequisites.
   var prereqs = [
-    function() { return this.src || this.error('Cannot duplicate - no source HTML.'); },
-    function() { return this.pageSize || this.setPageSize(); }
+    function() { return this.prop.src || this.error('Cannot duplicate - no source HTML.'); },
+    function() { return this.prop.pageSize || this.setPageSize(); }
   ];
 
   return this.thenList(prereqs).then(function() {
@@ -102,7 +103,7 @@ Worker.prototype.toContainer = function toContainer() {
       backgroundColor: 'rgba(0,0,0,0.8)'
     };
     var containerCSS = {
-      position: 'absolute', width: this.pageSize.inner.width + this.pageSize.unit,
+      position: 'absolute', width: this.prop.pageSize.inner.width + this.prop.pageSize.unit,
       left: 0, right: 0, top: 0, height: 'auto', margin: 'auto',
       backgroundColor: 'white'
     };
@@ -111,16 +112,16 @@ Worker.prototype.toContainer = function toContainer() {
     overlayCSS.opacity = 0;
 
     // Create and attach the elements.
-    var source = cloneNode(this.src, this.opt.html2canvas.javascriptEnabled);
-    this.overlay = createElement('div',   { className: 'html2pdf__overlay', style: overlayCSS });
-    this.container = createElement('div', { className: 'html2pdf__container', style: containerCSS });
-    this.container.appendChild(source);
-    this.overlay.appendChild(this.container);
-    document.body.appendChild(this.overlay);
+    var source = cloneNode(this.prop.src, this.opt.html2canvas.javascriptEnabled);
+    this.prop.overlay = createElement('div',   { className: 'html2pdf__overlay', style: overlayCSS });
+    this.prop.container = createElement('div', { className: 'html2pdf__container', style: containerCSS });
+    this.prop.container.appendChild(source);
+    this.prop.overlay.appendChild(this.prop.container);
+    document.body.appendChild(this.prop.overlay);
 
     // Enable page-breaks.
     var pageBreaks = source.querySelectorAll('.html2pdf__page-break');
-    var pxPageHeight = this.pageSize.inner.px.height;
+    var pxPageHeight = this.prop.pageSize.inner.px.height;
     Array.prototype.forEach.call(pageBreaks, function(el) {
       el.style.display = 'block';
       var clientRect = el.getBoundingClientRect();
@@ -132,7 +133,7 @@ Worker.prototype.toContainer = function toContainer() {
 Worker.prototype.toCanvas = function toCanvas() {
   // Set up function prerequisites.
   var prereqs = [
-    function() { return document.body.contains(this.container) || this.toContainer(); }
+    function() { return document.body.contains(this.prop.container) || this.toContainer(); }
   ];
 
   // Fulfill prereqs then create the canvas.
@@ -141,51 +142,51 @@ Worker.prototype.toCanvas = function toCanvas() {
     var options = Object.assign({}, this.opt.html2canvas);
     delete options.onrendered;
 
-    return html2canvas(this.container, options);
+    return html2canvas(this.prop.container, options);
   }).then(function(canvas) {
     // Handle old-fashioned 'onrendered' argument.
     var onRendered = this.opt.html2canvas.onrendered || function() {};
     onRendered(canvas);
 
-    this.canvas = canvas;
-    document.body.removeChild(this.overlay);
+    this.prop.canvas = canvas;
+    document.body.removeChild(this.prop.overlay);
   });
 };
 
 Worker.prototype.toImg = function toImg() {
   // Set up function prerequisites.
   var prereqs = [
-    function() { return this.canvas || this.toCanvas(); }
+    function() { return this.prop.canvas || this.toCanvas(); }
   ];
 
   // Fulfill prereqs then create the image.
   return this.thenList(prereqs).then(function() {
-    var imgData = this.canvas.toDataURL('image/' + this.opt.image.type, this.opt.image.quality);
-    this.img = document.createElement('img');
-    this.img.src = imgData;
+    var imgData = this.prop.canvas.toDataURL('image/' + this.opt.image.type, this.opt.image.quality);
+    this.prop.img = document.createElement('img');
+    this.prop.img.src = imgData;
   });
 };
 
 Worker.prototype.toPdf = function toPdf() {
   // Set up function prerequisites.
   var prereqs = [
-    function() { return this.canvas || this.toCanvas(); }
+    function() { return this.prop.canvas || this.toCanvas(); }
   ];
 
   // Fulfill prereqs then create the image.
   return this.thenList(prereqs).then(function() {
     // Create local copies of frequently used properties.
-    var canvas = this.canvas;
+    var canvas = this.prop.canvas;
     var opt = this.opt;
 
     // Calculate the number of pages.
     var ctx = canvas.getContext('2d');
     var pxFullHeight = canvas.height;
-    var pxPageHeight = Math.floor(canvas.width * this.pageSize.inner.ratio);
+    var pxPageHeight = Math.floor(canvas.width * this.prop.pageSize.inner.ratio);
     var nPages = Math.ceil(pxFullHeight / pxPageHeight);
 
     // Define pageHeight separately so it can be trimmed on the final page.
-    var pageHeight = this.pageSize.inner.height;
+    var pageHeight = this.prop.pageSize.inner.height;
 
     // Create a one-page canvas to split up the full image.
     var pageCanvas = document.createElement('canvas');
@@ -194,13 +195,13 @@ Worker.prototype.toPdf = function toPdf() {
     pageCanvas.height = pxPageHeight;
 
     // Initialize the PDF.
-    this.pdf = this.pdf || new jsPDF(opt.jsPDF);
+    this.prop.pdf = this.prop.pdf || new jsPDF(opt.jsPDF);
 
     for (var page=0; page<nPages; page++) {
       // Trim the final page to reduce file size.
       if (page === nPages-1) {
         pageCanvas.height = pxFullHeight % pxPageHeight;
-        pageHeight = pageCanvas.height * this.pageSize.inner.width / pageCanvas.width;
+        pageHeight = pageCanvas.height * this.prop.pageSize.inner.width / pageCanvas.width;
       }
 
       // Display the page.
@@ -211,10 +212,10 @@ Worker.prototype.toPdf = function toPdf() {
       pageCtx.drawImage(canvas, 0, page*pxPageHeight, w, h, 0, 0, w, h);
 
       // Add the page to the PDF.
-      if (page)  this.pdf.addPage();
+      if (page)  this.prop.pdf.addPage();
       var imgData = pageCanvas.toDataURL('image/' + opt.image.type, opt.image.quality);
-      this.pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0],
-                        this.pageSize.inner.width, pageHeight);
+      this.prop.pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0],
+                        this.prop.pageSize.inner.width, pageHeight);
     }
   });
 };
@@ -235,7 +236,7 @@ Worker.prototype.output = function output(type, options, src) {
 Worker.prototype.outputPdf = function outputPdf(type, options) {
   // Set up function prerequisites.
   var prereqs = [
-    function() { return this.pdf || this.toPdf(); }
+    function() { return this.prop.pdf || this.toPdf(); }
   ];
 
   // Fulfill prereqs then perform the appropriate output.
@@ -245,14 +246,14 @@ Worker.prototype.outputPdf = function outputPdf(type, options) {
      *  save(options), arraybuffer, blob, bloburi/bloburl,
      *  datauristring/dataurlstring, dataurlnewwindow, datauri/dataurl
      */
-    return this.pdf.output(type, options);
+    return this.prop.pdf.output(type, options);
   });
 };
 
 Worker.prototype.outputImg = function outputImg(type, options) {
   // Set up function prerequisites.
   var prereqs = [
-    function() { return this.img || this.toImg(); }
+    function() { return this.prop.img || this.toImg(); }
   ];
 
   // Fulfill prereqs then perform the appropriate output.
@@ -260,13 +261,13 @@ Worker.prototype.outputImg = function outputImg(type, options) {
     switch (type) {
       case undefined:
       case 'img':
-        return this.img;
+        return this.prop.img;
       case 'datauristring':
       case 'dataurlstring':
-        return this.img.src;
+        return this.prop.img.src;
       case 'datauri':
       case 'dataurl':
-        return document.location.href = this.img.src;
+        return document.location.href = this.prop.img.src;
       default:
         throw 'Image output type "' + type + '" is not supported.';
     }
@@ -276,14 +277,14 @@ Worker.prototype.outputImg = function outputImg(type, options) {
 Worker.prototype.save = function save(filename) {
   // Set up function prerequisites.
   var prereqs = [
-    function() { return this.pdf || this.toPdf(); }
+    function() { return this.prop.pdf || this.toPdf(); }
   ];
 
   // Fulfill prereqs, update the filename (if provided), and save the PDF.
   return this.thenList(prereqs).set(
     filename ? { filename: filename } : null
   ).then(function() {
-    this.pdf.save(this.opt.filename);
+    this.prop.pdf.save(this.opt.filename);
   });
 };
 
@@ -375,7 +376,7 @@ Worker.prototype.setPageSize = function setPageSize(pageSize) {
   }
 
   // Attach pageSize to this.
-  this.pageSize = pageSize;
+  this.prop.pageSize = pageSize;
 
   // Return this for command chaining.
   return this;
