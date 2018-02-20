@@ -5,10 +5,13 @@ import { objType, createElement, cloneNode, unitConvert } from './utils.js';
 /* ----- CONSTRUCTOR ----- */
 
 var Worker = function Worker(opt) {
-  var self = Object.assign(Worker.convert(Promise.resolve()), Worker.template);
+  // Create the root parent for the proto chain, and the starting Worker.
+  var root = Object.assign(Worker.convert(Promise.resolve()), Worker.template);
+  var self = Worker.convert(Promise.resolve(), root);
 
-  self.set(opt);
+  // Set progress, optional settings, and return.
   self.setProgress(1, Worker, 1, [Worker]);
+  self.set(opt);
   return self;
 };
 
@@ -423,7 +426,7 @@ Worker.prototype.then = function then(onFulfilled, onRejected) {
   });
 
   // Return the promise, after casting it into a Worker and preserving props.
-  return Worker.convert(returnVal, self);
+  return Worker.convert(returnVal, self.__proto__);
 };
 
 Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected) {
@@ -436,7 +439,7 @@ Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected) {
 
   // Return the promise, after casting it into a Worker and preserving props.
   var returnVal = Promise.prototype.then.call(self, onFulfilled, onRejected);
-  return Worker.convert(returnVal, self);
+  return Worker.convert(returnVal, self.__proto__);
 };
 
 Worker.prototype['catch'] = function (onRejected) {
