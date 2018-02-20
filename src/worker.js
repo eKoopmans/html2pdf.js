@@ -327,8 +327,8 @@ Worker.prototype.set = function set(opt) {
 
 Worker.prototype.get = function get(key, cbk) {
   return this.then(function() {
-    // Fetch the requested property, either as a root prop or in opt.
-    var val = (key in Worker.template) ? this[key] : this.opt[key];
+    // Fetch the requested property, either as a predefined prop or in opt.
+    var val = (key in Worker.template.prop) ? this.prop[key] : this.opt[key];
     return cbk ? cbk(val) : val;
   });
 };
