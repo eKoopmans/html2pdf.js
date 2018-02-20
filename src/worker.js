@@ -6,7 +6,8 @@ import { objType, createElement, cloneNode, unitConvert } from './utils.js';
 
 var Worker = function Worker(opt) {
   // Create the root parent for the proto chain, and the starting Worker.
-  var root = Object.assign(Worker.convert(Promise.resolve()), Worker.template);
+  var root = Object.assign(Worker.convert(Promise.resolve()),
+                           JSON.parse(JSON.stringify(Worker.template)));
   var self = Worker.convert(Promise.resolve(), root);
 
   // Set progress, optional settings, and return.
