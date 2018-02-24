@@ -64,7 +64,7 @@ Worker.prototype.from = function from(src, type) {
     }
   }
 
-  return this.then(function() {
+  return this.then(function from_main() {
     type = type || getType(src);
     switch (type) {
       case 'string':  return this.set({ src: createElement('div', {innerHTML: src}) });
@@ -95,11 +95,11 @@ Worker.prototype.to = function to(target) {
 Worker.prototype.toContainer = function toContainer() {
   // Set up function prerequisites.
   var prereqs = [
-    function() { return this.prop.src || this.error('Cannot duplicate - no source HTML.'); },
-    function() { return this.prop.pageSize || this.setPageSize(); }
+    function checkSrc() { return this.prop.src || this.error('Cannot duplicate - no source HTML.'); },
+    function checkPageSize() { return this.prop.pageSize || this.setPageSize(); }
   ];
 
-  return this.thenList(prereqs).then(function() {
+  return this.thenList(prereqs).then(function toContainer_main() {
     // Define the CSS styles for the container and its overlay parent.
     var overlayCSS = {
       position: 'fixed', overflow: 'hidden', zIndex: 1000,
@@ -126,7 +126,7 @@ Worker.prototype.toContainer = function toContainer() {
     // Enable page-breaks.
     var pageBreaks = source.querySelectorAll('.html2pdf__page-break');
     var pxPageHeight = this.prop.pageSize.inner.px.height;
-    Array.prototype.forEach.call(pageBreaks, function(el) {
+    Array.prototype.forEach.call(pageBreaks, function pageBreak_loop(el) {
       el.style.display = 'block';
       var clientRect = el.getBoundingClientRect();
       el.style.height = pxPageHeight - (clientRect.top % pxPageHeight) + 'px';
@@ -137,19 +137,20 @@ Worker.prototype.toContainer = function toContainer() {
 Worker.prototype.toCanvas = function toCanvas() {
   // Set up function prerequisites.
   var prereqs = [
-    function() { return document.body.contains(this.prop.container) || this.toContainer(); }
+    function checkContainer() { return document.body.contains(this.prop.container)
+                               || this.toContainer(); }
   ];
 
   // Fulfill prereqs then create the canvas.
-  return this.thenList(prereqs).then(function() {
+  return this.thenList(prereqs).then(function toCanvas_main() {
     // Handle old-fashioned 'onrendered' argument.
     var options = Object.assign({}, this.opt.html2canvas);
     delete options.onrendered;
 
     return html2canvas(this.prop.container, options);
-  }).then(function(canvas) {
+  }).then(function toCanvas_post(canvas) {
     // Handle old-fashioned 'onrendered' argument.
-    var onRendered = this.opt.html2canvas.onrendered || function() {};
+    var onRendered = this.opt.html2canvas.onrendered || function () {};
     onRendered(canvas);
 
     this.prop.canvas = canvas;
@@ -160,11 +161,11 @@ Worker.prototype.toCanvas = function toCanvas() {
 Worker.prototype.toImg = function toImg() {
   // Set up function prerequisites.
   var prereqs = [
-    function() { return this.prop.canvas || this.toCanvas(); }
+    function checkCanvas() { return this.prop.canvas || this.toCanvas(); }
   ];
 
   // Fulfill prereqs then create the image.
-  return this.thenList(prereqs).then(function() {
+  return this.thenList(prereqs).then(function toImg_main() {
     var imgData = this.prop.canvas.toDataURL('image/' + this.opt.image.type, this.opt.image.quality);
     this.prop.img = document.createElement('img');
     this.prop.img.src = imgData;
@@ -174,11 +175,11 @@ Worker.prototype.toImg = function toImg() {
 Worker.prototype.toPdf = function toPdf() {
   // Set up function prerequisites.
   var prereqs = [
-    function() { return this.prop.canvas || this.toCanvas(); }
+    function checkCanvas() { return this.prop.canvas || this.toCanvas(); }
   ];
 
   // Fulfill prereqs then create the image.
-  return this.thenList(prereqs).then(function() {
+  return this.thenList(prereqs).then(function toPdf_main() {
     // Create local copies of frequently used properties.
     var canvas = this.prop.canvas;
     var opt = this.opt;
@@ -240,11 +241,11 @@ Worker.prototype.output = function output(type, options, src) {
 Worker.prototype.outputPdf = function outputPdf(type, options) {
   // Set up function prerequisites.
   var prereqs = [
-    function() { return this.prop.pdf || this.toPdf(); }
+    function checkPdf() { return this.prop.pdf || this.toPdf(); }
   ];
 
   // Fulfill prereqs then perform the appropriate output.
-  return this.thenList(prereqs).then(function() {
+  return this.thenList(prereqs).then(function outputPdf_main() {
     /* Currently implemented output types:
      *    https://rawgit.com/MrRio/jsPDF/master/docs/jspdf.js.html#line992
      *  save(options), arraybuffer, blob, bloburi/bloburl,
@@ -257,11 +258,11 @@ Worker.prototype.outputPdf = function outputPdf(type, options) {
 Worker.prototype.outputImg = function outputImg(type, options) {
   // Set up function prerequisites.
   var prereqs = [
-    function() { return this.prop.img || this.toImg(); }
+    function checkImg() { return this.prop.img || this.toImg(); }
   ];
 
   // Fulfill prereqs then perform the appropriate output.
-  return this.thenList(prereqs).then(function() {
+  return this.thenList(prereqs).then(function outputImg_main() {
     switch (type) {
       case undefined:
       case 'img':
@@ -281,13 +282,13 @@ Worker.prototype.outputImg = function outputImg(type, options) {
 Worker.prototype.save = function save(filename) {
   // Set up function prerequisites.
   var prereqs = [
-    function() { return this.prop.pdf || this.toPdf(); }
+    function checkPdf() { return this.prop.pdf || this.toPdf(); }
   ];
 
   // Fulfill prereqs, update the filename (if provided), and save the PDF.
   return this.thenList(prereqs).set(
     filename ? { filename: filename } : null
-  ).then(function() {
+  ).then(function save_main() {
     this.prop.pdf.save(this.opt.filename);
   });
 };
@@ -327,7 +328,7 @@ Worker.prototype.set = function set(opt) {
 };
 
 Worker.prototype.get = function get(key, cbk) {
-  return this.then(function() {
+  return this.then(function get_main() {
     // Fetch the requested property, either as a predefined prop or in opt.
     var val = (key in Worker.template.prop) ? this.prop[key] : this.opt[key];
     return cbk ? cbk(val) : val;
@@ -418,10 +419,10 @@ Worker.prototype.then = function then(onFulfilled, onRejected) {
 
   // Update progress while queuing, calling, and resolving `then`.
   self.updateProgress(null, null, 1, [onFulfilled]);
-  var returnVal = Promise.prototype.then.call(self, function(val) {
+  var returnVal = Promise.prototype.then.call(self, function then_pre(val) {
     self.updateProgress(null, onFulfilled);
     return val;
-  }).then(onFulfilled, onRejected).then(function(val) {
+  }).then(onFulfilled, onRejected).then(function then_post(val) {
     self.updateProgress(1);
     return val;
   });
@@ -463,7 +464,7 @@ Worker.prototype.catchExternal = function catchExternal(onRejected) {
 Worker.prototype.thenList = function thenList(fns) {
   // Queue a series of promise 'factories' into the promise chain.
   var self = this;
-  fns.forEach(function(fn) {
+  fns.forEach(function thenList_forEach(fn) {
     self = self.thenCore(fn);
   });
   return self;
@@ -471,7 +472,7 @@ Worker.prototype.thenList = function thenList(fns) {
 
 Worker.prototype.error = function error(msg) {
   // Throw the error in the Promise chain.
-  return this.then(function() {
+  return this.then(function error_main() {
     throw msg;
   });
 };
