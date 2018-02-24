@@ -11,8 +11,8 @@ var Worker = function Worker(opt) {
   var self = Worker.convert(Promise.resolve(), root);
 
   // Set progress, optional settings, and return.
-  self.setProgress(1, Worker, 1, [Worker]);
-  self.set(opt);
+  self = self.setProgress(1, Worker, 1, [Worker]);
+  self = self.set(opt);
   return self;
 };
 
