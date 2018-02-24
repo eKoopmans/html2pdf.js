@@ -473,7 +473,7 @@ Worker.prototype.thenList = function thenList(fns) {
 Worker.prototype.error = function error(msg) {
   // Throw the error in the Promise chain.
   return this.then(function error_main() {
-    throw msg;
+    throw new Error(msg);
   });
 };
 
