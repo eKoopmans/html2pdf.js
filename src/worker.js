@@ -296,31 +296,32 @@ Worker.prototype.save = function save(filename) {
 /* ----- SET / GET ----- */
 
 Worker.prototype.set = function set(opt) {
-  // Set properties within the promise chain.
   // TODO: Test null/undefined input to this function.
   // TODO: Implement ordered pairs?
-  return this.then(async function set_main() {
-    for (var key in opt) {
+
+  // Build an array of setter functions to queue.
+  var fns = Object.keys(opt || {}).map(function (key) {
       if (key in Worker.template.prop) {
         // Set pre-defined properties.
-        this.prop[key] = opt[key];
+        return function set_prop() { this.prop[key] = opt[key]; }
       } else {
         switch (key) {
           case 'margin':
-            await this.setMargin(opt.margin);
-            break;
+            return this.setMargin.bind(this, opt.margin);
           case 'jsPDF':
-            // Include jsPDF here because it must also update pageSize.
-            this.opt.jsPDF = opt.jsPDF;
+            return function set_jsPDF() { this.opt.jsPDF = opt.jsPDF; return this.setPageSize(); }
           case 'pageSize':
-            await this.setPageSize(opt.pageSize);
-            break;
+            return this.setPageSize.bind(this, opt.pageSize);
           default:
             // Set any other properties in opt.
-            this.opt[key] = opt[key];
+            return function set_opt() { this.opt[key] = opt[key] };
         }
       }
-    }
+  }, this);
+
+  // Set properties within the promise chain.
+  return this.then(function set_main() {
+    return this.thenList(fns);
   });
 };
 
