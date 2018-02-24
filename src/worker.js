@@ -59,7 +59,7 @@ Worker.prototype.from = function from(src, type) {
   function getType(src) {
     switch (objType(src)) {
       case 'string':  return 'string';
-      case 'element': return src.nodeName.toLowerCase === 'canvas' ? 'canvas' : 'html';
+      case 'element': return src.nodeName.toLowerCase === 'canvas' ? 'canvas' : 'element';
       default:        return 'unknown';
     }
   }
@@ -68,7 +68,7 @@ Worker.prototype.from = function from(src, type) {
     type = type || getType(src);
     switch (type) {
       case 'string':  return this.set({ src: createElement('div', {innerHTML: src}) });
-      case 'html':    return this.set({ src: src });
+      case 'element': return this.set({ src: src });
       case 'canvas':  return this.set({ canvas: src });
       case 'img':     return this.set({ img: src });
       default:        return this.error('Unknown source type.');
