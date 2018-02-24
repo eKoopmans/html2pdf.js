@@ -1,6 +1,6 @@
 /**
  * html2pdf.js v0.8.2
- * Copyright (c) 2017 Erik Koopmans
+ * Copyright (c) 2018 Erik Koopmans
  * Released under the MIT License.
  */
 (function (global, factory) {
@@ -17,6 +17,560 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 } : function (obj) {
   return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 };
+
+// Determine the type of a variable/object.
+var objType = function objType(obj) {
+  var type = typeof obj === 'undefined' ? 'undefined' : _typeof(obj);
+  if (type === 'undefined') return 'undefined';else if (type === 'string' || obj instanceof String) return 'string';else if (type === 'number' || obj instanceof Number) return 'number';else if (type === 'function' || obj instanceof Function) return 'function';else if (!!obj && obj.constructor === Array) return 'array';else if (obj && obj.nodeType === 1) return 'element';else if (type === 'object') return 'object';else return 'unknown';
+};
+
+// Create an HTML element with optional className, innerHTML, and style.
+var createElement = function createElement(tagName, opt) {
+  var el = document.createElement(tagName);
+  if (opt.className) el.className = opt.className;
+  if (opt.innerHTML) {
+    el.innerHTML = opt.innerHTML;
+    var scripts = el.getElementsByTagName('script');
+    for (var i = scripts.length; i-- > 0; null) {
+      scripts[i].parentNode.removeChild(scripts[i]);
+    }
+  }
+  for (var key in opt.style) {
+    el.style[key] = opt.style[key];
+  }
+  return el;
+};
+
+// Deep-clone a node and preserve contents/properties.
+var cloneNode = function cloneNode(node, javascriptEnabled) {
+  // Recursively clone the node.
+  var clone = node.nodeType === 3 ? document.createTextNode(node.nodeValue) : node.cloneNode(false);
+  for (var child = node.firstChild; child; child = child.nextSibling) {
+    if (javascriptEnabled === true || child.nodeType !== 1 || child.nodeName !== 'SCRIPT') {
+      clone.appendChild(cloneNode(child, javascriptEnabled));
+    }
+  }
+
+  if (node.nodeType === 1) {
+    // Preserve contents/properties of special nodes.
+    if (node.nodeName === 'CANVAS') {
+      clone.width = node.width;
+      clone.height = node.height;
+      clone.getContext('2d').drawImage(node, 0, 0);
+    } else if (node.nodeName === 'TEXTAREA' || node.nodeName === 'SELECT') {
+      clone.value = node.value;
+    }
+
+    // Preserve the node's scroll position when it loads.
+    clone.addEventListener('load', function () {
+      clone.scrollTop = node.scrollTop;
+      clone.scrollLeft = node.scrollLeft;
+    }, true);
+  }
+
+  // Return the cloned node.
+  return clone;
+};
+
+// Convert units using the conversion value 'k' from jsPDF.
+var unitConvert = function unitConvert(obj, k) {
+  var newObj = {};
+  for (var key in obj) {
+    newObj[key] = obj[key] * 72 / 96 / k;
+  }
+  return newObj;
+};
+
+/* ----- CONSTRUCTOR ----- */
+
+var Worker = function Worker(opt) {
+  // Create the root parent for the proto chain, and the starting Worker.
+  var root = Object.assign(Worker.convert(Promise.resolve()), JSON.parse(JSON.stringify(Worker.template)));
+  var self = Worker.convert(Promise.resolve(), root);
+
+  // Set progress, optional settings, and return.
+  self = self.setProgress(1, Worker, 1, [Worker]);
+  self = self.set(opt);
+  return self;
+};
+
+// Boilerplate for subclassing Promise.
+Worker.prototype = Object.create(Promise.prototype);
+Worker.prototype.constructor = Worker;
+
+// Converts/casts promises into Workers.
+Worker.convert = function convert(promise, inherit) {
+  // Uses prototypal inheritance to receive changes made to ancestors' properties.
+  promise.__proto__ = inherit || Worker.prototype;
+  return promise;
+};
+
+Worker.template = {
+  prop: {
+    src: null,
+    container: null,
+    overlay: null,
+    canvas: null,
+    img: null,
+    pdf: null,
+    pageSize: null
+  },
+  progress: {
+    val: 0,
+    state: null,
+    n: 0,
+    stack: []
+  },
+  opt: {
+    filename: 'file.pdf',
+    margin: [0, 0, 0, 0],
+    image: { type: 'jpeg', quality: 0.95 },
+    enableLinks: true,
+    html2canvas: {},
+    jsPDF: {}
+  }
+};
+
+/* ----- FROM / TO ----- */
+
+Worker.prototype.from = function from(src, type) {
+  function getType(src) {
+    switch (objType(src)) {
+      case 'string':
+        return 'string';
+      case 'element':
+        return src.nodeName.toLowerCase === 'canvas' ? 'canvas' : 'element';
+      default:
+        return 'unknown';
+    }
+  }
+
+  return this.then(function from_main() {
+    type = type || getType(src);
+    switch (type) {
+      case 'string':
+        return this.set({ src: createElement('div', { innerHTML: src }) });
+      case 'element':
+        return this.set({ src: src });
+      case 'canvas':
+        return this.set({ canvas: src });
+      case 'img':
+        return this.set({ img: src });
+      default:
+        return this.error('Unknown source type.');
+    }
+  });
+};
+
+Worker.prototype.to = function to(target) {
+  // Route the 'to' request to the appropriate method.
+  switch (target) {
+    case 'container':
+      return this.toContainer();
+    case 'canvas':
+      return this.toCanvas();
+    case 'img':
+      return this.toImg();
+    case 'pdf':
+      return this.toPdf();
+    default:
+      return this.error('Invalid target.');
+  }
+};
+
+Worker.prototype.toContainer = function toContainer() {
+  // Set up function prerequisites.
+  var prereqs = [function checkSrc() {
+    return this.prop.src || this.error('Cannot duplicate - no source HTML.');
+  }, function checkPageSize() {
+    return this.prop.pageSize || this.setPageSize();
+  }];
+
+  return this.thenList(prereqs).then(function toContainer_main() {
+    // Define the CSS styles for the container and its overlay parent.
+    var overlayCSS = {
+      position: 'fixed', overflow: 'hidden', zIndex: 1000,
+      left: 0, right: 0, bottom: 0, top: 0,
+      backgroundColor: 'rgba(0,0,0,0.8)'
+    };
+    var containerCSS = {
+      position: 'absolute', width: this.prop.pageSize.inner.width + this.prop.pageSize.unit,
+      left: 0, right: 0, top: 0, height: 'auto', margin: 'auto',
+      backgroundColor: 'white'
+    };
+
+    // Set the overlay to hidden (could be changed in the future to provide a print preview).
+    overlayCSS.opacity = 0;
+
+    // Create and attach the elements.
+    var source = cloneNode(this.prop.src, this.opt.html2canvas.javascriptEnabled);
+    this.prop.overlay = createElement('div', { className: 'html2pdf__overlay', style: overlayCSS });
+    this.prop.container = createElement('div', { className: 'html2pdf__container', style: containerCSS });
+    this.prop.container.appendChild(source);
+    this.prop.overlay.appendChild(this.prop.container);
+    document.body.appendChild(this.prop.overlay);
+
+    // Enable page-breaks.
+    var pageBreaks = source.querySelectorAll('.html2pdf__page-break');
+    var pxPageHeight = this.prop.pageSize.inner.px.height;
+    Array.prototype.forEach.call(pageBreaks, function pageBreak_loop(el) {
+      el.style.display = 'block';
+      var clientRect = el.getBoundingClientRect();
+      el.style.height = pxPageHeight - clientRect.top % pxPageHeight + 'px';
+    }, this);
+  });
+};
+
+Worker.prototype.toCanvas = function toCanvas() {
+  // Set up function prerequisites.
+  var prereqs = [function checkContainer() {
+    return document.body.contains(this.prop.container) || this.toContainer();
+  }];
+
+  // Fulfill prereqs then create the canvas.
+  return this.thenList(prereqs).then(function toCanvas_main() {
+    // Handle old-fashioned 'onrendered' argument.
+    var options = Object.assign({}, this.opt.html2canvas);
+    delete options.onrendered;
+
+    return html2canvas(this.prop.container, options);
+  }).then(function toCanvas_post(canvas) {
+    // Handle old-fashioned 'onrendered' argument.
+    var onRendered = this.opt.html2canvas.onrendered || function () {};
+    onRendered(canvas);
+
+    this.prop.canvas = canvas;
+    document.body.removeChild(this.prop.overlay);
+  });
+};
+
+Worker.prototype.toImg = function toImg() {
+  // Set up function prerequisites.
+  var prereqs = [function checkCanvas() {
+    return this.prop.canvas || this.toCanvas();
+  }];
+
+  // Fulfill prereqs then create the image.
+  return this.thenList(prereqs).then(function toImg_main() {
+    var imgData = this.prop.canvas.toDataURL('image/' + this.opt.image.type, this.opt.image.quality);
+    this.prop.img = document.createElement('img');
+    this.prop.img.src = imgData;
+  });
+};
+
+Worker.prototype.toPdf = function toPdf() {
+  // Set up function prerequisites.
+  var prereqs = [function checkCanvas() {
+    return this.prop.canvas || this.toCanvas();
+  }];
+
+  // Fulfill prereqs then create the image.
+  return this.thenList(prereqs).then(function toPdf_main() {
+    // Create local copies of frequently used properties.
+    var canvas = this.prop.canvas;
+    var opt = this.opt;
+
+    // Calculate the number of pages.
+    var ctx = canvas.getContext('2d');
+    var pxFullHeight = canvas.height;
+    var pxPageHeight = Math.floor(canvas.width * this.prop.pageSize.inner.ratio);
+    var nPages = Math.ceil(pxFullHeight / pxPageHeight);
+
+    // Define pageHeight separately so it can be trimmed on the final page.
+    var pageHeight = this.prop.pageSize.inner.height;
+
+    // Create a one-page canvas to split up the full image.
+    var pageCanvas = document.createElement('canvas');
+    var pageCtx = pageCanvas.getContext('2d');
+    pageCanvas.width = canvas.width;
+    pageCanvas.height = pxPageHeight;
+
+    // Initialize the PDF.
+    this.prop.pdf = this.prop.pdf || new jsPDF(opt.jsPDF);
+
+    for (var page = 0; page < nPages; page++) {
+      // Trim the final page to reduce file size.
+      if (page === nPages - 1) {
+        pageCanvas.height = pxFullHeight % pxPageHeight;
+        pageHeight = pageCanvas.height * this.prop.pageSize.inner.width / pageCanvas.width;
+      }
+
+      // Display the page.
+      var w = pageCanvas.width;
+      var h = pageCanvas.height;
+      pageCtx.fillStyle = 'white';
+      pageCtx.fillRect(0, 0, w, h);
+      pageCtx.drawImage(canvas, 0, page * pxPageHeight, w, h, 0, 0, w, h);
+
+      // Add the page to the PDF.
+      if (page) this.prop.pdf.addPage();
+      var imgData = pageCanvas.toDataURL('image/' + opt.image.type, opt.image.quality);
+      this.prop.pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0], this.prop.pageSize.inner.width, pageHeight);
+    }
+  });
+};
+
+/* ----- OUTPUT / SAVE ----- */
+
+Worker.prototype.output = function output(type, options, src) {
+  // Redirect requests to the correct function (outputPdf / outputImg).
+  src = src || 'pdf';
+  if (src.toLowerCase() === 'img' || src.toLowerCase() === 'image') {
+    return this.outputImg(type, options);
+  } else {
+    return this.outputPdf(type, options);
+  }
+};
+
+Worker.prototype.outputPdf = function outputPdf(type, options) {
+  // Set up function prerequisites.
+  var prereqs = [function checkPdf() {
+    return this.prop.pdf || this.toPdf();
+  }];
+
+  // Fulfill prereqs then perform the appropriate output.
+  return this.thenList(prereqs).then(function outputPdf_main() {
+    /* Currently implemented output types:
+     *    https://rawgit.com/MrRio/jsPDF/master/docs/jspdf.js.html#line992
+     *  save(options), arraybuffer, blob, bloburi/bloburl,
+     *  datauristring/dataurlstring, dataurlnewwindow, datauri/dataurl
+     */
+    return this.prop.pdf.output(type, options);
+  });
+};
+
+Worker.prototype.outputImg = function outputImg(type, options) {
+  // Set up function prerequisites.
+  var prereqs = [function checkImg() {
+    return this.prop.img || this.toImg();
+  }];
+
+  // Fulfill prereqs then perform the appropriate output.
+  return this.thenList(prereqs).then(function outputImg_main() {
+    switch (type) {
+      case undefined:
+      case 'img':
+        return this.prop.img;
+      case 'datauristring':
+      case 'dataurlstring':
+        return this.prop.img.src;
+      case 'datauri':
+      case 'dataurl':
+        return document.location.href = this.prop.img.src;
+      default:
+        throw 'Image output type "' + type + '" is not supported.';
+    }
+  });
+};
+
+Worker.prototype.save = function save(filename) {
+  // Set up function prerequisites.
+  var prereqs = [function checkPdf() {
+    return this.prop.pdf || this.toPdf();
+  }];
+
+  // Fulfill prereqs, update the filename (if provided), and save the PDF.
+  return this.thenList(prereqs).set(filename ? { filename: filename } : null).then(function save_main() {
+    this.prop.pdf.save(this.opt.filename);
+  });
+};
+
+/* ----- SET / GET ----- */
+
+Worker.prototype.set = function set(opt) {
+  // TODO: Test null/undefined input to this function.
+  // TODO: Implement ordered pairs?
+
+  // Build an array of setter functions to queue.
+  var fns = Object.keys(opt || {}).map(function (key) {
+    if (key in Worker.template.prop) {
+      // Set pre-defined properties.
+      return function set_prop() {
+        this.prop[key] = opt[key];
+      };
+    } else {
+      switch (key) {
+        case 'margin':
+          return this.setMargin.bind(this, opt.margin);
+        case 'jsPDF':
+          return function set_jsPDF() {
+            this.opt.jsPDF = opt.jsPDF;return this.setPageSize();
+          };
+        case 'pageSize':
+          return this.setPageSize.bind(this, opt.pageSize);
+        default:
+          // Set any other properties in opt.
+          return function set_opt() {
+            this.opt[key] = opt[key];
+          };
+      }
+    }
+  }, this);
+
+  // Set properties within the promise chain.
+  return this.then(function set_main() {
+    return this.thenList(fns);
+  });
+};
+
+Worker.prototype.get = function get(key, cbk) {
+  return this.then(function get_main() {
+    // Fetch the requested property, either as a predefined prop or in opt.
+    var val = key in Worker.template.prop ? this.prop[key] : this.opt[key];
+    return cbk ? cbk(val) : val;
+  });
+};
+
+Worker.prototype.setMargin = function setMargin(margin) {
+  return this.then(function setMargin_main() {
+    // Parse the margin property.
+    switch (objType(margin)) {
+      case 'number':
+        margin = [margin, margin, margin, margin];
+      case 'array':
+        if (margin.length === 2) {
+          margin = [margin[0], margin[1], margin[0], margin[1]];
+        }
+        if (margin.length === 4) {
+          break;
+        }
+      default:
+        return this.error('Invalid margin array.');
+    }
+
+    // Set the margin property, then update pageSize.
+    this.opt.margin = margin;
+  }).then(this.setPageSize);
+};
+
+Worker.prototype.setPageSize = function setPageSize(pageSize) {
+  function toPx(val, k) {
+    return Math.floor(val * k / 72 * 96);
+  }
+
+  return this.then(function setPageSize_main() {
+    // Retrieve page-size based on jsPDF settings, if not explicitly provided.
+    pageSize = pageSize || jsPDF.getPageSize(this.opt.jsPDF);
+
+    // Add 'inner' field if not present.
+    if (!pageSize.hasOwnProperty('inner')) {
+      pageSize.inner = {
+        width: pageSize.width - this.opt.margin[1] - this.opt.margin[3],
+        height: pageSize.height - this.opt.margin[0] - this.opt.margin[2]
+      };
+      pageSize.inner.px = {
+        width: toPx(pageSize.inner.width, pageSize.k),
+        height: toPx(pageSize.inner.height, pageSize.k)
+      };
+      pageSize.inner.ratio = pageSize.inner.height / pageSize.inner.width;
+    }
+
+    // Attach pageSize to this.
+    this.prop.pageSize = pageSize;
+  });
+};
+
+Worker.prototype.setProgress = function setProgress(val, state, n, stack) {
+  // Immediately update all progress values.
+  if (val != null) this.progress.val = val;
+  if (state != null) this.progress.state = state;
+  if (n != null) this.progress.n = n;
+  if (stack != null) this.progress.stack = stack;
+  this.progress.ratio = this.progress.val / this.progress.state;
+
+  // Return this for command chaining.
+  return this;
+};
+
+Worker.prototype.updateProgress = function updateProgress(val, state, n, stack) {
+  // Immediately update all progress values, using setProgress.
+  return this.setProgress(val ? this.progress.val + val : null, state ? state : null, n ? this.progress.n + n : null, stack ? this.progress.stack.concat(stack) : null);
+};
+
+/* ----- PROMISE MAPPING ----- */
+
+Worker.prototype.then = function then(onFulfilled, onRejected) {
+  // Wrap `this` for encapsulation and bind it to the promise handlers.
+  var self = this;
+  if (onFulfilled) {
+    onFulfilled = onFulfilled.bind(self);
+  }
+  if (onRejected) {
+    onRejected = onRejected.bind(self);
+  }
+
+  // Update progress while queuing, calling, and resolving `then`.
+  self.updateProgress(null, null, 1, [onFulfilled]);
+  var returnVal = Promise.prototype.then.call(self, function then_pre(val) {
+    self.updateProgress(null, onFulfilled);
+    return val;
+  }).then(onFulfilled, onRejected).then(function then_post(val) {
+    self.updateProgress(1);
+    return val;
+  });
+
+  // Return the promise, after casting it into a Worker and preserving props.
+  return Worker.convert(returnVal, self.__proto__);
+};
+
+Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected) {
+  // Core version of then, with no updates to progress.
+
+  // Wrap `this` for encapsulation and bind it to the promise handlers.
+  var self = this;
+  if (onFulfilled) {
+    onFulfilled = onFulfilled.bind(self);
+  }
+  if (onRejected) {
+    onRejected = onRejected.bind(self);
+  }
+
+  // Return the promise, after casting it into a Worker and preserving props.
+  var returnVal = Promise.prototype.then.call(self, onFulfilled, onRejected);
+  return Worker.convert(returnVal, self.__proto__);
+};
+
+Worker.prototype['catch'] = function (onRejected) {
+  // Bind `this` to the promise handler, call `catch`, and return a Worker.
+  if (onRejected) {
+    onRejected = onRejected.bind(this);
+  }
+  var returnVal = Promise.prototype['catch'].call(this, onRejected);
+  return Worker.convert(returnVal, this);
+};
+
+Worker.prototype.thenExternal = function thenExternal(onFulfilled, onRejected) {
+  // Call `then` and return a standard promise (exits the Worker chain).
+  return Promise.prototype.then.call(this, onFulfilled, onRejected);
+};
+
+Worker.prototype.catchExternal = function catchExternal(onRejected) {
+  // Call `catch` and return a standard promise (exits the Worker chain).
+  return Promise.prototype['catch'].call(this, onRejected);
+};
+
+Worker.prototype.thenList = function thenList(fns) {
+  // Queue a series of promise 'factories' into the promise chain.
+  var self = this;
+  fns.forEach(function thenList_forEach(fn) {
+    self = self.thenCore(fn);
+  });
+  return self;
+};
+
+Worker.prototype.error = function error(msg) {
+  // Throw the error in the Promise chain.
+  return this.then(function error_main() {
+    throw new Error(msg);
+  });
+};
+
+/* ----- ALIASES ----- */
+
+Worker.prototype.using = Worker.prototype.set;
+Worker.prototype.saveAs = Worker.prototype.save;
+Worker.prototype.export = Worker.prototype.output;
+Worker.prototype.run = Worker.prototype.then;
 
 // Import dependencies.
 // Get dimensions of a PDF page, as determined by jsPDF.
@@ -122,67 +676,60 @@ jsPDF.getPageSize = function (orientation, unit, format) {
   return info;
 };
 
-// Determine the type of a variable/object.
-var objType = function objType(obj) {
-  var type = typeof obj === 'undefined' ? 'undefined' : _typeof(obj);
-  if (type === 'undefined') return 'undefined';else if (type === 'string' || obj instanceof String) return 'string';else if (type === 'number' || obj instanceof Number) return 'number';else if (type === 'function' || obj instanceof Function) return 'function';else if (!!obj && obj.constructor === Array) return 'array';else if (obj && obj.nodeType === 1) return 'element';else if (type === 'object') return 'object';else return 'unknown';
+// Add hyperlink functionality to the PDF creation.
+
+// Main link array, and refs to original functions.
+var linkInfo = [];
+var orig = {
+  toContainer: Worker.prototype.toContainer,
+  toPdf: Worker.prototype.toPdf
 };
 
-// Create an HTML element with optional className, innerHTML, and style.
-var createElement = function createElement(tagName, opt) {
-  var el = document.createElement(tagName);
-  if (opt.className) el.className = opt.className;
-  if (opt.innerHTML) {
-    el.innerHTML = opt.innerHTML;
-    var scripts = el.getElementsByTagName('script');
-    for (var i = scripts.length; i-- > 0; null) {
-      scripts[i].parentNode.removeChild(scripts[i]);
+Worker.prototype.toContainer = function toContainer() {
+  return orig.toContainer.call(this).then(function toContainer_hyperlink() {
+    // Retrieve hyperlink info if the option is enabled.
+    if (this.opt.enableLinks) {
+      // Find all anchor tags and get the container's bounds for reference.
+      var container = this.prop.container;
+      var links = container.querySelectorAll('a');
+      var containerRect = unitConvert(container.getBoundingClientRect(), this.prop.pageSize.k);
+      linkInfo = [];
+
+      // Loop through each anchor tag.
+      Array.prototype.forEach.call(links, function (link) {
+        // Treat each client rect as a separate link (for text-wrapping).
+        var clientRects = link.getClientRects();
+        for (var i = 0; i < clientRects.length; i++) {
+          var clientRect = unitConvert(clientRects[i], this.prop.pageSize.k);
+          clientRect.left -= containerRect.left;
+          clientRect.top -= containerRect.top;
+
+          var page = Math.floor(clientRect.top / this.prop.pageSize.inner.height) + 1;
+          var top = this.opt.margin[0] + clientRect.top % this.prop.pageSize.inner.height;
+          var left = this.opt.margin[1] + clientRect.left;
+
+          linkInfo.push({ page: page, top: top, left: left, clientRect: clientRect, link: link });
+        }
+      }, this);
     }
-  }
-  for (var key in opt.style) {
-    el.style[key] = opt.style[key];
-  }
-  return el;
+  });
 };
 
-// Deep-clone a node and preserve contents/properties.
-var cloneNode = function cloneNode(node, javascriptEnabled) {
-  // Recursively clone the node.
-  var clone = node.nodeType === 3 ? document.createTextNode(node.nodeValue) : node.cloneNode(false);
-  for (var child = node.firstChild; child; child = child.nextSibling) {
-    if (javascriptEnabled === true || child.nodeType !== 1 || child.nodeName !== 'SCRIPT') {
-      clone.appendChild(cloneNode(child, javascriptEnabled));
+Worker.prototype.toPdf = function toPdf() {
+  return orig.toPdf.call(this).then(function toPdf_hyperlink() {
+    // Add hyperlinks if the option is enabled.
+    if (this.opt.enableLinks) {
+      // Attach each anchor tag based on info from toContainer().
+      linkInfo.forEach(function (l) {
+        this.prop.pdf.setPage(l.page);
+        this.prop.pdf.link(l.left, l.top, l.clientRect.width, l.clientRect.height, { url: l.link.href });
+      }, this);
+
+      // Reset the active page of the PDF to the final page.
+      var nPages = this.prop.pdf.internal.getNumberOfPages();
+      this.prop.pdf.setPage(nPages);
     }
-  }
-
-  if (node.nodeType === 1) {
-    // Preserve contents/properties of special nodes.
-    if (node.nodeName === 'CANVAS') {
-      clone.width = node.width;
-      clone.height = node.height;
-      clone.getContext('2d').drawImage(node, 0, 0);
-    } else if (node.nodeName === 'TEXTAREA' || node.nodeName === 'SELECT') {
-      clone.value = node.value;
-    }
-
-    // Preserve the node's scroll position when it loads.
-    clone.addEventListener('load', function () {
-      clone.scrollTop = node.scrollTop;
-      clone.scrollLeft = node.scrollLeft;
-    }, true);
-  }
-
-  // Return the cloned node.
-  return clone;
-};
-
-// Convert units using the conversion value 'k' from jsPDF.
-var unitConvert = function unitConvert(obj, k) {
-  var newObj = {};
-  for (var key in obj) {
-    newObj[key] = obj[key] * 72 / 96 / k;
-  }
-  return newObj;
+  });
 };
 
 /**
@@ -193,184 +740,19 @@ var unitConvert = function unitConvert(obj, k) {
  *    'image' ('type' and 'quality'), and 'html2canvas' / 'jspdf', which are
  *    sent as settings to their corresponding functions.
  */
-var html2pdf = function html2pdf(source, opt) {
-  // Handle input.
-  opt = objType(opt) === 'object' ? opt : {};
-  var source = html2pdf.parseInput(source, opt);
+var html2pdf = function html2pdf(src, opt) {
+  // Create a new worker with the given options.
+  var worker = new html2pdf.Worker(opt);
 
-  // Determine the PDF page size.
-  var pageSize = jsPDF.getPageSize(opt.jsPDF);
-  pageSize.inner = {
-    width: pageSize.width - opt.margin[1] - opt.margin[3],
-    height: pageSize.height - opt.margin[0] - opt.margin[2]
-  };
-  pageSize.inner.ratio = pageSize.inner.height / pageSize.inner.width;
-
-  // Copy the source element into a PDF-styled container div.
-  var container = html2pdf.makeContainer(source, pageSize);
-  var overlay = container.parentElement;
-
-  // Get the locations of all hyperlinks.
-  if (opt.enableLinks) {
-    // Find all anchor tags and get the container's bounds for reference.
-    opt.links = [];
-    var links = container.querySelectorAll('a');
-    var containerRect = unitConvert(container.getBoundingClientRect(), pageSize.k);
-
-    // Treat each client rect as a separate link (for text-wrapping).
-    Array.prototype.forEach.call(links, function (link) {
-      var clientRects = link.getClientRects();
-      for (var i = 0; i < clientRects.length; i++) {
-        var clientRect = unitConvert(clientRects[i], pageSize.k);
-        clientRect.left -= containerRect.left;
-        clientRect.top -= containerRect.top;
-        opt.links.push({ el: link, clientRect: clientRect });
-      }
-    });
-  }
-
-  // Render the canvas and pass the result to makePDF.
-  var onRendered = opt.html2canvas.onrendered || function () {};
-  delete opt.html2canvas.onrendered;
-  var done = function done(canvas) {
-    onRendered(canvas);
-    document.body.removeChild(overlay);
-    html2pdf.makePDF(canvas, pageSize, opt);
-  };
-  html2canvas(container, opt.html2canvas).then(done);
-};
-
-html2pdf.parseInput = function (source, opt) {
-  // Parse the opt object.
-  opt.jsPDF = opt.jsPDF || {};
-  opt.html2canvas = opt.html2canvas || {};
-  opt.filename = opt.filename && objType(opt.filename) === 'string' ? opt.filename : 'file.pdf';
-  opt.enableLinks = opt.hasOwnProperty('enableLinks') ? opt.enableLinks : true;
-  opt.image = opt.image || {};
-  opt.image.type = opt.image.type || 'jpeg';
-  opt.image.quality = opt.image.quality || 0.95;
-
-  // Parse the margin property of the opt object.
-  switch (objType(opt.margin)) {
-    case 'undefined':
-      opt.margin = 0;
-    case 'number':
-      opt.margin = [opt.margin, opt.margin, opt.margin, opt.margin];
-      break;
-    case 'array':
-      if (opt.margin.length === 2) {
-        opt.margin = [opt.margin[0], opt.margin[1], opt.margin[0], opt.margin[1]];
-      }
-      if (opt.margin.length === 4) {
-        break;
-      }
-    default:
-      throw 'Invalid margin array.';
-  }
-
-  // Parse the source element/string.
-  if (!source) {
-    throw 'Missing source element or string.';
-  } else if (objType(source) === 'string') {
-    source = createElement('div', { innerHTML: source });
-  } else if (objType(source) === 'element') {
-    source = cloneNode(source, opt.html2canvas.javascriptEnabled);
+  if (src) {
+    // If src is specified, perform the traditional 'simple' operation.
+    return worker.from(src).save();
   } else {
-    throw 'Invalid source - please specify an HTML Element or string.';
+    // Otherwise, return the worker for new Promise-based operation.
+    return worker;
   }
-
-  // Return the parsed input (opt is modified in-place, no need to return).
-  return source;
 };
-
-html2pdf.makeContainer = function (source, pageSize) {
-  // Define the CSS styles for the container and its overlay parent.
-  var overlayCSS = {
-    position: 'fixed', overflow: 'hidden', zIndex: 1000,
-    left: 0, right: 0, bottom: 0, top: 0,
-    backgroundColor: 'rgba(0,0,0,0.8)'
-  };
-  var containerCSS = {
-    position: 'absolute', width: pageSize.inner.width + pageSize.unit,
-    left: 0, right: 0, top: 0, height: 'auto', margin: 'auto',
-    backgroundColor: 'white'
-  };
-
-  // Set the overlay to hidden (could be changed in the future to provide a print preview).
-  overlayCSS.opacity = 0;
-
-  // Create and attach the elements.
-  var overlay = createElement('div', { className: 'html2pdf__overlay', style: overlayCSS });
-  var container = createElement('div', { className: 'html2pdf__container', style: containerCSS });
-  container.appendChild(source);
-  overlay.appendChild(container);
-  document.body.appendChild(overlay);
-
-  // Enable page-breaks.
-  var pageBreaks = source.querySelectorAll('.html2pdf__page-break');
-  var pxPageHeight = pageSize.inner.height * pageSize.k / 72 * 96;
-  Array.prototype.forEach.call(pageBreaks, function (el) {
-    el.style.display = 'block';
-    var clientRect = el.getBoundingClientRect();
-    el.style.height = pxPageHeight - clientRect.top % pxPageHeight + 'px';
-  }, this);
-
-  // Return the container.
-  return container;
-};
-
-html2pdf.makePDF = function (canvas, pageSize, opt) {
-  // Calculate the number of pages.
-  var ctx = canvas.getContext('2d');
-  var pxFullHeight = canvas.height;
-  var pxPageHeight = Math.floor(canvas.width * pageSize.inner.ratio);
-  var nPages = Math.ceil(pxFullHeight / pxPageHeight);
-
-  // Create a one-page canvas to split up the full image.
-  var pageCanvas = document.createElement('canvas');
-  var pageCtx = pageCanvas.getContext('2d');
-  var pageHeight = pageSize.inner.height;
-  pageCanvas.width = canvas.width;
-  pageCanvas.height = pxPageHeight;
-
-  // Initialize the PDF.
-  var pdf = new jsPDF(opt.jsPDF);
-
-  for (var page = 0; page < nPages; page++) {
-    // Trim the final page to reduce file size.
-    if (page === nPages - 1) {
-      pageCanvas.height = pxFullHeight % pxPageHeight;
-      pageHeight = pageCanvas.height * pageSize.inner.width / pageCanvas.width;
-    }
-
-    // Display the page.
-    var w = pageCanvas.width;
-    var h = pageCanvas.height;
-    pageCtx.fillStyle = 'white';
-    pageCtx.fillRect(0, 0, w, h);
-    pageCtx.drawImage(canvas, 0, page * pxPageHeight, w, h, 0, 0, w, h);
-
-    // Add the page to the PDF.
-    if (page) pdf.addPage();
-    var imgData = pageCanvas.toDataURL('image/' + opt.image.type, opt.image.quality);
-    pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0], pageSize.inner.width, pageHeight);
-
-    // Add hyperlinks.
-    if (opt.enableLinks) {
-      var pageTop = page * pageSize.inner.height;
-      opt.links.forEach(function (link) {
-        if (link.clientRect.top > pageTop && link.clientRect.top < pageTop + pageSize.inner.height) {
-          var left = opt.margin[1] + link.clientRect.left;
-          var top = opt.margin[0] + link.clientRect.top - pageTop;
-          pdf.link(left, top, link.clientRect.width, link.clientRect.height, { url: link.el.href });
-        }
-      });
-    }
-  }
-
-  // Finish the PDF.
-  pdf.save(opt.filename);
-};
+html2pdf.Worker = Worker;
 
 return html2pdf;
 
