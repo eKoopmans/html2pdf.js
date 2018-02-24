@@ -296,35 +296,32 @@ Worker.prototype.save = function save(filename) {
 /* ----- SET / GET ----- */
 
 Worker.prototype.set = function set(opt) {
-  // Set properties immediately.
-  //    NOTE: Don't need to worry about race conditions (with .then) because
-  //    each promise is unique. So anything set here will override the
-  //    prototype, even if an earlier .then resolves after this.
+  // Set properties within the promise chain.
   // TODO: Test null/undefined input to this function.
   // TODO: Implement ordered pairs?
-  for (var key in opt) {
-    if (key in Worker.template.prop) {
-      // Set pre-defined properties.
-      this.prop[key] = opt[key];
-    } else {
-      switch (key) {
-        case 'margin':
-          this.setMargin(opt.margin);
-          break;
-        case 'jsPDF':
-          this.opt.jsPDF = opt.jsPDF;
-        case 'pageSize':
-          this.setPageSize(opt.pageSize);
-          break;
-        default:
-          // Set any other properties in opt.
-          this.opt[key] = opt[key];
+  return this.then(async function set_main() {
+    for (var key in opt) {
+      if (key in Worker.template.prop) {
+        // Set pre-defined properties.
+        this.prop[key] = opt[key];
+      } else {
+        switch (key) {
+          case 'margin':
+            await this.setMargin(opt.margin);
+            break;
+          case 'jsPDF':
+            // Include jsPDF here because it must also update pageSize.
+            this.opt.jsPDF = opt.jsPDF;
+          case 'pageSize':
+            await this.setPageSize(opt.pageSize);
+            break;
+          default:
+            // Set any other properties in opt.
+            this.opt[key] = opt[key];
+        }
       }
     }
-  }
-
-  // Return this for command chaining.
-  return this;
+  });
 };
 
 Worker.prototype.get = function get(key, cbk) {
@@ -336,27 +333,25 @@ Worker.prototype.get = function get(key, cbk) {
 };
 
 Worker.prototype.setMargin = function setMargin(margin) {
-  // Parse the margin property.
-  switch (objType(margin)) {
-    case 'number':
-      margin = [margin, margin, margin, margin];
-    case 'array':
-      if (margin.length === 2) {
-        margin = [margin[0], margin[1], margin[0], margin[1]];
-      }
-      if (margin.length === 4) {
-        break;
-      }
-    default:
-      return this.error('Invalid margin array.');
-  }
-  this.opt.margin = margin;
+  return this.then(function setMargin_main() {
+    // Parse the margin property.
+    switch (objType(margin)) {
+      case 'number':
+        margin = [margin, margin, margin, margin];
+      case 'array':
+        if (margin.length === 2) {
+          margin = [margin[0], margin[1], margin[0], margin[1]];
+        }
+        if (margin.length === 4) {
+          break;
+        }
+      default:
+        return this.error('Invalid margin array.');
+    }
 
-  // Update pageSize with the new margin.
-  this.setPageSize();
-
-  // Return this for command chaining.
-  return this;
+    // Set the margin property, then update pageSize.
+    this.opt.margin = margin;
+  }).then(this.setPageSize);
 }
 
 Worker.prototype.setPageSize = function setPageSize(pageSize) {
@@ -364,27 +359,26 @@ Worker.prototype.setPageSize = function setPageSize(pageSize) {
     return Math.floor(val * k / 72 * 96);
   }
 
-  // Retrieve page-size based on jsPDF settings, if not explicitly provided.
-  pageSize = pageSize || jsPDF.getPageSize(this.opt.jsPDF);
+  return this.then(function setPageSize_main() {
+    // Retrieve page-size based on jsPDF settings, if not explicitly provided.
+    pageSize = pageSize || jsPDF.getPageSize(this.opt.jsPDF);
 
-  // Add 'inner' field if not present.
-  if (!pageSize.hasOwnProperty('inner')) {
-    pageSize.inner = {
-      width:  pageSize.width - this.opt.margin[1] - this.opt.margin[3],
-      height: pageSize.height - this.opt.margin[0] - this.opt.margin[2]
-    };
-    pageSize.inner.px = {
-      width:  toPx(pageSize.inner.width, pageSize.k),
-      height: toPx(pageSize.inner.height, pageSize.k)
-    };
-    pageSize.inner.ratio = pageSize.inner.height / pageSize.inner.width;
-  }
+    // Add 'inner' field if not present.
+    if (!pageSize.hasOwnProperty('inner')) {
+      pageSize.inner = {
+        width:  pageSize.width - this.opt.margin[1] - this.opt.margin[3],
+        height: pageSize.height - this.opt.margin[0] - this.opt.margin[2]
+      };
+      pageSize.inner.px = {
+        width:  toPx(pageSize.inner.width, pageSize.k),
+        height: toPx(pageSize.inner.height, pageSize.k)
+      };
+      pageSize.inner.ratio = pageSize.inner.height / pageSize.inner.width;
+    }
 
-  // Attach pageSize to this.
-  this.prop.pageSize = pageSize;
-
-  // Return this for command chaining.
-  return this;
+    // Attach pageSize to this.
+    this.prop.pageSize = pageSize;
+  });
 }
 
 Worker.prototype.setProgress = function setProgress(val, state, n, stack) {
