@@ -17,6 +17,40 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var _extends = Object.assign || function (target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i];
+
+    for (var key in source) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        target[key] = source[key];
+      }
+    }
+  }
+
+  return target;
+};
+
 // Determine the type of a variable/object.
 var objType = function objType(obj) {
   var type = typeof obj === 'undefined' ? 'undefined' : _typeof(obj);
@@ -84,7 +118,7 @@ var unitConvert = function unitConvert(obj, k) {
 
 var Worker = function Worker(opt) {
   // Create the root parent for the proto chain, and the starting Worker.
-  var root = Object.assign(Worker.convert(Promise.resolve()), JSON.parse(JSON.stringify(Worker.template)));
+  var root = _extends(Worker.convert(Promise.resolve()), JSON.parse(JSON.stringify(Worker.template)));
   var self = Worker.convert(Promise.resolve(), root);
 
   // Set progress, optional settings, and return.
@@ -229,7 +263,7 @@ Worker.prototype.toCanvas = function toCanvas() {
   // Fulfill prereqs then create the canvas.
   return this.thenList(prereqs).then(function toCanvas_main() {
     // Handle old-fashioned 'onrendered' argument.
-    var options = Object.assign({}, this.opt.html2canvas);
+    var options = _extends({}, this.opt.html2canvas);
     delete options.onrendered;
 
     return html2canvas(this.prop.container, options);
@@ -376,7 +410,7 @@ Worker.prototype.save = function save(filename) {
 
 /* ----- SET / GET ----- */
 
-Worker.prototype.set = function set(opt) {
+Worker.prototype.set = function set$$1(opt) {
   // TODO: Test null/undefined input to this function.
   // TODO: Implement ordered pairs?
 
@@ -412,7 +446,7 @@ Worker.prototype.set = function set(opt) {
   });
 };
 
-Worker.prototype.get = function get(key, cbk) {
+Worker.prototype.get = function get$$1(key, cbk) {
   return this.then(function get_main() {
     // Fetch the requested property, either as a predefined prop or in opt.
     var val = key in Worker.template.prop ? this.prop[key] : this.opt[key];
