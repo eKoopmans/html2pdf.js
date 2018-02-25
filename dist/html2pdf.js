@@ -412,8 +412,12 @@ Worker.prototype.save = function save(filename) {
 /* ----- SET / GET ----- */
 
 Worker.prototype.set = function set$$1(opt) {
-  // TODO: Test null/undefined input to this function.
   // TODO: Implement ordered pairs?
+
+  // Silently ignore invalid or empty input.
+  if (objType(opt) !== 'object') {
+    return this;
+  }
 
   // Build an array of setter functions to queue.
   var fns = Object.keys(opt || {}).map(function (key) {
@@ -533,9 +537,12 @@ Worker.prototype.then = function then(onFulfilled, onRejected) {
     onRejected = onRejected.bind(self);
   }
 
+  // Cast self into a Promise to avoid es6-promise recursively defining `then`.
+  var selfPromise = '_state' in self ? Worker.convert(_extends({}, self), Promise.prototype) : self;
+
   // Update progress while queuing, calling, and resolving `then`.
   self.updateProgress(null, null, 1, [onFulfilled]);
-  var returnVal = Promise.prototype.then.call(self, function then_pre(val) {
+  var returnVal = Promise.prototype.then.call(selfPromise, function then_pre(val) {
     self.updateProgress(null, onFulfilled);
     return val;
   }).then(onFulfilled, onRejected).then(function then_post(val) {
@@ -559,8 +566,11 @@ Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected) {
     onRejected = onRejected.bind(self);
   }
 
+  // Cast self into a Promise to avoid es6-promise recursively defining `then`.
+  var selfPromise = '_state' in self ? Worker.convert(_extends({}, self), Promise.prototype) : self;
+
   // Return the promise, after casting it into a Worker and preserving props.
-  var returnVal = Promise.prototype.then.call(self, onFulfilled, onRejected);
+  var returnVal = Promise.prototype.then.call(selfPromise, onFulfilled, onRejected);
   return Worker.convert(returnVal, self.__proto__);
 };
 
