@@ -416,8 +416,8 @@ Worker.prototype.then = function then(onFulfilled, onRejected) {
   if (onFulfilled)  { onFulfilled = onFulfilled.bind(self); }
   if (onRejected)   { onRejected = onRejected.bind(self); }
 
-  // Cast self into a Promise to avoid es6-promise recursively defining `then`.
-  var selfPromise = ('_state' in self) ?
+  // Cast self into a Promise to avoid polyfills recursively defining `then`.
+  var selfPromise = (Promise.toString().indexOf('[native code]') === -1) ?
       Worker.convert(Object.assign({}, self), Promise.prototype) : self;
 
   // Update progress while queuing, calling, and resolving `then`.
@@ -442,8 +442,8 @@ Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected) {
   if (onFulfilled)  { onFulfilled = onFulfilled.bind(self); }
   if (onRejected)   { onRejected = onRejected.bind(self); }
 
-  // Cast self into a Promise to avoid es6-promise recursively defining `then`.
-  var selfPromise = ('_state' in self) ?
+  // Cast self into a Promise to avoid polyfills recursively defining `then`.
+  var selfPromise = (Promise.toString().indexOf('[native code]') === -1) ?
       Worker.convert(Object.assign({}, self), Promise.prototype) : self;
 
   // Return the promise, after casting it into a Worker and preserving props.
