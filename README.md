@@ -87,7 +87,7 @@ var opt = {
   image:        { type: 'jpeg', quality: 0.98 },
   html2canvas:  { dpi: 192, letterRendering: true },
   jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-});
+};
 
 // New Promise-based usage:
 html2pdf().from(element).set(opt).save();
