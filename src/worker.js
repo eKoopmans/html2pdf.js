@@ -411,31 +411,25 @@ Worker.prototype.updateProgress = function updateProgress(val, state, n, stack) 
 /* ----- PROMISE MAPPING ----- */
 
 Worker.prototype.then = function then(onFulfilled, onRejected) {
-  // Wrap `this` for encapsulation and bind it to the promise handlers.
+  // Wrap `this` for encapsulation.
   var self = this;
-  if (onFulfilled)  { onFulfilled = onFulfilled.bind(self); }
-  if (onRejected)   { onRejected = onRejected.bind(self); }
 
-  // Cast self into a Promise to avoid polyfills recursively defining `then`.
-  var selfPromise = (Promise.toString().indexOf('[native code]') === -1) ?
-      Worker.convert(Object.assign({}, self), Promise.prototype) : self;
-
-  // Update progress while queuing, calling, and resolving `then`.
-  self.updateProgress(null, null, 1, [onFulfilled]);
-  var returnVal = Promise.prototype.then.call(selfPromise, function then_pre(val) {
-    self.updateProgress(null, onFulfilled);
-    return val;
-  }).then(onFulfilled, onRejected).then(function then_post(val) {
-    self.updateProgress(1);
-    return val;
+  return this.thenCore(onFulfilled, onRejected, function then_main(onFulfilled, onRejected) {
+    // Update progress while queuing, calling, and resolving `then`.
+    self.updateProgress(null, null, 1, [onFulfilled]);
+    return Promise.prototype.then.call(this, function then_pre(val) {
+      self.updateProgress(null, onFulfilled);
+      return val;
+    }).then(onFulfilled, onRejected).then(function then_post(val) {
+      self.updateProgress(1);
+      return val;
+    });
   });
-
-  // Return the promise, after casting it into a Worker and preserving props.
-  return Worker.convert(returnVal, self.__proto__);
 };
 
-Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected) {
-  // Core version of then, with no updates to progress.
+Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected, thenBase) {
+  // Handle optional thenBase parameter.
+  thenBase = thenBase || Promise.prototype.then;
 
   // Wrap `this` for encapsulation and bind it to the promise handlers.
   var self = this;
@@ -447,7 +441,7 @@ Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected) {
       Worker.convert(Object.assign({}, self), Promise.prototype) : self;
 
   // Return the promise, after casting it into a Worker and preserving props.
-  var returnVal = Promise.prototype.then.call(selfPromise, onFulfilled, onRejected);
+  var returnVal = thenBase.call(selfPromise, onFulfilled, onRejected);
   return Worker.convert(returnVal, self.__proto__);
 };
 
