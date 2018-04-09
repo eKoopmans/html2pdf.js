@@ -445,21 +445,9 @@ Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected, thenBase)
   return Worker.convert(returnVal, self.__proto__);
 };
 
-Worker.prototype['catch'] = function (onRejected) {
-  // Bind `this` to the promise handler, call `catch`, and return a Worker.
-  if (onRejected)   { onRejected = onRejected.bind(this); }
-  var returnVal = Promise.prototype['catch'].call(this, onRejected);
-  return Worker.convert(returnVal, this);
-};
-
 Worker.prototype.thenExternal = function thenExternal(onFulfilled, onRejected) {
   // Call `then` and return a standard promise (exits the Worker chain).
   return Promise.prototype.then.call(this, onFulfilled, onRejected);
-};
-
-Worker.prototype.catchExternal = function catchExternal(onRejected) {
-  // Call `catch` and return a standard promise (exits the Worker chain).
-  return Promise.prototype['catch'].call(this, onRejected);
 };
 
 Worker.prototype.thenList = function thenList(fns) {
@@ -469,6 +457,18 @@ Worker.prototype.thenList = function thenList(fns) {
     self = self.thenCore(fn);
   });
   return self;
+};
+
+Worker.prototype['catch'] = function (onRejected) {
+  // Bind `this` to the promise handler, call `catch`, and return a Worker.
+  if (onRejected)   { onRejected = onRejected.bind(this); }
+  var returnVal = Promise.prototype['catch'].call(this, onRejected);
+  return Worker.convert(returnVal, this);
+};
+
+Worker.prototype.catchExternal = function catchExternal(onRejected) {
+  // Call `catch` and return a standard promise (exits the Worker chain).
+  return Promise.prototype['catch'].call(this, onRejected);
 };
 
 Worker.prototype.error = function error(msg) {
