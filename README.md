@@ -71,6 +71,18 @@ You may add `html2pdf`-specific page-breaks to your document by adding the CSS c
 </div>
 ```
 
+In converse you can add the CSS class `html2pdf__page-break-avoid` to any element. During PDF creation if it is detected that the start of an element with this class will be on a different page than the end, then a page break element will be inserted before it so it starts on a new page.
+
+```html
+<div id="element-to-print">
+  <span>I'm on page 1!</span>
+  <figure class="html2pdf__page-break-avoid">
+    <img src="img.jpg">
+    <figcaption>Don't page break in this image.</figcaption>
+  </figure>
+</div>
+```
+
 ### Image type and quality
 
 You may customize the image type and quality exported from the canvas by setting the `image` option. This must be an object with the following fields:

@@ -134,6 +134,28 @@ html2pdf.makeContainer = function(source, pageSize) {
     el.style.height = pxPageHeight - (clientRect.top % pxPageHeight) + 'px';
   }, this);
 
+  // Enable avoiding page-breaks in the middle of elements.
+  var pageBreakAvoids = source.querySelectorAll('.html2pdf__page-break-avoid');
+  Array.prototype.forEach.call(pageBreakAvoids, function (el) {
+    var clientRect = el.getBoundingClientRect();
+    var startPageNum = Math.floor(clientRect.top / pxPageHeight);
+    var endPageNum = Math.floor(clientRect.bottom / pxPageHeight);
+    if(endPageNum > startPageNum){
+      /*
+      * Add a page-break element before the current element with
+      * the height computed so elements further down can properly
+      * avoid page-breaks if possible.
+      */
+      var pageBreak = createElement("div", {
+        style: {
+          height: (pxPageHeight - (clientRect.top % pxPageHeight) + 'px'),
+          display: "block"
+        }
+      });
+      el.parentElement.insertBefore(pageBreak, el);
+    }
+  }, this);
+
   // Return the container.
   return container;
 };
