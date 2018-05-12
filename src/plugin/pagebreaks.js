@@ -7,7 +7,7 @@ var orig = {
 Worker.prototype.toContainer = function toContainer() {
   return orig.toContainer.call(this).then(function toContainer_pagebreak() {
     // Enable page-breaks.
-    var pageBreaks = source.querySelectorAll('.html2pdf__page-break');
+    var pageBreaks = this.prop.container.querySelectorAll('.html2pdf__page-break');
     var pxPageHeight = this.prop.pageSize.inner.px.height;
     Array.prototype.forEach.call(pageBreaks, function pageBreak_loop(el) {
       el.style.display = 'block';
