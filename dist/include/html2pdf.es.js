@@ -238,15 +238,6 @@ Worker.prototype.toContainer = function toContainer() {
     this.prop.container.appendChild(source);
     this.prop.overlay.appendChild(this.prop.container);
     document.body.appendChild(this.prop.overlay);
-
-    // Enable page-breaks.
-    var pageBreaks = source.querySelectorAll('.html2pdf__page-break');
-    var pxPageHeight = this.prop.pageSize.inner.px.height;
-    Array.prototype.forEach.call(pageBreaks, function pageBreak_loop(el) {
-      el.style.display = 'block';
-      var clientRect = el.getBoundingClientRect();
-      el.style.height = pxPageHeight - clientRect.top % pxPageHeight + 'px';
-    }, this);
   });
 };
 
@@ -523,6 +514,26 @@ Worker.prototype.updateProgress = function updateProgress(val, state, n, stack) 
 /* ----- PROMISE MAPPING ----- */
 
 Worker.prototype.then = function then(onFulfilled, onRejected) {
+  // Wrap `this` for encapsulation.
+  var self = this;
+
+  return this.thenCore(onFulfilled, onRejected, function then_main(onFulfilled, onRejected) {
+    // Update progress while queuing, calling, and resolving `then`.
+    self.updateProgress(null, null, 1, [onFulfilled]);
+    return Promise.prototype.then.call(this, function then_pre(val) {
+      self.updateProgress(null, onFulfilled);
+      return val;
+    }).then(onFulfilled, onRejected).then(function then_post(val) {
+      self.updateProgress(1);
+      return val;
+    });
+  });
+};
+
+Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected, thenBase) {
+  // Handle optional thenBase parameter.
+  thenBase = thenBase || Promise.prototype.then;
+
   // Wrap `this` for encapsulation and bind it to the promise handlers.
   var self = this;
   if (onFulfilled) {
@@ -533,40 +544,25 @@ Worker.prototype.then = function then(onFulfilled, onRejected) {
   }
 
   // Cast self into a Promise to avoid polyfills recursively defining `then`.
-  var selfPromise = Promise.toString().indexOf('[native code]') === -1 ? Worker.convert(_extends({}, self), Promise.prototype) : self;
-
-  // Update progress while queuing, calling, and resolving `then`.
-  self.updateProgress(null, null, 1, [onFulfilled]);
-  var returnVal = Promise.prototype.then.call(selfPromise, function then_pre(val) {
-    self.updateProgress(null, onFulfilled);
-    return val;
-  }).then(onFulfilled, onRejected).then(function then_post(val) {
-    self.updateProgress(1);
-    return val;
-  });
+  var selfPromise = Promise.toString() !== 'function Promise() { [native code] }' ? Worker.convert(_extends({}, self), Promise.prototype) : self;
 
   // Return the promise, after casting it into a Worker and preserving props.
+  var returnVal = thenBase.call(selfPromise, onFulfilled, onRejected);
   return Worker.convert(returnVal, self.__proto__);
 };
 
-Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected) {
-  // Core version of then, with no updates to progress.
+Worker.prototype.thenExternal = function thenExternal(onFulfilled, onRejected) {
+  // Call `then` and return a standard promise (exits the Worker chain).
+  return Promise.prototype.then.call(this, onFulfilled, onRejected);
+};
 
-  // Wrap `this` for encapsulation and bind it to the promise handlers.
+Worker.prototype.thenList = function thenList(fns) {
+  // Queue a series of promise 'factories' into the promise chain.
   var self = this;
-  if (onFulfilled) {
-    onFulfilled = onFulfilled.bind(self);
-  }
-  if (onRejected) {
-    onRejected = onRejected.bind(self);
-  }
-
-  // Cast self into a Promise to avoid polyfills recursively defining `then`.
-  var selfPromise = Promise.toString().indexOf('[native code]') === -1 ? Worker.convert(_extends({}, self), Promise.prototype) : self;
-
-  // Return the promise, after casting it into a Worker and preserving props.
-  var returnVal = Promise.prototype.then.call(selfPromise, onFulfilled, onRejected);
-  return Worker.convert(returnVal, self.__proto__);
+  fns.forEach(function thenList_forEach(fn) {
+    self = self.thenCore(fn);
+  });
+  return self;
 };
 
 Worker.prototype['catch'] = function (onRejected) {
@@ -578,23 +574,9 @@ Worker.prototype['catch'] = function (onRejected) {
   return Worker.convert(returnVal, this);
 };
 
-Worker.prototype.thenExternal = function thenExternal(onFulfilled, onRejected) {
-  // Call `then` and return a standard promise (exits the Worker chain).
-  return Promise.prototype.then.call(this, onFulfilled, onRejected);
-};
-
 Worker.prototype.catchExternal = function catchExternal(onRejected) {
   // Call `catch` and return a standard promise (exits the Worker chain).
   return Promise.prototype['catch'].call(this, onRejected);
-};
-
-Worker.prototype.thenList = function thenList(fns) {
-  // Queue a series of promise 'factories' into the promise chain.
-  var self = this;
-  fns.forEach(function thenList_forEach(fn) {
-    self = self.thenCore(fn);
-  });
-  return self;
 };
 
 Worker.prototype.error = function error(msg) {
@@ -715,17 +697,34 @@ jsPDF.getPageSize = function (orientation, unit, format) {
   return info;
 };
 
+var orig = {
+  toContainer: Worker.prototype.toContainer
+};
+
+Worker.prototype.toContainer = function toContainer() {
+  return orig.toContainer.call(this).then(function toContainer_pagebreak() {
+    // Enable page-breaks.
+    var pageBreaks = this.prop.container.querySelectorAll('.html2pdf__page-break');
+    var pxPageHeight = this.prop.pageSize.inner.px.height;
+    Array.prototype.forEach.call(pageBreaks, function pageBreak_loop(el) {
+      el.style.display = 'block';
+      var clientRect = el.getBoundingClientRect();
+      el.style.height = pxPageHeight - clientRect.top % pxPageHeight + 'px';
+    }, this);
+  });
+};
+
 // Add hyperlink functionality to the PDF creation.
 
 // Main link array, and refs to original functions.
 var linkInfo = [];
-var orig = {
+var orig$1 = {
   toContainer: Worker.prototype.toContainer,
   toPdf: Worker.prototype.toPdf
 };
 
 Worker.prototype.toContainer = function toContainer() {
-  return orig.toContainer.call(this).then(function toContainer_hyperlink() {
+  return orig$1.toContainer.call(this).then(function toContainer_hyperlink() {
     // Retrieve hyperlink info if the option is enabled.
     if (this.opt.enableLinks) {
       // Find all anchor tags and get the container's bounds for reference.
@@ -755,7 +754,7 @@ Worker.prototype.toContainer = function toContainer() {
 };
 
 Worker.prototype.toPdf = function toPdf() {
-  return orig.toPdf.call(this).then(function toPdf_hyperlink() {
+  return orig$1.toPdf.call(this).then(function toPdf_hyperlink() {
     // Add hyperlinks if the option is enabled.
     if (this.opt.enableLinks) {
       // Attach each anchor tag based on info from toContainer().
