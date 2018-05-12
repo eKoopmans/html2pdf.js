@@ -434,7 +434,7 @@ Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected) {
   if (onRejected)   { onRejected = onRejected.bind(self); }
 
   // Cast self into a Promise to avoid polyfills recursively defining `then`.
-  var selfPromise = (Promise.toString().indexOf('[native code]') === -1) ?
+  var selfPromise = (Promise.toString() !== 'function Promise() { [native code] }') ?
       Worker.convert(Object.assign({}, self), Promise.prototype) : self;
 
   // Return the promise, after casting it into a Worker and preserving props.
