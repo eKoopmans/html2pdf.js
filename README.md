@@ -48,6 +48,14 @@ This worker has methods that can be chained sequentially, as each Promise resolv
 var worker = html2pdf().from(element).save();
 ```
 
+#### Workflow
+
+The basic workflow of html2pdf tasks (enforced by the prereq system) is:
+
+```
+.from() -> .toContainer() -> .toCanvas() -> .toImg() -> .toPdf() -> .save()
+```
+
 #### Worker API
 
 | Method       | Arguments          | Description |
@@ -56,7 +64,7 @@ var worker = html2pdf().from(element).save();
 | to           | target             | Converts the source to the specified target (`'container'`, `'canvas'`, `'img'`, or `'pdf'`). Each target also has its own `toX` method that can be called directly: `toContainer()`, `toCanvas()`, `toImg()`, and `toPdf()`. |
 | output       | type, options, src | Routes to the appropriate `outputPdf` or `outputImg` method based on specified `src` (`'pdf'` (default) or `'img'`). |
 | outputPdf    | type, options      | Sends `type` and `options` to the jsPDF object's `output` method, and returns the result as a Promise (use `.then` to access). See the [jsPDF source code](https://rawgit.com/MrRio/jsPDF/master/docs/jspdf.js.html#line992) for more info. |
-| outputImg    | type, options      | Returns the specified data type for the image as a Promise (use `.then` to access). Supported types: `'img'`, `'datauristring/dataurlstring'`, and `'datauri/dataurl'`. |
+| outputImg    | type, options      | Returns the specified data type for the image as a Promise (use `.then` to access). Supported types: `'img'`, `'datauristring'`/`'dataurlstring'`, and `'datauri'`/`'dataurl'`. |
 | save         | filename           | Saves the PDF object with the optional filename (creates user download prompt). |
 | set          | opt                | Sets the specified properties. See [Options](#options) below for more details. |
 | get          | key, cbk           | Returns the property specified in `key`, either as a Promise (use `.then` to access), or by calling `cbk` if provided. |

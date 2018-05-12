@@ -122,15 +122,6 @@ Worker.prototype.toContainer = function toContainer() {
     this.prop.container.appendChild(source);
     this.prop.overlay.appendChild(this.prop.container);
     document.body.appendChild(this.prop.overlay);
-
-    // Enable page-breaks.
-    var pageBreaks = source.querySelectorAll('.html2pdf__page-break');
-    var pxPageHeight = this.prop.pageSize.inner.px.height;
-    Array.prototype.forEach.call(pageBreaks, function pageBreak_loop(el) {
-      el.style.display = 'block';
-      var clientRect = el.getBoundingClientRect();
-      el.style.height = pxPageHeight - (clientRect.top % pxPageHeight) + 'px';
-    }, this);
   });
 };
 
@@ -437,7 +428,7 @@ Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected, thenBase)
   if (onRejected)   { onRejected = onRejected.bind(self); }
 
   // Cast self into a Promise to avoid polyfills recursively defining `then`.
-  var selfPromise = (Promise.toString().indexOf('[native code]') === -1) ?
+  var selfPromise = (Promise.toString() !== 'function Promise() { [native code] }') ?
       Worker.convert(Object.assign({}, self), Promise.prototype) : self;
 
   // Return the promise, after casting it into a Worker and preserving props.
