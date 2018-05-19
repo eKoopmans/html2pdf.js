@@ -33,19 +33,75 @@ var element = document.getElementById('element-to-print');
 html2pdf(element);
 ```
 
+### Advanced usage
+
+Every step of html2pdf is configurable, using its new Promise-based API. If html2pdf is called without arguments, it will return a `Worker` object:
+
+```js
+var worker = html2pdf();  // Or:  var worker = new html2pdf.Worker;
+```
+
+This worker has methods that can be chained sequentially, as each Promise resolves, and allows insertion of your own intermediate functions between steps. A prerequisite system allows you to skip over mandatory steps (like canvas creation) without any trouble:
+
+```js
+// This will implicitly create the canvas and PDF objects before saving.
+var worker = html2pdf().from(element).save();
+```
+
+#### Workflow
+
+The basic workflow of html2pdf tasks (enforced by the prereq system) is:
+
+```
+.from() -> .toContainer() -> .toCanvas() -> .toImg() -> .toPdf() -> .save()
+```
+
+#### Worker API
+
+| Method       | Arguments          | Description |
+|--------------|--------------------|-------------|
+| from         | src, type          | Sets the source (HTML string or element) for the PDF. Optional `type` specifies other sources: `'string'`, `'element'`, `'canvas'`, or `'img'`. |
+| to           | target             | Converts the source to the specified target (`'container'`, `'canvas'`, `'img'`, or `'pdf'`). Each target also has its own `toX` method that can be called directly: `toContainer()`, `toCanvas()`, `toImg()`, and `toPdf()`. |
+| output       | type, options, src | Routes to the appropriate `outputPdf` or `outputImg` method based on specified `src` (`'pdf'` (default) or `'img'`). |
+| outputPdf    | type, options      | Sends `type` and `options` to the jsPDF object's `output` method, and returns the result as a Promise (use `.then` to access). See the [jsPDF source code](https://rawgit.com/MrRio/jsPDF/master/docs/jspdf.js.html#line992) for more info. |
+| outputImg    | type, options      | Returns the specified data type for the image as a Promise (use `.then` to access). Supported types: `'img'`, `'datauristring'`/`'dataurlstring'`, and `'datauri'`/`'dataurl'`. |
+| save         | filename           | Saves the PDF object with the optional filename (creates user download prompt). |
+| set          | opt                | Sets the specified properties. See [Options](#options) below for more details. |
+| get          | key, cbk           | Returns the property specified in `key`, either as a Promise (use `.then` to access), or by calling `cbk` if provided. |
+| then         | onFulfilled, onRejected | Standard Promise method, with `this` re-bound to the Worker, and with added progress-tracking (see [Progress](#progress) below). Note that `.then` returns a `Worker`, which is a subclass of Promise. |
+| thenCore     | onFulFilled, onRejected | Standard Promise method, with `this` re-bound to the Worker (no progress-tracking). Note that `.thenCore` returns a `Worker`, which is a subclass of Promise. |
+| thenExternal | onFulfilled, onRejected | True Promise method. Using this 'exits' the Worker chain - you will not be able to continue chaining Worker methods after `.thenExternal`. |
+| catch, catchExternal | onRejected | Standard Promise method. `catchExternal` exits the Worker chain - you will not be able to continue chaining Worker methods after `.catchExternal`. |
+| error        | msg                | Throws an error in the Worker's Promise chain. |
+
+A few aliases are also provided for convenience:
+
+| Method    | Alias     |
+|-----------|-----------|
+| save      | saveAs    |
+| set       | using     |
+| output    | export    |
+| then      | run       |
+
 ## Options
 
 html2pdf can be configured using an optional `opt` parameter:
 
 ```js
 var element = document.getElementById('element-to-print');
-html2pdf(element, {
+var opt = {
   margin:       1,
   filename:     'myfile.pdf',
   image:        { type: 'jpeg', quality: 0.98 },
   html2canvas:  { dpi: 192, letterRendering: true },
   jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-});
+};
+
+// New Promise-based usage:
+html2pdf().from(element).set(opt).save();
+
+// Old monolithic-style usage:
+html2pdf(element, opt);
 ```
 
 The `opt` parameter has the following optional fields:
@@ -81,6 +137,10 @@ You may customize the image type and quality exported from the canvas by setting
 |quality     |number          |0.95                          |The image quality, from 0 to 1. This setting is only used for jpeg/webp (not png).           |
 
 These options are limited to the available settings for [HTMLCanvasElement.toDataURL()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL), which ignores quality settings for 'png' images. To enable png image compression, try using the [canvas-png-compression shim](https://github.com/ShyykoSerhiy/canvas-png-compression), which should be an in-place solution to enable png compression via the `quality` option.
+
+## Progress
+
+The Worker object returned by `html2pdf()` has a built-in progress-tracking mechanism. It will be updated to allow a progress callback that will be called with each update, however it is currently a work-in-progress.
 
 ## Dependencies
 
