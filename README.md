@@ -93,7 +93,7 @@ var opt = {
   margin:       1,
   filename:     'myfile.pdf',
   image:        { type: 'jpeg', quality: 0.98 },
-  html2canvas:  { dpi: 192, letterRendering: true },
+  html2canvas:  { scale: 2 },
   jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
 };
 
@@ -154,8 +154,6 @@ If using the unbundled `dist/html2pdf.min.js` (or its un-minified version), you 
 <script src="html2canvas.min.js"></script>
 <script src="html2pdf.min.js"></script>
 ```
-
-html2pdf currently uses [this fork](https://github.com/eKoopmans/html2canvas/tree/develop) of html2canvas to resolve a few bugs and add support for box-shadows and custom resolutions (via the `dpi`/`scale` options).
 
 ## Contributing
 
