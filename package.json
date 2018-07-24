@@ -1,13 +1,13 @@
 {
   "name": "html2pdf.js",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Client-side HTML-to-PDF rendering using pure JS",
   "main": "dist/require/html2pdf.cjs.js",
   "module": "dist/include/html2pdf.es.js",
   "browser": "dist/html2pdf.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eKoopmans/html2pdf.git"
+    "url": "git+https://github.com/FreezinG117/html2pdf.git"
   },
   "keywords": [
     "javascript",
@@ -23,9 +23,9 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/eKoopmans/html2pdf/issues"
+    "url": "https://github.com/FreezinG117/html2pdf/issues"
   },
-  "homepage": "https://github.com/eKoopmans/html2pdf",
+  "homepage": "https://github.com/FreezinG117/html2pdf",
   "dependencies": {
     "es6-promise": "^4.1.1",
     "html2canvas": "^1.0.0-alpha.12",
