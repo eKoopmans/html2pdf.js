@@ -330,7 +330,7 @@ Worker.prototype.get = function get(key, cbk) {
 
 Worker.prototype.setMargin = function setMargin(margin) {
   return this.then(function setMargin_main() {
-    // Parse the margin property.
+    // Parse the margin property: [top, left, bottom, right].
     switch (objType(margin)) {
       case 'number':
         margin = [margin, margin, margin, margin];
