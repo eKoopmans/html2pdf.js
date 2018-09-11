@@ -1,5 +1,5 @@
 // Determine the type of a variable/object.
-export const objType = function(obj) {
+export const objType = function objType(obj) {
   var type = typeof obj;
   if (type === 'undefined')                                 return 'undefined';
   else if (type === 'string' || obj instanceof String)      return 'string';
@@ -12,7 +12,7 @@ export const objType = function(obj) {
 };
 
 // Create an HTML element with optional className, innerHTML, and style.
-export const createElement = function(tagName, opt) {
+export const createElement = function createElement(tagName, opt) {
   var el = document.createElement(tagName);
   if (opt.className)  el.className = opt.className;
   if (opt.innerHTML) {
@@ -29,7 +29,7 @@ export const createElement = function(tagName, opt) {
 };
 
 // Deep-clone a node and preserve contents/properties.
-export const cloneNode = function(node, javascriptEnabled) {
+export const cloneNode = function cloneNode(node, javascriptEnabled) {
   // Recursively clone the node.
   var clone = node.nodeType === 3 ? document.createTextNode(node.nodeValue) : node.cloneNode(false);
   for (var child = node.firstChild; child; child = child.nextSibling) {
@@ -60,7 +60,7 @@ export const cloneNode = function(node, javascriptEnabled) {
 }
 
 // Convert units from px using the conversion value 'k' from jsPDF.
-export const unitConvert = function(obj, k) {
+export const unitConvert = function unitConvert(obj, k) {
   if (objType(obj) === 'number') {
     return obj * 72 / 96 / k;
   } else {
