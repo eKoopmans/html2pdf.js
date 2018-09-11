@@ -59,11 +59,20 @@ export const cloneNode = function(node, javascriptEnabled) {
   return clone;
 }
 
-// Convert units using the conversion value 'k' from jsPDF.
+// Convert units from px using the conversion value 'k' from jsPDF.
 export const unitConvert = function(obj, k) {
-  var newObj = {};
-  for (var key in obj) {
-    newObj[key] = obj[key] * 72 / 96 / k;
+  if (objType(obj) === 'number') {
+    return obj * 72 / 96 / k;
+  } else {
+    var newObj = {};
+    for (var key in obj) {
+      newObj[key] = obj[key] * 72 / 96 / k;
+    }
+    return newObj;
   }
-  return newObj;
 };
+
+// Convert units to px using the conversion value 'k' from jsPDF.
+export const toPx = function toPx(val, k) {
+  return Math.floor(val * k / 72 * 96);
+}

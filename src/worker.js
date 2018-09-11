@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { objType, createElement, cloneNode, unitConvert } from './utils.js';
+import { objType, createElement, cloneNode, toPx } from './utils.js';
 
 /* ----- CONSTRUCTOR ----- */
 
@@ -351,10 +351,6 @@ Worker.prototype.setMargin = function setMargin(margin) {
 }
 
 Worker.prototype.setPageSize = function setPageSize(pageSize) {
-  function toPx(val, k) {
-    return Math.floor(val * k / 72 * 96);
-  }
-
   return this.then(function setPageSize_main() {
     // Retrieve page-size based on jsPDF settings, if not explicitly provided.
     pageSize = pageSize || jsPDF.getPageSize(this.opt.jsPDF);
