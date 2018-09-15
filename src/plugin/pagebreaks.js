@@ -47,7 +47,6 @@ Worker.prototype.toContainer = function toContainer() {
     legacyEls = Array.prototype.slice.call(legacyEls);
 
     // Loop through all elements.
-    // TODO: Only loop through all if css option is chosen?
     var els = root.querySelectorAll('*');
     Array.prototype.forEach.call(els, function pageBreak_loop(el) {
       // Setup pagebreak rules based on legacy and avoidAll modes.
