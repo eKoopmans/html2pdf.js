@@ -8,7 +8,7 @@ import pkg from './package.json';
 
 function banner() {
   var text = pkg.name + ' v' + pkg.version + '\n';
-  text += 'Copyright (c) ' + (new Date).getFullYear() + ' Erik Koopmans\n';
+  text += 'Copyright (c) ' + (new Date).getFullYear() + ' \n';
   text += 'Released under the ' + pkg.license + ' License.';
   text = '/**\n * ' + text.replace(/\n/g, '\n * ') + '\n */';
   return { banner: text };
