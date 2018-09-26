@@ -1,31 +1,17 @@
 {
-  "name": "html2pdf.js",
-  "version": "0.9.0",
+  "name": "htmlpdfconverter",
+  "version": "1.0.2",
   "description": "Client-side HTML-to-PDF rendering using pure JS",
   "main": "dist/require/html2pdf.cjs.js",
   "module": "dist/include/html2pdf.es.js",
   "browser": "dist/html2pdf.js",
   "repository": {
-    "type": "git",
-    "url": "git+https://github.com/eKoopmans/html2pdf.git"
+    "type": "git"
   },
-  "keywords": [
-    "javascript",
-    "pdf-generation",
-    "html",
-    "client-side",
-    "canvas"
-  ],
   "author": {
-    "name": "Erik Koopmans",
-    "email": "erik@erik-koopmans.com",
-    "url": "https://www.erik-koopmans.com"
+    "name": "Deep Dave"
   },
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/eKoopmans/html2pdf/issues"
-  },
-  "homepage": "https://github.com/eKoopmans/html2pdf",
   "dependencies": {
     "es6-promise": "^4.1.1",
     "html2canvas": "^1.0.0-alpha.12",
