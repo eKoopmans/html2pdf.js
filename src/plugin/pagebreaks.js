@@ -36,7 +36,7 @@ Worker.prototype.toContainer = function toContainer() {
     var self = this;
     ['before', 'after', 'avoid'].forEach(function(key) {
       var all = mode.avoidAll && key === 'avoid';
-      select[key] = all ? [] : (undefined === self.opt.pageBreak[key] ? [] : [].concat(self.opt.pageBreak[key]));
+      select[key] = all ? [] : [].concat(self.opt.pageBreak[key] || []);
       if (select[key].length > 0) {
         select[key] = Array.prototype.slice.call(
           root.querySelectorAll(select[key].join(', ')));
