@@ -107,7 +107,7 @@ Worker.prototype.toContainer = function toContainer() {
           display: 'block',
           height: pxPageHeight - (clientRect.bottom % pxPageHeight) + 'px'
         }});
-        el.parentNode.insertAfter(pad, el);
+        el.parentNode.insertBefore(pad, el.nextSibling);
       }
     });
   });
