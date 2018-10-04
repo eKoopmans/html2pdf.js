@@ -86,8 +86,8 @@ Worker.prototype.toContainer = function toContainer() {
         var endPage = Math.floor(clientRect.bottom / pxPageHeight);
         var nPages = Math.abs(clientRect.bottom - clientRect.top) / pxPageHeight;
 
-        // Turn on rules.before if the el is broken and is less than a page long.
-        if (endPage !== startPage && nPages < 1) {
+        // Turn on rules.before if the el is broken and is at most one page long.
+        if (endPage !== startPage && nPages <= 1) {
           rules.before = true;
         }
       }
