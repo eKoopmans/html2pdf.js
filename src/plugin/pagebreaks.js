@@ -63,7 +63,7 @@ Worker.prototype.toContainer = function toContainer() {
         var style = window.getComputedStyle(el);
         // TODO: Handle 'left' and 'right' correctly.
         // TODO: Add support for 'avoid' on breakBefore/After.
-        var cssOpt = ['always', 'left', 'right'];
+        var cssOpt = ['always', 'page', 'left', 'right'];
         rules = {
           before: rules.before || cssOpt.indexOf(style.breakBefore || style.pageBreakBefore) !== -1,
           after:  rules.after || cssOpt.indexOf(style.breakAfter || style.pageBreakAfter) !== -1,
