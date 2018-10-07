@@ -10,7 +10,7 @@ var orig = {
 
 // Add pageBreak default options to the Worker template.
 Worker.template.opt.pageBreak = {
-  mode: ['css', 'legacy'],  // 'avoid-all', 'css', 'legacy', 'whiteline'
+  mode: ['css', 'legacy'],  // 'avoid-all', 'css', 'legacy'
   before: [],
   after: [],
   avoid: []
@@ -27,8 +27,7 @@ Worker.prototype.toContainer = function toContainer() {
     var mode = {
       avoidAll:   modeSrc.indexOf('avoid-all') !== -1,
       css:        modeSrc.indexOf('css') !== -1,
-      legacy:     modeSrc.indexOf('legacy') !== -1,
-      whiteline:  modeSrc.indexOf('whiteline') !== -1
+      legacy:     modeSrc.indexOf('legacy') !== -1
     };
 
     // Get arrays of all explicitly requested elements.
