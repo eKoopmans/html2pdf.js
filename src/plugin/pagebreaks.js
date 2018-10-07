@@ -8,8 +8,8 @@ var orig = {
   toContainer: Worker.prototype.toContainer
 };
 
-// Add pageBreak default options to the Worker template.
-Worker.template.opt.pageBreak = {
+// Add pagebreak default options to the Worker template.
+Worker.template.opt.pagebreak = {
   mode: ['css', 'legacy'],  // 'avoid-all', 'css', 'legacy'
   before: [],
   after: [],
@@ -23,7 +23,7 @@ Worker.prototype.toContainer = function toContainer() {
     var pxPageHeight = this.prop.pageSize.inner.px.height;
 
     // Check all requested modes.
-    var modeSrc = [].concat(this.opt.pageBreak.mode);
+    var modeSrc = [].concat(this.opt.pagebreak.mode);
     var mode = {
       avoidAll:   modeSrc.indexOf('avoid-all') !== -1,
       css:        modeSrc.indexOf('css') !== -1,
@@ -35,7 +35,7 @@ Worker.prototype.toContainer = function toContainer() {
     var self = this;
     ['before', 'after', 'avoid'].forEach(function(key) {
       var all = mode.avoidAll && key === 'avoid';
-      select[key] = all ? [] : [].concat(self.opt.pageBreak[key] || []);
+      select[key] = all ? [] : [].concat(self.opt.pagebreak[key] || []);
       if (select[key].length > 0) {
         select[key] = Array.prototype.slice.call(
           root.querySelectorAll(select[key].join(', ')));
@@ -48,7 +48,7 @@ Worker.prototype.toContainer = function toContainer() {
 
     // Loop through all elements.
     var els = root.querySelectorAll('*');
-    Array.prototype.forEach.call(els, function pageBreak_loop(el) {
+    Array.prototype.forEach.call(els, function pagebreak_loop(el) {
       // Setup pagebreak rules based on legacy and avoidAll modes.
       var rules = {
         before: false,
