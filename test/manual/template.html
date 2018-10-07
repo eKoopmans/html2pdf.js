@@ -1,0 +1,44 @@
+﻿<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>html2pdf Test - Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <style type="text/css">
+      /* Basic styling for root. */
+      #root {
+        width: 500px;
+        height: 700px;
+        background-color: yellow;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Button to generate PDF. -->
+    <button onclick="test()">Generate PDF</button>
+
+    <!-- Div to capture. -->
+    <div id="root">
+      This is a test
+    </div>
+
+    <!-- Include html2pdf bundle. -->
+    <script src="../../dist/html2pdf.bundle.js"></script>
+
+    <script>
+      function test() {
+        // Get the element.
+        var element = document.getElementById('root');
+
+        // Generate the PDF.
+        html2pdf().from(element).set({
+          margin: 1,
+          filename: 'test.pdf',
+          html2canvas: { scale: 2 },
+          jsPDF: {orientation: 'portrait', unit: 'in', format: 'letter', compressPDF: true}
+        }).save();
+      }
+    </script>
+  </body>
+</html>
