@@ -10,7 +10,7 @@ var orig = {
 
 // Add pagebreak default options to the Worker template.
 Worker.template.opt.pagebreak = {
-  mode: ['css', 'legacy'],  // 'avoid-all', 'css', 'legacy'
+  mode: ['avoid-all', 'css', 'legacy'],   // All options: 'avoid-all', 'css', 'legacy'
   before: [],
   after: [],
   avoid: []
