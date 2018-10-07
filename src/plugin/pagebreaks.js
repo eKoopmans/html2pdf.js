@@ -63,11 +63,12 @@ Worker.prototype.toContainer = function toContainer() {
         var style = window.getComputedStyle(el);
         // TODO: Handle 'left' and 'right' correctly.
         // TODO: Add support for 'avoid' on breakBefore/After.
-        var cssOpt = ['always', 'page', 'left', 'right'];
+        var breakOpt = ['always', 'page', 'left', 'right'];
+        var avoidOpt = ['avoid', 'avoid-page'];
         rules = {
-          before: rules.before || cssOpt.indexOf(style.breakBefore || style.pageBreakBefore) !== -1,
-          after:  rules.after || cssOpt.indexOf(style.breakAfter || style.pageBreakAfter) !== -1,
-          avoid:  rules.avoid || (style.breakInside || style.pageBreakInside) === 'avoid'
+          before: rules.before || breakOpt.indexOf(style.breakBefore || style.pageBreakBefore) !== -1,
+          after:  rules.after || breakOpt.indexOf(style.breakAfter || style.pageBreakAfter) !== -1,
+          avoid:  rules.avoid || avoidOpt.indexOf(style.breakInside || style.pageBreakInside) !== -1
         };
       }
 
