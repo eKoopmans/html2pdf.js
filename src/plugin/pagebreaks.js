@@ -1,7 +1,27 @@
 import Worker from '../worker.js';
 import { objType, createElement } from '../utils.js';
 
-// Add page-break functionality.
+/* Pagebreak plugin:
+
+    Adds page-break functionality to the html2pdf library. Page-breaks can be
+    enabled by CSS styles, set on individual elements using selectors, or
+    avoided from breaking inside all elements.
+
+    Options on the `opt.pagebreak` object:
+
+    mode:   String or array of strings: 'avoid-all', 'css', and/or 'legacy'
+            Default: ['css', 'legacy']
+
+    before: String or array of CSS selectors for which to add page-breaks
+            before each element. Can be a specific element with an ID
+            ('#myID'), all elements of a type (e.g. 'img'), all of a class
+            ('.myClass'), or even '*' to match every element.
+
+    after:  Like 'before', but adds a page-break immediately after the element.
+
+    avoid:  Like 'before', but avoids page-breaks on these elements. You can
+            enable this feature on every element using the 'avoid-all' mode.
+*/
 
 // Refs to original functions.
 var orig = {
@@ -10,7 +30,7 @@ var orig = {
 
 // Add pagebreak default options to the Worker template.
 Worker.template.opt.pagebreak = {
-  mode: ['avoid-all', 'css', 'legacy'],   // All options: 'avoid-all', 'css', 'legacy'
+  mode: ['css', 'legacy'],
   before: [],
   after: [],
   avoid: []
