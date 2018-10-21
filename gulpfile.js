@@ -38,13 +38,13 @@ function mergeBranch(branch) {
 /* ----- TASKS ----- */
 
 // Bump version using NPM (only affects package*.json, doesn't commit).
-gulp.task('bump-version', function() {
+gulp.task('bump-version', function bumpVersion() {
   console.log('Bumping version number.');
   return exec('npm --no-git-tag-version version ' + args.newversion);
 });
 
 // Stage a release (bump version and create a 'release/[version]' branch).
-gulp.task('stage-release', ['bump-version'], function() {
+gulp.task('stage-release', gulp.series('bump-version', function stageRelease() {
   var version = getVersion();
   var branch = 'release/' + version;
   var cmd = 'git checkout -b ' + branch + ' && git add -A';
@@ -52,9 +52,9 @@ gulp.task('stage-release', ['bump-version'], function() {
 
   console.log('Creating release branch and committing changes.');
   return exec(cmd);
-});
+}));
 
-gulp.task('finalize-release', function() {
+gulp.task('finalize-release', function finalizeRelease() {
   var version = getVersion();
   var branch = 'release/' + version;
   var cmd = 'git checkout ' + branch + ' && npm run build';
@@ -70,7 +70,7 @@ gulp.task('finalize-release', function() {
 });
 
 // Tag and merge the latest release into master/develop.
-gulp.task('release', ['finalize-release'], function() {
+gulp.task('release', gulp.series('finalize-release', function release() {
   var version = getVersion();
   var branch = 'release/' + version;
 
@@ -78,4 +78,4 @@ gulp.task('release', ['finalize-release'], function() {
     console.log('Deleting release branch.');
     return exec('git branch -d ' + branch);
   });
-});
+}));
