@@ -192,6 +192,10 @@ If using the unbundled `dist/html2pdf.min.js` (or its un-minified version), you 
 
 When submitting an issue, please provide reproducible code that highlights the issue, preferably by creating a fork of [this template jsFiddle](https://jsfiddle.net/u6o6ne41/) (which has html2pdf already loaded). Remember that html2pdf uses [html2canvas](https://github.com/niklasvh/html2canvas) and [jsPDF](https://github.com/MrRio/jsPDF) as dependencies, so it's a good idea to check each of those repositories' issue trackers to see if your problem has already been addressed.
 
+### Tests
+
+html2pdf is currently sorely lacking in unit tests. Any contributions or suggestions of automated (or manual) tests are welcome. This is high on the to-do list for this project.
+
 ### Pull requests
 
 If you want to create a new feature or bugfix, please feel free to fork and submit a pull request! Use the [`develop`](/eKoopmans/html2pdf/tree/develop) branch, which features the latest development, and make changes to `/src/` rather than directly to `/dist/`. You can test your changes by rebuilding with `npm run build`.
