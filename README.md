@@ -2,6 +2,31 @@
 
 html2pdf converts any webpage or element into a printable PDF entirely client-side using [html2canvas](https://github.com/niklasvh/html2canvas) and [jsPDF](https://github.com/MrRio/jsPDF).
 
+## Table of contents
+
+- [Getting started](#getting-started)
+  - [HTML](#html)
+  - [NPM](#npm)
+  - [Bower](#bower)
+- [Usage](#usage)
+  - [Advanced usage](#advanced-usage)
+    - [Workflow](#workflow)
+    - [Worker API](#worker-api)
+- [Options](#options)
+  - [Page-breaks](#page-breaks)
+    - [Page-break settings](#page-break-settings)
+    - [Page-break modes](#page-break-modes)
+    - [Example usage](#example-usage)
+  - [Image type and quality](#image-type-and-quality)
+- [Progress tracking](#progress-tracking)
+- [Dependencies](#dependencies)
+- [Contributing](#contributing)
+  - [Issues](#issues)
+  - [Tests](#tests)
+  - [Pull requests](#pull-requests)
+- [Credits](#credits)
+- [License](#license)
+
 ## Getting started
 
 #### HTML
@@ -169,7 +194,7 @@ You may customize the image type and quality exported from the canvas by setting
 
 These options are limited to the available settings for [HTMLCanvasElement.toDataURL()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL), which ignores quality settings for 'png' images. To enable png image compression, try using the [canvas-png-compression shim](https://github.com/ShyykoSerhiy/canvas-png-compression), which should be an in-place solution to enable png compression via the `quality` option.
 
-## Progress
+## Progress tracking
 
 The Worker object returned by `html2pdf()` has a built-in progress-tracking mechanism. It will be updated to allow a progress callback that will be called with each update, however it is currently a work-in-progress.
 
