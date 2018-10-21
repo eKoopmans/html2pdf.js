@@ -2,6 +2,31 @@
 
 html2pdf converts any webpage or element into a printable PDF entirely client-side using [html2canvas](https://github.com/niklasvh/html2canvas) and [jsPDF](https://github.com/MrRio/jsPDF).
 
+## Table of contents
+
+- [Getting started](#getting-started)
+  - [HTML](#html)
+  - [NPM](#npm)
+  - [Bower](#bower)
+- [Usage](#usage)
+  - [Advanced usage](#advanced-usage)
+    - [Workflow](#workflow)
+    - [Worker API](#worker-api)
+- [Options](#options)
+  - [Page-breaks](#page-breaks)
+    - [Page-break settings](#page-break-settings)
+    - [Page-break modes](#page-break-modes)
+    - [Example usage](#example-usage)
+  - [Image type and quality](#image-type-and-quality)
+- [Progress tracking](#progress-tracking)
+- [Dependencies](#dependencies)
+- [Contributing](#contributing)
+  - [Issues](#issues)
+  - [Tests](#tests)
+  - [Pull requests](#pull-requests)
+- [Credits](#credits)
+- [License](#license)
+
 ## Getting started
 
 #### HTML
@@ -98,7 +123,7 @@ var opt = {
 };
 
 // New Promise-based usage:
-html2pdf().from(element).set(opt).save();
+html2pdf().set(opt).from(element).save();
 
 // Old monolithic-style usage:
 html2pdf(element, opt);
@@ -106,25 +131,56 @@ html2pdf(element, opt);
 
 The `opt` parameter has the following optional fields:
 
-|Name        |Type            |Default                       |Description                                                                                                 |
-|------------|----------------|------------------------------|------------------------------------------------------------------------------------------------------------|
-|margin      |number or array |0                             |PDF margin (in jsPDF units). Can be a single number, `[vMargin, hMargin]`, or `[top, left, bottom, right]`. |
-|filename    |string          |'file.pdf'                    |The default filename of the exported PDF.                                                                   |
-|image       |object          |{type: 'jpeg', quality: 0.95} |The image type and quality used to generate the PDF. See the Extra Features section below.                  |
-|enableLinks |boolean         |true                          |If enabled, PDF hyperlinks are automatically added ontop of all anchor tags.                                |
-|html2canvas |object          |{ }                           |Configuration options sent directly to `html2canvas` ([see here](https://html2canvas.hertzen.com/configuration) for usage).|
-|jsPDF       |object          |{ }                           |Configuration options sent directly to `jsPDF` ([see here](http://rawgit.com/MrRio/jsPDF/master/docs/jsPDF.html) for usage).|
+|Name        |Type            |Default                         |Description                                                                                                 |
+|------------|----------------|--------------------------------|------------------------------------------------------------------------------------------------------------|
+|margin      |number or array |`0`                             |PDF margin (in jsPDF units). Can be a single number, `[vMargin, hMargin]`, or `[top, left, bottom, right]`. |
+|filename    |string          |`'file.pdf'`                    |The default filename of the exported PDF.                                                                   |
+|pagebreak   |object          |`{mode: ['css', 'legacy']}`     |Controls the pagebreak behaviour on the page. See [Page-breaks](#page-breaks) below.                        |
+|image       |object          |`{type: 'jpeg', quality: 0.95}` |The image type and quality used to generate the PDF. See [Image type and quality](#image-type-and-quality) below.|
+|enableLinks |boolean         |`true`                          |If enabled, PDF hyperlinks are automatically added ontop of all anchor tags.                                |
+|html2canvas |object          |`{ }`                           |Configuration options sent directly to `html2canvas` ([see here](https://html2canvas.hertzen.com/configuration) for usage).|
+|jsPDF       |object          |`{ }`                           |Configuration options sent directly to `jsPDF` ([see here](http://rawgit.com/MrRio/jsPDF/master/docs/jsPDF.html) for usage).|
 
 ### Page-breaks
 
-You may add `html2pdf`-specific page-breaks to your document by adding the CSS class `html2pdf__page-break` to any element (normally an empty `div`). For React elements, use `className=html2pdf__page-break`. During PDF creation, these elements will be given a height calculated to fill the remainder of the PDF page that they are on. Example usage:
+html2pdf has the ability to automatically add page-breaks to clean up your document. Page-breaks can be added by CSS styles, set on individual elements using selectors, or avoided from breaking inside all elements (`avoid-all` mode).
 
-```html
-<div id="element-to-print">
-  <span>I'm on page 1!</span>
-  <div class="html2pdf__page-break"></div>
-  <span>I'm on page 2!</span>
-</div>
+By default, html2pdf will respect most CSS [`break-before`](https://developer.mozilla.org/en-US/docs/Web/CSS/break-before), [`break-after`](https://developer.mozilla.org/en-US/docs/Web/CSS/break-after), and [`break-inside`](https://developer.mozilla.org/en-US/docs/Web/CSS/break-inside) rules, and also add page-breaks after any element with class `html2pdf__page-break` (for legacy purposes).
+
+#### Page-break settings
+
+|Setting   |Type            |Default             |Description |
+|----------|----------------|--------------------|------------|
+|mode      |string or array |`['css', 'legacy']` |The mode(s) on which to automatically add page-breaks. One or more of `'avoid-all'`, `'css'`, and `'legacy'`. |
+|before    |string or array |`[]`                |CSS selectors for which to add page-breaks before each element. Can be a specific element with an ID (`'#myID'`), all elements of a type (e.g. `'img'`), all of a class (`'.myClass'`), or even `'*'` to match every element. |
+|after     |string or array |`[]`                |Like 'before', but adds a page-break immediately after the element. |
+|avoid     |string or array |`[]`                |Like 'before', but avoids page-breaks on these elements. You can enable this feature on every element using the 'avoid-all' mode. |
+
+#### Page-break modes
+
+| Mode      | Description |
+|-----------|-------------|
+| avoid-all | Automatically adds page-breaks to avoid splitting any elements across pages. |
+| css       | Adds page-breaks according to the CSS `break-before`, `break-after`, and `break-inside` properties. Only recognizes `always/left/right` for before/after, and `avoid` for inside. |
+| legacy    | Adds page-breaks after elements with class `html2pdf__page-break`. This feature may be removed in the future. |
+
+#### Example usage
+
+```js
+// Avoid page-breaks on all elements, and add one before #page2el.
+html2pdf().set({
+  pagebreak: { mode: 'avoid-all', before: '#page2el' }
+});
+
+// Enable all 'modes', with no explicit elements.
+html2pdf().set({
+  pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+});
+
+// No modes, only explicit elements.
+html2pdf().set({
+  pagebreak: { before: '.beforeClass', after: ['#after1', '#after2'], avoid: 'img' }
+});
 ```
 
 ### Image type and quality
@@ -138,7 +194,7 @@ You may customize the image type and quality exported from the canvas by setting
 
 These options are limited to the available settings for [HTMLCanvasElement.toDataURL()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL), which ignores quality settings for 'png' images. To enable png image compression, try using the [canvas-png-compression shim](https://github.com/ShyykoSerhiy/canvas-png-compression), which should be an in-place solution to enable png compression via the `quality` option.
 
-## Progress
+## Progress tracking
 
 The Worker object returned by `html2pdf()` has a built-in progress-tracking mechanism. It will be updated to allow a progress callback that will be called with each update, however it is currently a work-in-progress.
 
@@ -160,6 +216,10 @@ If using the unbundled `dist/html2pdf.min.js` (or its un-minified version), you 
 ### Issues
 
 When submitting an issue, please provide reproducible code that highlights the issue, preferably by creating a fork of [this template jsFiddle](https://jsfiddle.net/u6o6ne41/) (which has html2pdf already loaded). Remember that html2pdf uses [html2canvas](https://github.com/niklasvh/html2canvas) and [jsPDF](https://github.com/MrRio/jsPDF) as dependencies, so it's a good idea to check each of those repositories' issue trackers to see if your problem has already been addressed.
+
+### Tests
+
+html2pdf is currently sorely lacking in unit tests. Any contributions or suggestions of automated (or manual) tests are welcome. This is high on the to-do list for this project.
 
 ### Pull requests
 
