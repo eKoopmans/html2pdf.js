@@ -49,6 +49,23 @@ Install html2pdf and its dependencies using NPM with `npm install --save html2pd
 
 Install html2pdf and its dependencies using Bower with `bower install --save html2pdf.js` (make sure to include `.js` in the package name).
 
+#### Console
+
+If you're on a webpage that you can't modify directly and wish to use html2pdf to capture a screenshot, you can follow these steps:
+
+1. Open your browser's console (instructions for different browsers [here](https://webmasters.stackexchange.com/a/77337/94367)).
+2. Paste in this code:
+    ```js
+    function addScript(url) {
+        var script = document.createElement('script');
+        script.type = 'application/javascript';
+        script.src = url;
+        document.head.appendChild(script);
+    }
+    addScript('https://raw.githack.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js');
+    ```
+3. You may now execute html2pdf commands directly from the console. To capture a default PDF of the entire page, use `html2pdf(document.body)`.
+
 ## Usage
 
 Once installed, html2pdf is ready to use. The following command will generate a PDF of `#element-to-print` and prompt the user to save the result:
