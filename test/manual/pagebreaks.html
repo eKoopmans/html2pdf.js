@@ -23,7 +23,12 @@
         page-break-inside: avoid;
       }
 
-      /* Big and bigger elements. */
+      /* Sized elements. */
+      .medium {
+        height: 4in;
+        background-color: orange;
+        border: 1px solid black;
+      }
       .big {
         height: 10.9in;
         background-color: yellow;
@@ -84,12 +89,41 @@
       </div>
       <table>
         <tr>
-          <td>Cell 1-1 - start of new page</td>
-          <td>Cell 1-2 - start of new page</td>
+          <td>Cell 1-1 - start of new page (avoid-all only)</td>
+          <td>Cell 1-2 - start of new page (avoid-all only)</td>
         </tr>
         <tr class="big">
-          <td>Cell 2-1 - start of another new page</td>
-          <td>Cell 2-2 - start of another new page</td>
+          <td>Cell 2-1 - start of another new page (avoid-all only)</td>
+          <td>Cell 2-2 - start of another new page (avoid-all only)</td>
+        </tr>
+      </table>
+
+      <!-- Advanced table. -->
+      <p class="avoid big">Spacing (takes up most of a new page, on avoid-all/css/specify).</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Cell 1-1 - start of new page (avoid-all only)</th>
+            <th>Cell 1-2 - start of new page (avoid-all only)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="medium">
+            <td>Cell 2-1 - continue on page</td>
+            <td>Cell 2-2 - continue on page</td>
+          </tr>
+          <tr class="medium">
+            <td>Cell 3-1 - continue on page</td>
+            <td>Cell 3-2 - continue on page</td>
+          </tr>
+          <tr class="medium">
+            <td>Cell 4-1 - start of new page (avoid-all only)</td>
+            <td>Cell 4-2 - start of new page (avoid-all only)</td>
+          </tr>
+        </tbody>
+        <tr class="big">
+          <td>Cell 5-1 - start of another new page (avoid-all only)</td>
+          <td>Cell 5-2 - start of another new page (avoid-all only)</td>
         </tr>
       </table>
     </div>
