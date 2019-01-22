@@ -1,6 +1,6 @@
 /**
  * html2pdf.js v0.9.1
- * Copyright (c) 2018 Erik Koopmans
+ * Copyright (c) 2019 Erik Koopmans
  * Released under the MIT License.
  */
 (function (global, factory) {
@@ -775,6 +775,20 @@ Worker.prototype.toContainer = function toContainer() {
     // Loop through all elements.
     var els = root.querySelectorAll('*');
     Array.prototype.forEach.call(els, function pagebreak_loop(el) {
+      // Setup behaviour based on element type.
+      var tagName = el.tagName.toLowerCase();
+      switch (el.tagName.toLowerCase()) {
+        case 'thead':
+        case 'tbody':
+        case 'tfoot':
+          return;
+        case 'tr':
+        case 'caption':
+          var padTag = 'tr';break;
+        default:
+          var padTag = 'div';
+      }
+
       // Setup pagebreak rules based on legacy and avoidAll modes.
       var rules = {
         before: false,
@@ -820,7 +834,7 @@ Worker.prototype.toContainer = function toContainer() {
 
       // Before: Create a padding div to push the element to the next page.
       if (rules.before) {
-        var pad = createElement('div', { style: {
+        var pad = createElement(padTag, { style: {
             display: 'block',
             height: pxPageHeight - clientRect.top % pxPageHeight + 'px'
           } });
@@ -829,7 +843,7 @@ Worker.prototype.toContainer = function toContainer() {
 
       // After: Create a padding div to fill the remaining page.
       if (rules.after) {
-        var pad = createElement('div', { style: {
+        var pad = createElement(padTag, { style: {
             display: 'block',
             height: pxPageHeight - clientRect.bottom % pxPageHeight + 'px'
           } });
