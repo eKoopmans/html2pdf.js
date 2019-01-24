@@ -8,6 +8,7 @@ html2pdf converts any webpage or element into a printable PDF entirely client-si
   - [HTML](#html)
   - [NPM](#npm)
   - [Bower](#bower)
+  - [Console](#console)
 - [Usage](#usage)
   - [Advanced usage](#advanced-usage)
     - [Workflow](#workflow)
