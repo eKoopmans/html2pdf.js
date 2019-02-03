@@ -30,8 +30,6 @@ Worker.convert = function convert(promise, inherit) {
 Worker.template = {
   prop: {
     src: null,
-    container: null,
-    overlay: null,
     canvas: null,
     img: null,
     pdf: null,
@@ -79,8 +77,6 @@ Worker.prototype.from = function from(src, type) {
 Worker.prototype.to = function to(target) {
   // Route the 'to' request to the appropriate method.
   switch (target) {
-    case 'container':
-      return this.toContainer();
     case 'canvas':
       return this.toCanvas();
     case 'img':
@@ -92,44 +88,11 @@ Worker.prototype.to = function to(target) {
   }
 };
 
-Worker.prototype.toContainer = function toContainer() {
+Worker.prototype.toCanvas = function toCanvas() {
   // Set up function prerequisites.
   var prereqs = [
     function checkSrc() { return this.prop.src || this.error('Cannot duplicate - no source HTML.'); },
     function checkPageSize() { return this.prop.pageSize || this.setPageSize(); }
-  ];
-
-  return this.thenList(prereqs).then(function toContainer_main() {
-    // Define the CSS styles for the container and its overlay parent.
-    var overlayCSS = {
-      position: 'fixed', overflow: 'hidden', zIndex: 1000,
-      left: 0, right: 0, bottom: 0, top: 0,
-      backgroundColor: 'rgba(0,0,0,0.8)'
-    };
-    var containerCSS = {
-      position: 'absolute', width: this.prop.pageSize.inner.width + this.prop.pageSize.unit,
-      left: 0, right: 0, top: 0, height: 'auto', margin: 'auto',
-      backgroundColor: 'white'
-    };
-
-    // Set the overlay to hidden (could be changed in the future to provide a print preview).
-    overlayCSS.opacity = 0;
-
-    // Create and attach the elements.
-    var source = cloneNode(this.prop.src, this.opt.html2canvas.javascriptEnabled);
-    this.prop.overlay = createElement('div',   { className: 'html2pdf__overlay', style: overlayCSS });
-    this.prop.container = createElement('div', { className: 'html2pdf__container', style: containerCSS });
-    this.prop.container.appendChild(source);
-    this.prop.overlay.appendChild(this.prop.container);
-    document.body.appendChild(this.prop.overlay);
-  });
-};
-
-Worker.prototype.toCanvas = function toCanvas() {
-  // Set up function prerequisites.
-  var prereqs = [
-    function checkContainer() { return document.body.contains(this.prop.container)
-                               || this.toContainer(); }
   ];
 
   // Fulfill prereqs then create the canvas.
@@ -138,14 +101,25 @@ Worker.prototype.toCanvas = function toCanvas() {
     var options = Object.assign({}, this.opt.html2canvas);
     delete options.onrendered;
 
-    return html2canvas(this.prop.container, options);
+    // Alter html2canvas options for reflow behaviour.
+    var src = this.prop.src;
+    var ignoreElements_orig = options.ignoreElements || function () {};
+    options.ignoreElements = function (element) {
+      // List of metadata tags:   https://www.w3schools.com/html/html_head.asp
+      var metaTags = ['HEAD', 'TITLE', 'BASE', 'LINK', 'META', 'SCRIPT', 'STYLE'];
+      var toClone = metaTags.indexOf(el.tagName) !== -1 || el.contains(src) || src.contains(el);
+      return !toClone || ignoreElement_orig(element);
+    }
+    options.windowWidth = this.prop.pageSize.inner.px.width;
+    options.width = options.windowWidth;
+
+    return html2canvas(src, options);
   }).then(function toCanvas_post(canvas) {
     // Handle old-fashioned 'onrendered' argument.
     var onRendered = this.opt.html2canvas.onrendered || function () {};
     onRendered(canvas);
 
     this.prop.canvas = canvas;
-    document.body.removeChild(this.prop.overlay);
   });
 };
 
