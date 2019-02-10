@@ -138,6 +138,15 @@ Worker.prototype.toCanvas = function toCanvas() {
     var options = Object.assign({}, this.opt.html2canvas);
     delete options.onrendered;
 
+    // Use jsPDF canvas rendering by default.
+    if (!options.canvas) {
+      if (!this.prop.pdf) {
+        this.prop.pdf = new jsPDF(opt.jsPDF);
+        this.prop.pdf.context2d.autoPaging = true;
+      }
+      options.canvas = this.prop.pdf.canvas;
+    }
+
     return html2canvas(this.prop.container, options);
   }).then(function toCanvas_post(canvas) {
     // Handle old-fashioned 'onrendered' argument.
@@ -163,6 +172,12 @@ Worker.prototype.toPdf = function toPdf() {
     // Create local copies of frequently used properties.
     var canvas = this.prop.canvas;
     var opt = this.opt;
+
+    // Handle jsPDF canvas rendering (already rendered to PDF).
+    if (this.prop.pdf && canvas === this.prop.pdf.canvas) {
+      this.progress.step = 3;
+      return;
+    }
 
     // Calculate the number of pages.
     var ctx = canvas.getContext('2d');
