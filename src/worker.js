@@ -141,7 +141,7 @@ Worker.prototype.toCanvas = function toCanvas() {
     // Use jsPDF canvas rendering by default.
     if (!options.canvas) {
       if (!this.prop.pdf) {
-        this.prop.pdf = new jsPDF(opt.jsPDF);
+        this.prop.pdf = new jsPDF(this.opt.jsPDF);
         this.prop.pdf.context2d.autoPaging = true;
       }
       options.canvas = this.prop.pdf.canvas;
