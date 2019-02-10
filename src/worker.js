@@ -41,7 +41,8 @@ Worker.template = {
     val: 0,
     state: null,
     n: 0,
-    stack: []
+    stack: [],
+    step: 0
   },
   opt: {
     filename: 'file.pdf',
@@ -122,13 +123,16 @@ Worker.prototype.toContainer = function toContainer() {
     this.prop.container.appendChild(source);
     this.prop.overlay.appendChild(this.prop.container);
     document.body.appendChild(this.prop.overlay);
+
+    // Update progress.
+    this.progress.step = 1;
   });
 };
 
 Worker.prototype.toCanvas = function toCanvas() {
   // Set up function prerequisites.
   var prereqs = [
-    function checkContainer() { return document.body.contains(this.prop.container)
+    function checkContainer() { return this.progress.step >= 1 && document.body.contains(this.prop.container)
                                || this.toContainer(); }
   ];
 
@@ -146,13 +150,16 @@ Worker.prototype.toCanvas = function toCanvas() {
 
     this.prop.canvas = canvas;
     document.body.removeChild(this.prop.overlay);
+
+    // Update progress.
+    this.progress.step = 2;
   });
 };
 
 Worker.prototype.toImg = function toImg() {
   // Set up function prerequisites.
   var prereqs = [
-    function checkCanvas() { return this.prop.canvas || this.toCanvas(); }
+    function checkCanvas() { return this.progress.step >= 2 && this.prop.canvas || this.toCanvas(); }
   ];
 
   // Fulfill prereqs then create the image.
@@ -160,13 +167,16 @@ Worker.prototype.toImg = function toImg() {
     var imgData = this.prop.canvas.toDataURL('image/' + this.opt.image.type, this.opt.image.quality);
     this.prop.img = document.createElement('img');
     this.prop.img.src = imgData;
+
+    // Update progress.
+    this.progress.step = 3;
   });
 };
 
 Worker.prototype.toPdf = function toPdf() {
   // Set up function prerequisites.
   var prereqs = [
-    function checkCanvas() { return this.prop.canvas || this.toCanvas(); }
+    function checkCanvas() { return this.progress.step >= 2 && this.prop.canvas || this.toCanvas(); }
   ];
 
   // Fulfill prereqs then create the image.
@@ -213,6 +223,9 @@ Worker.prototype.toPdf = function toPdf() {
       this.prop.pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0],
                         this.prop.pageSize.inner.width, pageHeight);
     }
+
+    // Update progress.
+    this.progress.step = 3;
   });
 };
 
@@ -232,7 +245,7 @@ Worker.prototype.output = function output(type, options, src) {
 Worker.prototype.outputPdf = function outputPdf(type, options) {
   // Set up function prerequisites.
   var prereqs = [
-    function checkPdf() { return this.prop.pdf || this.toPdf(); }
+    function checkPdf() { return this.progress.step >= 3 && this.prop.pdf || this.toPdf(); }
   ];
 
   // Fulfill prereqs then perform the appropriate output.
@@ -249,7 +262,7 @@ Worker.prototype.outputPdf = function outputPdf(type, options) {
 Worker.prototype.outputImg = function outputImg(type, options) {
   // Set up function prerequisites.
   var prereqs = [
-    function checkImg() { return this.prop.img || this.toImg(); }
+    function checkImg() { return this.progress.step >= 3 && this.prop.img || this.toImg(); }
   ];
 
   // Fulfill prereqs then perform the appropriate output.
@@ -273,7 +286,7 @@ Worker.prototype.outputImg = function outputImg(type, options) {
 Worker.prototype.save = function save(filename) {
   // Set up function prerequisites.
   var prereqs = [
-    function checkPdf() { return this.prop.pdf || this.toPdf(); }
+    function checkPdf() { return this.progress.step >= 3 && this.prop.pdf || this.toPdf(); }
   ];
 
   // Fulfill prereqs, update the filename (if provided), and save the PDF.
