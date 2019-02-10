@@ -33,7 +33,6 @@ Worker.template = {
     container: null,
     overlay: null,
     canvas: null,
-    img: null,
     pdf: null,
     pageSize: null
   },
@@ -71,7 +70,6 @@ Worker.prototype.from = function from(src, type) {
       case 'string':  return this.set({ src: createElement('div', {innerHTML: src}) });
       case 'element': return this.set({ src: src });
       case 'canvas':  return this.set({ canvas: src });
-      case 'img':     return this.set({ img: src });
       default:        return this.error('Unknown source type.');
     }
   });
@@ -84,8 +82,6 @@ Worker.prototype.to = function to(target) {
       return this.toContainer();
     case 'canvas':
       return this.toCanvas();
-    case 'img':
-      return this.toImg();
     case 'pdf':
       return this.toPdf();
     default:
@@ -156,23 +152,6 @@ Worker.prototype.toCanvas = function toCanvas() {
   });
 };
 
-Worker.prototype.toImg = function toImg() {
-  // Set up function prerequisites.
-  var prereqs = [
-    function checkCanvas() { return this.progress.step >= 2 && this.prop.canvas || this.toCanvas(); }
-  ];
-
-  // Fulfill prereqs then create the image.
-  return this.thenList(prereqs).then(function toImg_main() {
-    var imgData = this.prop.canvas.toDataURL('image/' + this.opt.image.type, this.opt.image.quality);
-    this.prop.img = document.createElement('img');
-    this.prop.img.src = imgData;
-
-    // Update progress.
-    this.progress.step = 3;
-  });
-};
-
 Worker.prototype.toPdf = function toPdf() {
   // Set up function prerequisites.
   var prereqs = [
@@ -232,17 +211,7 @@ Worker.prototype.toPdf = function toPdf() {
 
 /* ----- OUTPUT / SAVE ----- */
 
-Worker.prototype.output = function output(type, options, src) {
-  // Redirect requests to the correct function (outputPdf / outputImg).
-  src = src || 'pdf';
-  if (src.toLowerCase() === 'img' || src.toLowerCase() === 'image') {
-    return this.outputImg(type, options);
-  } else {
-    return this.outputPdf(type, options);
-  }
-};
-
-Worker.prototype.outputPdf = function outputPdf(type, options) {
+Worker.prototype.output = function output(type, options) {
   // Set up function prerequisites.
   var prereqs = [
     function checkPdf() { return this.progress.step >= 3 && this.prop.pdf || this.toPdf(); }
@@ -256,30 +225,6 @@ Worker.prototype.outputPdf = function outputPdf(type, options) {
      *  datauristring/dataurlstring, dataurlnewwindow, datauri/dataurl
      */
     return this.prop.pdf.output(type, options);
-  });
-};
-
-Worker.prototype.outputImg = function outputImg(type, options) {
-  // Set up function prerequisites.
-  var prereqs = [
-    function checkImg() { return this.progress.step >= 3 && this.prop.img || this.toImg(); }
-  ];
-
-  // Fulfill prereqs then perform the appropriate output.
-  return this.thenList(prereqs).then(function outputImg_main() {
-    switch (type) {
-      case undefined:
-      case 'img':
-        return this.prop.img;
-      case 'datauristring':
-      case 'dataurlstring':
-        return this.prop.img.src;
-      case 'datauri':
-      case 'dataurl':
-        return document.location.href = this.prop.img.src;
-      default:
-        throw 'Image output type "' + type + '" is not supported.';
-    }
   });
 };
 
@@ -485,6 +430,7 @@ Worker.prototype.using = Worker.prototype.set;
 Worker.prototype.saveAs = Worker.prototype.save;
 Worker.prototype.export = Worker.prototype.output;
 Worker.prototype.run = Worker.prototype.then;
+Worker.prototype.outputPdf = Worker.prototype.output;
 
 
 /* ----- FINISHING ----- */
