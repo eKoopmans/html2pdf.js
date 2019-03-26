@@ -247,8 +247,17 @@ If you want to create a new feature or bugfix, please feel free to fork and subm
 
 [Erik Koopmans](https://github.com/eKoopmans)
 
+### Contributors
+
+@WilcoBreedt
+@Ranger1230
+
+### Thank you
+
+[Sauce Labs](https://saucelabs.com/) for unit testing.
+
 ## License
 
 [The MIT License](http://opensource.org/licenses/MIT)
 
-Copyright (c) 2017 Erik Koopmans <[http://www.erik-koopmans.com/](http://www.erik-koopmans.com/)>
+Copyright (c) 2017-2019 Erik Koopmans <[http://www.erik-koopmans.com/](http://www.erik-koopmans.com/)>
