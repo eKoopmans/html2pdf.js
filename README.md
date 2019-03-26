@@ -247,14 +247,14 @@ If you want to create a new feature or bugfix, please feel free to fork and subm
 
 [Erik Koopmans](https://github.com/eKoopmans)
 
-### Contributors
+#### Contributors
 
-@WilcoBreedt
-@Ranger1230
+- [@WilcoBreedt](https://github.com/WilcoBreedt)
+- [@Ranger1230](https://github.com/Ranger1230)
 
-### Thank you
+#### Special thanks
 
-[Sauce Labs](https://saucelabs.com/) for unit testing.
+- [Sauce Labs](https://saucelabs.com/) for unit testing.
 
 ## License
 
