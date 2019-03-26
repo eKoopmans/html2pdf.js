@@ -1,6 +1,6 @@
-# html2pdf
+# html2pdf.js
 
-html2pdf converts any webpage or element into a printable PDF entirely client-side using [html2canvas](https://github.com/niklasvh/html2canvas) and [jsPDF](https://github.com/MrRio/jsPDF).
+html2pdf.js converts any webpage or element into a printable PDF entirely client-side using [html2canvas](https://github.com/niklasvh/html2canvas) and [jsPDF](https://github.com/MrRio/jsPDF).
 
 ## Table of contents
 
@@ -32,7 +32,7 @@ html2pdf converts any webpage or element into a printable PDF entirely client-si
 
 #### HTML
 
-The simplest way to use html2pdf is to download `dist/html2pdf.bundle.min.js` to your project folder and include it in your HTML with:
+The simplest way to use html2pdf.js is to download `dist/html2pdf.bundle.min.js` to your project folder and include it in your HTML with:
 
 ```html
 <script src="html2pdf.bundle.min.js"></script>
@@ -42,17 +42,17 @@ The simplest way to use html2pdf is to download `dist/html2pdf.bundle.min.js` to
 
 #### NPM
 
-Install html2pdf and its dependencies using NPM with `npm install --save html2pdf.js` (make sure to include `.js` in the package name).
+Install html2pdf.js and its dependencies using NPM with `npm install --save html2pdf.js` (make sure to include `.js` in the package name).
 
-*Note: You can use NPM to create your project, but html2pdf **will not run in Node.js**, it must be run in a browser.*
+*Note: You can use NPM to create your project, but html2pdf.js **will not run in Node.js**, it must be run in a browser.*
 
 #### Bower
 
-Install html2pdf and its dependencies using Bower with `bower install --save html2pdf.js` (make sure to include `.js` in the package name).
+Install html2pdf.js and its dependencies using Bower with `bower install --save html2pdf.js` (make sure to include `.js` in the package name).
 
 #### Console
 
-If you're on a webpage that you can't modify directly and wish to use html2pdf to capture a screenshot, you can follow these steps:
+If you're on a webpage that you can't modify directly and wish to use html2pdf.js to capture a screenshot, you can follow these steps:
 
 1. Open your browser's console (instructions for different browsers [here](https://webmasters.stackexchange.com/a/77337/94367)).
 2. Paste in this code:
@@ -65,11 +65,11 @@ If you're on a webpage that you can't modify directly and wish to use html2pdf t
     }
     addScript('https://raw.githack.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js');
     ```
-3. You may now execute html2pdf commands directly from the console. To capture a default PDF of the entire page, use `html2pdf(document.body)`.
+3. You may now execute html2pdf.js commands directly from the console. To capture a default PDF of the entire page, use `html2pdf(document.body)`.
 
 ## Usage
 
-Once installed, html2pdf is ready to use. The following command will generate a PDF of `#element-to-print` and prompt the user to save the result:
+Once installed, html2pdf.js is ready to use. The following command will generate a PDF of `#element-to-print` and prompt the user to save the result:
 
 ```js
 var element = document.getElementById('element-to-print');
@@ -78,7 +78,7 @@ html2pdf(element);
 
 ### Advanced usage
 
-Every step of html2pdf is configurable, using its new Promise-based API. If html2pdf is called without arguments, it will return a `Worker` object:
+Every step of html2pdf.js is configurable, using its new Promise-based API. If html2pdf.js is called without arguments, it will return a `Worker` object:
 
 ```js
 var worker = html2pdf();  // Or:  var worker = new html2pdf.Worker;
@@ -93,7 +93,7 @@ var worker = html2pdf().from(element).save();
 
 #### Workflow
 
-The basic workflow of html2pdf tasks (enforced by the prereq system) is:
+The basic workflow of html2pdf.js tasks (enforced by the prereq system) is:
 
 ```
 .from() -> .toContainer() -> .toCanvas() -> .toImg() -> .toPdf() -> .save()
@@ -128,7 +128,7 @@ A few aliases are also provided for convenience:
 
 ## Options
 
-html2pdf can be configured using an optional `opt` parameter:
+html2pdf.js can be configured using an optional `opt` parameter:
 
 ```js
 var element = document.getElementById('element-to-print');
@@ -161,9 +161,9 @@ The `opt` parameter has the following optional fields:
 
 ### Page-breaks
 
-html2pdf has the ability to automatically add page-breaks to clean up your document. Page-breaks can be added by CSS styles, set on individual elements using selectors, or avoided from breaking inside all elements (`avoid-all` mode).
+html2pdf.js has the ability to automatically add page-breaks to clean up your document. Page-breaks can be added by CSS styles, set on individual elements using selectors, or avoided from breaking inside all elements (`avoid-all` mode).
 
-By default, html2pdf will respect most CSS [`break-before`](https://developer.mozilla.org/en-US/docs/Web/CSS/break-before), [`break-after`](https://developer.mozilla.org/en-US/docs/Web/CSS/break-after), and [`break-inside`](https://developer.mozilla.org/en-US/docs/Web/CSS/break-inside) rules, and also add page-breaks after any element with class `html2pdf__page-break` (for legacy purposes).
+By default, html2pdf.js will respect most CSS [`break-before`](https://developer.mozilla.org/en-US/docs/Web/CSS/break-before), [`break-after`](https://developer.mozilla.org/en-US/docs/Web/CSS/break-after), and [`break-inside`](https://developer.mozilla.org/en-US/docs/Web/CSS/break-inside) rules, and also add page-breaks after any element with class `html2pdf__page-break` (for legacy purposes).
 
 #### Page-break settings
 
@@ -218,7 +218,7 @@ The Worker object returned by `html2pdf()` has a built-in progress-tracking mech
 
 ## Dependencies
 
-html2pdf depends on the external packages [html2canvas](https://github.com/niklasvh/html2canvas), [jsPDF](https://github.com/MrRio/jsPDF), and [es6-promise](https://github.com/stefanpenner/es6-promise). These dependencies are automatically loaded when using NPM or the bundled package.
+html2pdf.js depends on the external packages [html2canvas](https://github.com/niklasvh/html2canvas), [jsPDF](https://github.com/MrRio/jsPDF), and [es6-promise](https://github.com/stefanpenner/es6-promise). These dependencies are automatically loaded when using NPM or the bundled package.
 
 If using the unbundled `dist/html2pdf.min.js` (or its un-minified version), you must also include each dependency. Order is important, otherwise html2canvas will be overridden by jsPDF's own internal implementation:
 
@@ -233,11 +233,11 @@ If using the unbundled `dist/html2pdf.min.js` (or its un-minified version), you 
 
 ### Issues
 
-When submitting an issue, please provide reproducible code that highlights the issue, preferably by creating a fork of [this template jsFiddle](https://jsfiddle.net/u6o6ne41/) (which has html2pdf already loaded). Remember that html2pdf uses [html2canvas](https://github.com/niklasvh/html2canvas) and [jsPDF](https://github.com/MrRio/jsPDF) as dependencies, so it's a good idea to check each of those repositories' issue trackers to see if your problem has already been addressed.
+When submitting an issue, please provide reproducible code that highlights the issue, preferably by creating a fork of [this template jsFiddle](https://jsfiddle.net/u6o6ne41/) (which has html2pdf.js already loaded). Remember that html2pdf.js uses [html2canvas](https://github.com/niklasvh/html2canvas) and [jsPDF](https://github.com/MrRio/jsPDF) as dependencies, so it's a good idea to check each of those repositories' issue trackers to see if your problem has already been addressed.
 
 ### Tests
 
-html2pdf is currently sorely lacking in unit tests. Any contributions or suggestions of automated (or manual) tests are welcome. This is high on the to-do list for this project.
+html2pdf.js is currently sorely lacking in unit tests. Any contributions or suggestions of automated (or manual) tests are welcome. This is high on the to-do list for this project.
 
 ### Pull requests
 
