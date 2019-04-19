@@ -60,7 +60,7 @@
   "scripts": {
     "build": "rollup -c",
     "clean": "rimraf dist",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npx karma start karma.conf.js",
     "stage-release": "gulp stage-release --newversion",
     "release": "gulp release --tagmessage",
     "publish": "npm publish",
