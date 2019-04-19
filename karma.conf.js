@@ -1,5 +1,13 @@
 // Karma configuration
 
+// Load Rollup dependencies
+const rollupConfig = {
+  resolve: require('rollup-plugin-node-resolve'),
+  commonjs: require('rollup-plugin-commonjs'),
+  replace: require('rollup-plugin-replace'),
+  babel: require('rollup-plugin-babel')
+}
+
 module.exports = function(config) {
   config.set({
 
@@ -14,7 +22,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'dist/html2pdf.bundle.js',
+      { pattern: 'src/index.js', watched: false },
       'test/**/*.js'
     ],
 
@@ -28,6 +36,7 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
+      'src/index.js': ['rollup']
     },
 
 
@@ -65,6 +74,27 @@ module.exports = function(config) {
 
     // Concurrency level
     // how many browser should be started simultaneous
-    concurrency: Infinity
+    concurrency: Infinity,
+
+
+    // Rollup preprocessor
+    // Setup as a normal Rollup config object, just without the input
+    // It has its own autoWatch behaviour, so Karma's file watcher must be disabled on its files
+    rollupPreprocessor: {
+      output: {
+        name: 'html2pdf',
+        format: 'iife',
+        globals: {
+          jspdf: 'jsPDF',
+          html2canvas: 'html2canvas'
+        }
+      },
+      plugins: [
+        rollupConfig.resolve(),
+        rollupConfig.commonjs(),
+        rollupConfig.replace({ 'process.env.NODE_ENV': JSON.stringify('production') }),
+        rollupConfig.babel({ exclude: 'node_modules/**' })
+      ]
+    }
   })
 }
