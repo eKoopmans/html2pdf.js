@@ -200,6 +200,10 @@ Worker.prototype.toPdf = function toPdf() {
         pageHeight = pageCanvas.height * this.prop.pageSize.inner.width / pageCanvas.width;
       }
 
+      if (pageHeight === 0) {
+        continue;
+      }
+
       // Display the page.
       var w = pageCanvas.width;
       var h = pageCanvas.height;
