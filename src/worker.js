@@ -308,9 +308,11 @@ Worker.prototype.set = function set(opt) {
           case 'pageSize':
             return this.setPageSize.bind(this, opt.pageSize);
           case 'html2canvas':
-            return Object.keys(opt[key] || {}).map(function (h2cKey) {
-              return this.opt['html2canvas'][h2cKey] = opt[key][h2cKey];
-            });
+            return function set_html2canvas() {
+              Object.keys(opt.html2canvas || {}).map(function (key) {
+                return this.opt.html2canvas[key] = opt.html2canvas[key];
+              }, this);
+            };
           default:
             // Set any other properties in opt.
             return function set_opt() { this.opt[key] = opt[key] };
