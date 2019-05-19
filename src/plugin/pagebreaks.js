@@ -25,7 +25,7 @@ import { objType, createElement } from '../utils.js';
 
 // Refs to original functions.
 var orig = {
-  toContainer: Worker.prototype.toContainer
+  toCanvas: Worker.prototype.toCanvas
 };
 
 // Add pagebreak default options to the Worker template.
@@ -36,10 +36,17 @@ Worker.template.opt.pagebreak = {
   avoid: []
 };
 
-Worker.prototype.toContainer = function toContainer() {
-  return orig.toContainer.call(this).then(function toContainer_pagebreak() {
+Worker.prototype.toCanvas = function toCanvas() {
+  return this.then(function toCanvas_pagebreak() {
+    // Attach extra behaviour to the html2canvas onclone property.
+    var oncloneOrig = this.opt.html2canvas.onclone || function () {};
+    this.opt.html2canvas.onclone = onclone_pagebreak.bind(this, oncloneOrig);
+  }).then(orig.toCanvas.bind(this));
+};
+
+function onclone_pagebreak(oncloneOrig, doc) {
     // Setup root element and inner page height.
-    var root = this.prop.container;
+    var root = doc.body;
     var pxPageHeight = this.prop.pageSize.inner.px.height;
 
     // Check all requested modes.
@@ -130,5 +137,7 @@ Worker.prototype.toContainer = function toContainer() {
         el.parentNode.insertBefore(pad, el.nextSibling);
       }
     });
-  });
-};
+
+    // Call the original onclone callback.
+    oncloneOrig(doc);
+}

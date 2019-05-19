@@ -6,16 +6,23 @@ import { unitConvert } from '../utils.js';
 // Main link array, and refs to original functions.
 var linkInfo = [];
 var orig = {
-  toContainer: Worker.prototype.toContainer,
+  toCanvas: Worker.prototype.toCanvas,
   toPdf: Worker.prototype.toPdf,
 };
 
-Worker.prototype.toContainer = function toContainer() {
-  return orig.toContainer.call(this).then(function toContainer_hyperlink() {
+Worker.prototype.toCanvas = function toCanvas() {
+  return this.then(function toCanvas_hyperlink() {
+    // Attach extra behaviour to the html2canvas onclone property.
+    var oncloneOrig = this.opt.html2canvas.onclone || function () {};
+    this.opt.html2canvas.onclone = onclone_hyperlink.bind(this, oncloneOrig);
+  }).then(orig.toCanvas.bind(this));
+};
+
+function onclone_hyperlink(oncloneOrig, doc) {
     // Retrieve hyperlink info if the option is enabled.
     if (this.opt.enableLinks) {
       // Find all anchor tags and get the container's bounds for reference.
-      var container = this.prop.container;
+      var container = doc.body;
       var links = container.querySelectorAll('a');
       var containerRect = unitConvert(container.getBoundingClientRect(), this.prop.pageSize.k);
       linkInfo = [];
@@ -37,14 +44,16 @@ Worker.prototype.toContainer = function toContainer() {
         }
       }, this);
     }
-  });
-};
+
+    // Call the original onclone callback.
+    oncloneOrig(doc);
+}
 
 Worker.prototype.toPdf = function toPdf() {
   return orig.toPdf.call(this).then(function toPdf_hyperlink() {
     // Add hyperlinks if the option is enabled.
     if (this.opt.enableLinks) {
-      // Attach each anchor tag based on info from toContainer().
+      // Attach each anchor tag based on info from the cloned document.
       linkInfo.forEach(function(l) {
         this.prop.pdf.setPage(l.page);
         this.prop.pdf.link(l.left, l.top, l.clientRect.width, l.clientRect.height,
