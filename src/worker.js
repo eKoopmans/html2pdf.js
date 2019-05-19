@@ -104,11 +104,11 @@ Worker.prototype.toCanvas = function toCanvas() {
     // Alter html2canvas options for reflow behaviour.
     var src = this.prop.src;
     var ignoreElements_orig = options.ignoreElements || function () {};
-    options.ignoreElements = function (element) {
+    options.ignoreElements = function (el) {
       // List of metadata tags:   https://www.w3schools.com/html/html_head.asp
       var metaTags = ['HEAD', 'TITLE', 'BASE', 'LINK', 'META', 'SCRIPT', 'STYLE'];
       var toClone = metaTags.indexOf(el.tagName) !== -1 || el.contains(src) || src.contains(el);
-      return !toClone || ignoreElement_orig(element);
+      return !toClone || ignoreElements_orig(el);
     }
     options.windowWidth = this.prop.pageSize.inner.px.width;
     options.width = options.windowWidth;
