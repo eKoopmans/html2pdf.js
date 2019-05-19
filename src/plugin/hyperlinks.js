@@ -19,34 +19,34 @@ Worker.prototype.toCanvas = function toCanvas() {
 };
 
 function onclone_hyperlink(oncloneOrig, doc) {
-    // Retrieve hyperlink info if the option is enabled.
-    if (this.opt.enableLinks) {
-      // Find all anchor tags and get the container's bounds for reference.
-      var container = doc.body;
-      var links = container.querySelectorAll('a');
-      var containerRect = unitConvert(container.getBoundingClientRect(), this.prop.pageSize.k);
-      linkInfo = [];
+  // Retrieve hyperlink info if the option is enabled.
+  if (this.opt.enableLinks) {
+    // Find all anchor tags and get the container's bounds for reference.
+    var container = doc.body;
+    var links = container.querySelectorAll('a');
+    var containerRect = unitConvert(container.getBoundingClientRect(), this.prop.pageSize.k);
+    linkInfo = [];
 
-      // Loop through each anchor tag.
-      Array.prototype.forEach.call(links, function(link) {
-        // Treat each client rect as a separate link (for text-wrapping).
-        var clientRects = link.getClientRects();
-        for (var i=0; i<clientRects.length; i++) {
-          var clientRect = unitConvert(clientRects[i], this.prop.pageSize.k);
-          clientRect.left -= containerRect.left;
-          clientRect.top -= containerRect.top;
+    // Loop through each anchor tag.
+    Array.prototype.forEach.call(links, function(link) {
+      // Treat each client rect as a separate link (for text-wrapping).
+      var clientRects = link.getClientRects();
+      for (var i=0; i<clientRects.length; i++) {
+        var clientRect = unitConvert(clientRects[i], this.prop.pageSize.k);
+        clientRect.left -= containerRect.left;
+        clientRect.top -= containerRect.top;
 
-          var page = Math.floor(clientRect.top / this.prop.pageSize.inner.height) + 1;
-          var top = this.opt.margin[0] + clientRect.top % this.prop.pageSize.inner.height;
-          var left = this.opt.margin[1] + clientRect.left;
+        var page = Math.floor(clientRect.top / this.prop.pageSize.inner.height) + 1;
+        var top = this.opt.margin[0] + clientRect.top % this.prop.pageSize.inner.height;
+        var left = this.opt.margin[1] + clientRect.left;
 
-          linkInfo.push({ page, top, left, clientRect, link });
-        }
-      }, this);
-    }
+        linkInfo.push({ page, top, left, clientRect, link });
+      }
+    }, this);
+  }
 
-    // Call the original onclone callback.
-    oncloneOrig(doc);
+  // Call the original onclone callback.
+  oncloneOrig(doc);
 }
 
 Worker.prototype.toPdf = function toPdf() {
