@@ -1,6 +1,6 @@
 /**
  * html2pdf.js v0.9.1
- * Copyright (c) 2018 Erik Koopmans
+ * Copyright (c) 2019 Erik Koopmans
  * Released under the MIT License.
  */
 import 'es6-promise/auto';
@@ -71,35 +71,7 @@ var createElement = function createElement(tagName, opt) {
 };
 
 // Deep-clone a node and preserve contents/properties.
-var cloneNode = function cloneNode(node, javascriptEnabled) {
-  // Recursively clone the node.
-  var clone = node.nodeType === 3 ? document.createTextNode(node.nodeValue) : node.cloneNode(false);
-  for (var child = node.firstChild; child; child = child.nextSibling) {
-    if (javascriptEnabled === true || child.nodeType !== 1 || child.nodeName !== 'SCRIPT') {
-      clone.appendChild(cloneNode(child, javascriptEnabled));
-    }
-  }
 
-  if (node.nodeType === 1) {
-    // Preserve contents/properties of special nodes.
-    if (node.nodeName === 'CANVAS') {
-      clone.width = node.width;
-      clone.height = node.height;
-      clone.getContext('2d').drawImage(node, 0, 0);
-    } else if (node.nodeName === 'TEXTAREA' || node.nodeName === 'SELECT') {
-      clone.value = node.value;
-    }
-
-    // Preserve the node's scroll position when it loads.
-    clone.addEventListener('load', function () {
-      clone.scrollTop = node.scrollTop;
-      clone.scrollLeft = node.scrollLeft;
-    }, true);
-  }
-
-  // Return the cloned node.
-  return clone;
-};
 
 // Convert units from px using the conversion value 'k' from jsPDF.
 var unitConvert = function unitConvert(obj, k) {
@@ -146,8 +118,6 @@ Worker.convert = function convert(promise, inherit) {
 Worker.template = {
   prop: {
     src: null,
-    container: null,
-    overlay: null,
     canvas: null,
     img: null,
     pdf: null,
@@ -203,8 +173,6 @@ Worker.prototype.from = function from(src, type) {
 Worker.prototype.to = function to(target) {
   // Route the 'to' request to the appropriate method.
   switch (target) {
-    case 'container':
-      return this.toContainer();
     case 'canvas':
       return this.toCanvas();
     case 'img':
@@ -216,44 +184,12 @@ Worker.prototype.to = function to(target) {
   }
 };
 
-Worker.prototype.toContainer = function toContainer() {
+Worker.prototype.toCanvas = function toCanvas() {
   // Set up function prerequisites.
   var prereqs = [function checkSrc() {
     return this.prop.src || this.error('Cannot duplicate - no source HTML.');
   }, function checkPageSize() {
     return this.prop.pageSize || this.setPageSize();
-  }];
-
-  return this.thenList(prereqs).then(function toContainer_main() {
-    // Define the CSS styles for the container and its overlay parent.
-    var overlayCSS = {
-      position: 'fixed', overflow: 'hidden', zIndex: 1000,
-      left: 0, right: 0, bottom: 0, top: 0,
-      backgroundColor: 'rgba(0,0,0,0.8)'
-    };
-    var containerCSS = {
-      position: 'absolute', width: this.prop.pageSize.inner.width + this.prop.pageSize.unit,
-      left: 0, right: 0, top: 0, height: 'auto', margin: 'auto',
-      backgroundColor: 'white'
-    };
-
-    // Set the overlay to hidden (could be changed in the future to provide a print preview).
-    overlayCSS.opacity = 0;
-
-    // Create and attach the elements.
-    var source = cloneNode(this.prop.src, this.opt.html2canvas.javascriptEnabled);
-    this.prop.overlay = createElement('div', { className: 'html2pdf__overlay', style: overlayCSS });
-    this.prop.container = createElement('div', { className: 'html2pdf__container', style: containerCSS });
-    this.prop.container.appendChild(source);
-    this.prop.overlay.appendChild(this.prop.container);
-    document.body.appendChild(this.prop.overlay);
-  });
-};
-
-Worker.prototype.toCanvas = function toCanvas() {
-  // Set up function prerequisites.
-  var prereqs = [function checkContainer() {
-    return document.body.contains(this.prop.container) || this.toContainer();
   }];
 
   // Fulfill prereqs then create the canvas.
@@ -262,14 +198,25 @@ Worker.prototype.toCanvas = function toCanvas() {
     var options = _extends({}, this.opt.html2canvas);
     delete options.onrendered;
 
-    return html2canvas(this.prop.container, options);
+    // Alter html2canvas options for reflow behaviour.
+    var src = this.prop.src;
+    var ignoreElements_orig = options.ignoreElements || function () {};
+    options.ignoreElements = function (el) {
+      // List of metadata tags:   https://www.w3schools.com/html/html_head.asp
+      var metaTags = ['HEAD', 'TITLE', 'BASE', 'LINK', 'META', 'SCRIPT', 'STYLE'];
+      var toClone = metaTags.indexOf(el.tagName) !== -1 || el.contains(src) || src.contains(el);
+      return !toClone || ignoreElements_orig(el);
+    };
+    options.windowWidth = this.prop.pageSize.inner.px.width;
+    options.width = options.windowWidth;
+
+    return html2canvas(src, options);
   }).then(function toCanvas_post(canvas) {
     // Handle old-fashioned 'onrendered' argument.
     var onRendered = this.opt.html2canvas.onrendered || function () {};
     onRendered(canvas);
 
     this.prop.canvas = canvas;
-    document.body.removeChild(this.prop.overlay);
   });
 };
 
@@ -319,7 +266,7 @@ Worker.prototype.toPdf = function toPdf() {
 
     for (var page = 0; page < nPages; page++) {
       // Trim the final page to reduce file size.
-      if (page === nPages - 1) {
+      if (page === nPages - 1 && pxFullHeight % pxPageHeight !== 0) {
         pageCanvas.height = pxFullHeight % pxPageHeight;
         pageHeight = pageCanvas.height * this.prop.pageSize.inner.width / pageCanvas.width;
       }
@@ -727,7 +674,7 @@ jsPDF.getPageSize = function (orientation, unit, format) {
 
 // Refs to original functions.
 var orig = {
-  toContainer: Worker.prototype.toContainer
+  toCanvas: Worker.prototype.toCanvas
 };
 
 // Add pagebreak default options to the Worker template.
@@ -738,146 +685,164 @@ Worker.template.opt.pagebreak = {
   avoid: []
 };
 
-Worker.prototype.toContainer = function toContainer() {
-  return orig.toContainer.call(this).then(function toContainer_pagebreak() {
-    // Setup root element and inner page height.
-    var root = this.prop.container;
-    var pxPageHeight = this.prop.pageSize.inner.px.height;
+Worker.prototype.toCanvas = function toCanvas() {
+  return this.then(function toCanvas_pagebreak() {
+    // Attach extra behaviour to the html2canvas onclone property.
+    var oncloneOrig = this.opt.html2canvas.onclone || function () {};
+    this.opt.html2canvas.onclone = onclone_pagebreak.bind(this, oncloneOrig);
+  }).then(orig.toCanvas.bind(this));
+};
 
-    // Check all requested modes.
-    var modeSrc = [].concat(this.opt.pagebreak.mode);
-    var mode = {
-      avoidAll: modeSrc.indexOf('avoid-all') !== -1,
-      css: modeSrc.indexOf('css') !== -1,
-      legacy: modeSrc.indexOf('legacy') !== -1
+function onclone_pagebreak(oncloneOrig, doc) {
+  // Setup root element and inner page height.
+  var root = doc.body;
+  var pxPageHeight = this.prop.pageSize.inner.px.height;
+
+  // Check all requested modes.
+  var modeSrc = [].concat(this.opt.pagebreak.mode);
+  var mode = {
+    avoidAll: modeSrc.indexOf('avoid-all') !== -1,
+    css: modeSrc.indexOf('css') !== -1,
+    legacy: modeSrc.indexOf('legacy') !== -1
+  };
+
+  // Get arrays of all explicitly requested elements.
+  var select = {};
+  var self = this;
+  ['before', 'after', 'avoid'].forEach(function (key) {
+    var all = mode.avoidAll && key === 'avoid';
+    select[key] = all ? [] : [].concat(self.opt.pagebreak[key] || []);
+    if (select[key].length > 0) {
+      select[key] = Array.prototype.slice.call(root.querySelectorAll(select[key].join(', ')));
+    }
+  });
+
+  // Get all legacy page-break elements.
+  var legacyEls = root.querySelectorAll('.html2pdf__page-break');
+  legacyEls = Array.prototype.slice.call(legacyEls);
+
+  // Loop through all elements.
+  var els = root.querySelectorAll('*');
+  Array.prototype.forEach.call(els, function pagebreak_loop(el) {
+    // Setup pagebreak rules based on legacy and avoidAll modes.
+    var rules = {
+      before: false,
+      after: mode.legacy && legacyEls.indexOf(el) !== -1,
+      avoid: mode.avoidAll
     };
 
-    // Get arrays of all explicitly requested elements.
-    var select = {};
-    var self = this;
-    ['before', 'after', 'avoid'].forEach(function (key) {
-      var all = mode.avoidAll && key === 'avoid';
-      select[key] = all ? [] : [].concat(self.opt.pagebreak[key] || []);
-      if (select[key].length > 0) {
-        select[key] = Array.prototype.slice.call(root.querySelectorAll(select[key].join(', ')));
-      }
-    });
-
-    // Get all legacy page-break elements.
-    var legacyEls = root.querySelectorAll('.html2pdf__page-break');
-    legacyEls = Array.prototype.slice.call(legacyEls);
-
-    // Loop through all elements.
-    var els = root.querySelectorAll('*');
-    Array.prototype.forEach.call(els, function pagebreak_loop(el) {
-      // Setup pagebreak rules based on legacy and avoidAll modes.
-      var rules = {
-        before: false,
-        after: mode.legacy && legacyEls.indexOf(el) !== -1,
-        avoid: mode.avoidAll
+    // Add rules for css mode.
+    if (mode.css) {
+      // TODO: Check if this is valid with iFrames.
+      var style = window.getComputedStyle(el);
+      // TODO: Handle 'left' and 'right' correctly.
+      // TODO: Add support for 'avoid' on breakBefore/After.
+      var breakOpt = ['always', 'page', 'left', 'right'];
+      var avoidOpt = ['avoid', 'avoid-page'];
+      rules = {
+        before: rules.before || breakOpt.indexOf(style.breakBefore || style.pageBreakBefore) !== -1,
+        after: rules.after || breakOpt.indexOf(style.breakAfter || style.pageBreakAfter) !== -1,
+        avoid: rules.avoid || avoidOpt.indexOf(style.breakInside || style.pageBreakInside) !== -1
       };
+    }
 
-      // Add rules for css mode.
-      if (mode.css) {
-        // TODO: Check if this is valid with iFrames.
-        var style = window.getComputedStyle(el);
-        // TODO: Handle 'left' and 'right' correctly.
-        // TODO: Add support for 'avoid' on breakBefore/After.
-        var breakOpt = ['always', 'page', 'left', 'right'];
-        var avoidOpt = ['avoid', 'avoid-page'];
-        rules = {
-          before: rules.before || breakOpt.indexOf(style.breakBefore || style.pageBreakBefore) !== -1,
-          after: rules.after || breakOpt.indexOf(style.breakAfter || style.pageBreakAfter) !== -1,
-          avoid: rules.avoid || avoidOpt.indexOf(style.breakInside || style.pageBreakInside) !== -1
-        };
-      }
-
-      // Add rules for explicit requests.
-      Object.keys(rules).forEach(function (key) {
-        rules[key] = rules[key] || select[key].indexOf(el) !== -1;
-      });
-
-      // Get element position on the screen.
-      // TODO: Subtract the top of the container from clientRect.top/bottom?
-      var clientRect = el.getBoundingClientRect();
-
-      // Avoid: Check if a break happens mid-element.
-      if (rules.avoid && !rules.before) {
-        var startPage = Math.floor(clientRect.top / pxPageHeight);
-        var endPage = Math.floor(clientRect.bottom / pxPageHeight);
-        var nPages = Math.abs(clientRect.bottom - clientRect.top) / pxPageHeight;
-
-        // Turn on rules.before if the el is broken and is at most one page long.
-        if (endPage !== startPage && nPages <= 1) {
-          rules.before = true;
-        }
-      }
-
-      // Before: Create a padding div to push the element to the next page.
-      if (rules.before) {
-        var pad = createElement('div', { style: {
-            display: 'block',
-            height: pxPageHeight - clientRect.top % pxPageHeight + 'px'
-          } });
-        el.parentNode.insertBefore(pad, el);
-      }
-
-      // After: Create a padding div to fill the remaining page.
-      if (rules.after) {
-        var pad = createElement('div', { style: {
-            display: 'block',
-            height: pxPageHeight - clientRect.bottom % pxPageHeight + 'px'
-          } });
-        el.parentNode.insertBefore(pad, el.nextSibling);
-      }
+    // Add rules for explicit requests.
+    Object.keys(rules).forEach(function (key) {
+      rules[key] = rules[key] || select[key].indexOf(el) !== -1;
     });
+
+    // Get element position on the screen.
+    // TODO: Subtract the top of the container from clientRect.top/bottom?
+    var clientRect = el.getBoundingClientRect();
+
+    // Avoid: Check if a break happens mid-element.
+    if (rules.avoid && !rules.before) {
+      var startPage = Math.floor(clientRect.top / pxPageHeight);
+      var endPage = Math.floor(clientRect.bottom / pxPageHeight);
+      var nPages = Math.abs(clientRect.bottom - clientRect.top) / pxPageHeight;
+
+      // Turn on rules.before if the el is broken and is at most one page long.
+      if (endPage !== startPage && nPages <= 1) {
+        rules.before = true;
+      }
+    }
+
+    // Before: Create a padding div to push the element to the next page.
+    if (rules.before) {
+      var pad = createElement('div', { style: {
+          display: 'block',
+          height: pxPageHeight - clientRect.top % pxPageHeight + 'px'
+        } });
+      el.parentNode.insertBefore(pad, el);
+    }
+
+    // After: Create a padding div to fill the remaining page.
+    if (rules.after) {
+      var pad = createElement('div', { style: {
+          display: 'block',
+          height: pxPageHeight - clientRect.bottom % pxPageHeight + 'px'
+        } });
+      el.parentNode.insertBefore(pad, el.nextSibling);
+    }
   });
-};
+
+  // Call the original onclone callback.
+  oncloneOrig(doc);
+}
 
 // Add hyperlink functionality to the PDF creation.
 
 // Main link array, and refs to original functions.
 var linkInfo = [];
 var orig$1 = {
-  toContainer: Worker.prototype.toContainer,
+  toCanvas: Worker.prototype.toCanvas,
   toPdf: Worker.prototype.toPdf
 };
 
-Worker.prototype.toContainer = function toContainer() {
-  return orig$1.toContainer.call(this).then(function toContainer_hyperlink() {
-    // Retrieve hyperlink info if the option is enabled.
-    if (this.opt.enableLinks) {
-      // Find all anchor tags and get the container's bounds for reference.
-      var container = this.prop.container;
-      var links = container.querySelectorAll('a');
-      var containerRect = unitConvert(container.getBoundingClientRect(), this.prop.pageSize.k);
-      linkInfo = [];
-
-      // Loop through each anchor tag.
-      Array.prototype.forEach.call(links, function (link) {
-        // Treat each client rect as a separate link (for text-wrapping).
-        var clientRects = link.getClientRects();
-        for (var i = 0; i < clientRects.length; i++) {
-          var clientRect = unitConvert(clientRects[i], this.prop.pageSize.k);
-          clientRect.left -= containerRect.left;
-          clientRect.top -= containerRect.top;
-
-          var page = Math.floor(clientRect.top / this.prop.pageSize.inner.height) + 1;
-          var top = this.opt.margin[0] + clientRect.top % this.prop.pageSize.inner.height;
-          var left = this.opt.margin[1] + clientRect.left;
-
-          linkInfo.push({ page: page, top: top, left: left, clientRect: clientRect, link: link });
-        }
-      }, this);
-    }
-  });
+Worker.prototype.toCanvas = function toCanvas() {
+  return this.then(function toCanvas_hyperlink() {
+    // Attach extra behaviour to the html2canvas onclone property.
+    var oncloneOrig = this.opt.html2canvas.onclone || function () {};
+    this.opt.html2canvas.onclone = onclone_hyperlink.bind(this, oncloneOrig);
+  }).then(orig$1.toCanvas.bind(this));
 };
+
+function onclone_hyperlink(oncloneOrig, doc) {
+  // Retrieve hyperlink info if the option is enabled.
+  if (this.opt.enableLinks) {
+    // Find all anchor tags and get the container's bounds for reference.
+    var container = doc.body;
+    var links = container.querySelectorAll('a');
+    var containerRect = unitConvert(container.getBoundingClientRect(), this.prop.pageSize.k);
+    linkInfo = [];
+
+    // Loop through each anchor tag.
+    Array.prototype.forEach.call(links, function (link) {
+      // Treat each client rect as a separate link (for text-wrapping).
+      var clientRects = link.getClientRects();
+      for (var i = 0; i < clientRects.length; i++) {
+        var clientRect = unitConvert(clientRects[i], this.prop.pageSize.k);
+        clientRect.left -= containerRect.left;
+        clientRect.top -= containerRect.top;
+
+        var page = Math.floor(clientRect.top / this.prop.pageSize.inner.height) + 1;
+        var top = this.opt.margin[0] + clientRect.top % this.prop.pageSize.inner.height;
+        var left = this.opt.margin[1] + clientRect.left;
+
+        linkInfo.push({ page: page, top: top, left: left, clientRect: clientRect, link: link });
+      }
+    }, this);
+  }
+
+  // Call the original onclone callback.
+  oncloneOrig(doc);
+}
 
 Worker.prototype.toPdf = function toPdf() {
   return orig$1.toPdf.call(this).then(function toPdf_hyperlink() {
     // Add hyperlinks if the option is enabled.
     if (this.opt.enableLinks) {
-      // Attach each anchor tag based on info from toContainer().
+      // Attach each anchor tag based on info from the cloned document.
       linkInfo.forEach(function (l) {
         this.prop.pdf.setPage(l.page);
         this.prop.pdf.link(l.left, l.top, l.clientRect.width, l.clientRect.height, { url: l.link.href });
