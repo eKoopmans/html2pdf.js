@@ -235,6 +235,35 @@ If using the unbundled `dist/html2pdf.min.js` (or its un-minified version), you 
 
 When submitting an issue, please provide reproducible code that highlights the issue, preferably by creating a fork of [this template jsFiddle](https://jsfiddle.net/u6o6ne41/) (which has html2pdf.js already loaded). Remember that html2pdf.js uses [html2canvas](https://github.com/niklasvh/html2canvas) and [jsPDF](https://github.com/MrRio/jsPDF) as dependencies, so it's a good idea to check each of those repositories' issue trackers to see if your problem has already been addressed.
 
+#### Known issues
+
+1. **Rendering:** The rendering engine html2canvas isn't perfect (though it's pretty good!). If html2canvas isn't rendering your content correctly, I can't fix it.
+    - You can test this with something like [this fiddle](https://jsfiddle.net/eKoopmans/z1rupL4c/), to see if there's a problem in the canvas creation itself.
+
+2. **Node cloning (CSS etc):** The way html2pdf.js clones your content before sending to html2canvas is buggy. A fix is currently being developed - try out:
+    - direct file: Go to [html2pdf.js/bugfix/clone-nodes-BUILD](/eKoopmans/html2pdf.js/tree/bugfix/clone-nodes-BUILD) and replace the files in your project with the relevant files (e.g. `dist/html2pdf.bundle.js`)
+    - npm: `npm install eKoopmans/html2pdf.js#bugfix/clone-nodes-BUILD`
+    - Related project: [Bugfix: Cloned nodes](https://github.com/eKoopmans/html2pdf.js/projects/9)
+
+3. **Resizing:** Currently, html2pdf.js resizes the root element to fit onto a PDF page (causing internal content to "reflow").
+    - This is often desired behaviour, but not always.
+    - There are plans to add alternate behaviour (e.g. "shrink-to-page"), but nothing that's ready to test yet.
+    - Related project: [Feature: Single-page PDFs](https://github.com/eKoopmans/html2pdf.js/projects/1)
+
+4. **Rendered as image:** html2pdf.js renders all content into an image, then places that image into a PDF.
+    - This means text is *not selectable or searchable*, and causes large file sizes.
+    - This is currently unavoidable, however recent improvements in jsPDF mean that it may soon be possible to render straight into vector graphics.
+    - Related project: [Feature: New renderer](https://github.com/eKoopmans/html2pdf.js/projects/4)
+
+5. **Promise clashes:** html2pdf.js relies on specific Promise behaviour, and can fail when used with custom Promise libraries.
+    - In the next release, Promises will be sandboxed in html2pdf.js to remove this issue.
+    - Related project: [Bugfix: Sandboxed promises](https://github.com/eKoopmans/html2pdf.js/projects/11)
+
+6. **Maximum size:** HTML5 canvases have a [maximum height/width](https://stackoverflow.com/a/11585939/4080966). Anything larger will fail to render.
+    - This is a limitation of HTML5 itself, and results in large PDFs rendering completely blank in html2pdf.js.
+    - The jsPDF canvas renderer (mentioned in Known Issue #4) may be able to fix this issue!
+    - Related project: [Bugfix: Maximum canvas size](https://github.com/eKoopmans/html2pdf.js/projects/5)
+
 ### Tests
 
 html2pdf.js is currently sorely lacking in unit tests. Any contributions or suggestions of automated (or manual) tests are welcome. This is high on the to-do list for this project.
