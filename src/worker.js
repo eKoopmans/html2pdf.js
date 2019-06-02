@@ -195,7 +195,7 @@ Worker.prototype.toPdf = function toPdf() {
 
     for (var page=0; page<nPages; page++) {
       // Trim the final page to reduce file size.
-      if (page === nPages-1) {
+      if (page === nPages-1 && pxFullHeight % pxPageHeight !== 0) {
         pageCanvas.height = pxFullHeight % pxPageHeight;
         pageHeight = pageCanvas.height * this.prop.pageSize.inner.width / pageCanvas.width;
       }
