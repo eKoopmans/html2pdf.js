@@ -57,7 +57,7 @@ export const cloneNode = function cloneNode(node, javascriptEnabled) {
 
   // Return the cloned node.
   return clone;
-}
+};
 
 // Convert units from px using the conversion value 'k' from jsPDF.
 export const unitConvert = function unitConvert(obj, k) {
@@ -75,4 +75,21 @@ export const unitConvert = function unitConvert(obj, k) {
 // Convert units to px using the conversion value 'k' from jsPDF.
 export const toPx = function toPx(val, k) {
   return Math.floor(val * k / 72 * 96);
-}
+};
+
+export const createIFrameContainer = function createIFrameContainer() {
+  const cloneIframeContainer = document.createElement('iframe');
+
+  cloneIframeContainer.className = 'html2pdf-container';
+  cloneIframeContainer.style.visibility = 'hidden';
+  cloneIframeContainer.style.position = 'fixed';
+  cloneIframeContainer.style.left = '-10000px';
+  cloneIframeContainer.style.top = '0px';
+  cloneIframeContainer.style.border = '0';
+  cloneIframeContainer.width = document.defaultView.innerWidth.toString();
+  cloneIframeContainer.height = document.defaultView.innerHeight.toString();
+  cloneIframeContainer.scrolling = 'no'; // ios won't scroll without it
+
+  return cloneIframeContainer;
+};
+

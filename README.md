@@ -1,6 +1,6 @@
 # html2pdf
 
-html2pdf converts any webpage or element into a printable PDF entirely client-side using [html2canvas](https://github.com/niklasvh/html2canvas) and [jsPDF](https://github.com/MrRio/jsPDF).
+html2pdf converts any webpage or element into a printable PDF entirely client-side using [dom-to-image-more](https://github.com/1904labs/dom-to-image-more) and [jsPDF](https://github.com/MrRio/jsPDF).
 
 ## Table of contents
 
@@ -38,7 +38,7 @@ The simplest way to use html2pdf is to download `dist/html2pdf.bundle.min.js` to
 <script src="html2pdf.bundle.min.js"></script>
 ```
 
-*Note: [Click here](#dependencies) for more information about using the unbundled version `dist/html2canvas.min.js`.*
+*Note: [Click here](#dependencies) for more information about using the unbundled version `dist/html2pdf.min.js`.*
 
 #### NPM
 
@@ -136,7 +136,7 @@ var opt = {
   margin:       1,
   filename:     'myfile.pdf',
   image:        { type: 'jpeg', quality: 0.98 },
-  html2canvas:  { scale: 2 },
+  domtoimage:   { scale: 2 },
   jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
 };
 
@@ -156,7 +156,7 @@ The `opt` parameter has the following optional fields:
 |pagebreak   |object          |`{mode: ['css', 'legacy']}`     |Controls the pagebreak behaviour on the page. See [Page-breaks](#page-breaks) below.                        |
 |image       |object          |`{type: 'jpeg', quality: 0.95}` |The image type and quality used to generate the PDF. See [Image type and quality](#image-type-and-quality) below.|
 |enableLinks |boolean         |`true`                          |If enabled, PDF hyperlinks are automatically added ontop of all anchor tags.                                |
-|html2canvas |object          |`{ }`                           |Configuration options sent directly to `html2canvas` ([see here](https://html2canvas.hertzen.com/configuration) for usage).|
+|domtoimage |object          |`{ }`                           |Configuration options sent directly to `dom-to-image-more` ([see here](https://github.com/1904labs/dom-to-image-more/blob/master/src/dom-to-image-more.js#L42) for usage).|
 |jsPDF       |object          |`{ }`                           |Configuration options sent directly to `jsPDF` ([see here](http://rawgit.com/MrRio/jsPDF/master/docs/jsPDF.html) for usage).|
 
 ### Page-breaks
@@ -218,22 +218,15 @@ The Worker object returned by `html2pdf()` has a built-in progress-tracking mech
 
 ## Dependencies
 
-html2pdf depends on the external packages [html2canvas](https://github.com/niklasvh/html2canvas), [jsPDF](https://github.com/MrRio/jsPDF), and [es6-promise](https://github.com/stefanpenner/es6-promise). These dependencies are automatically loaded when using NPM or the bundled package.
+html2pdf depends on the external packages [dom-to-image-more](https://github.com/1904labs/dom-to-image-more), [jsPDF](https://github.com/MrRio/jsPDF), and [es6-promise](https://github.com/stefanpenner/es6-promise). These dependencies are automatically loaded when using NPM or the bundled package.
 
-If using the unbundled `dist/html2pdf.min.js` (or its un-minified version), you must also include each dependency. Order is important, otherwise html2canvas will be overridden by jsPDF's own internal implementation:
-
-```html
-<script src="es6-promise.auto.min.js"></script>
-<script src="jspdf.min.js"></script>
-<script src="html2canvas.min.js"></script>
-<script src="html2pdf.min.js"></script>
-```
+If using the unbundled `dist/html2pdf.min.js` (or its un-minified version), you must also include each dependency.
 
 ## Contributing
 
 ### Issues
 
-When submitting an issue, please provide reproducible code that highlights the issue, preferably by creating a fork of [this template jsFiddle](https://jsfiddle.net/u6o6ne41/) (which has html2pdf already loaded). Remember that html2pdf uses [html2canvas](https://github.com/niklasvh/html2canvas) and [jsPDF](https://github.com/MrRio/jsPDF) as dependencies, so it's a good idea to check each of those repositories' issue trackers to see if your problem has already been addressed.
+When submitting an issue, please provide reproducible code that highlights the issue, preferably by creating a fork of [this template jsFiddle](https://jsfiddle.net/u6o6ne41/) (which has html2pdf already loaded). Remember that html2pdf uses [dom-to-image-more](https://github.com/1904labs/dom-to-image-more) and [jsPDF](https://github.com/MrRio/jsPDF) as dependencies, so it's a good idea to check each of those repositories' issue trackers to see if your problem has already been addressed.
 
 ### Tests
 

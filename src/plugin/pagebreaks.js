@@ -1,5 +1,5 @@
 import Worker from '../worker.js';
-import { objType, createElement } from '../utils.js';
+import { createElement, createIFrameContainer } from '../utils.js';
 
 /* Pagebreak plugin:
 
@@ -38,15 +38,19 @@ Worker.template.opt.pagebreak = {
 
 Worker.prototype.toCanvas = function toCanvas() {
   return this.then(function toCanvas_pagebreak() {
-    // Attach extra behaviour to the html2canvas onclone property.
-    var oncloneOrig = this.opt.html2canvas.onclone || function () {};
-    this.opt.html2canvas.onclone = onclone_pagebreak.bind(this, oncloneOrig);
+    // Attach extra behaviour to the domtoimage onclone property.
+    var oncloneOrig = this.opt.domtoimage.onclone || function () {};
+    this.opt.domtoimage.onclone = onclone_pagebreak.bind(this, oncloneOrig);
   }).then(orig.toCanvas.bind(this));
 };
 
-function onclone_pagebreak(oncloneOrig, doc) {
-  // Setup root element and inner page height.
-  var root = doc.body;
+function onclone_pagebreak(oncloneOrig, root) {
+  var iframe = createIFrameContainer();
+  document.body.appendChild(iframe);
+  // We need to add the cloned element to an iframe to calculate bounding client rectangle
+  iframe.contentWindow.document.body.appendChild(root);
+  iframe.contentWindow.document.body.style.margin = '0';
+
   var pxPageHeight = this.prop.pageSize.inner.px.height;
 
   // Check all requested modes.
@@ -121,23 +125,25 @@ function onclone_pagebreak(oncloneOrig, doc) {
 
     // Before: Create a padding div to push the element to the next page.
     if (rules.before) {
-      var pad = createElement('div', {style: {
+      var beforePad = createElement('div', {style: {
         display: 'block',
         height: pxPageHeight - (clientRect.top % pxPageHeight) + 'px'
       }});
-      el.parentNode.insertBefore(pad, el);
+      el.parentNode.insertBefore(beforePad, el);
     }
 
     // After: Create a padding div to fill the remaining page.
     if (rules.after) {
-      var pad = createElement('div', {style: {
+      var afterPad = createElement('div', {style: {
         display: 'block',
         height: pxPageHeight - (clientRect.bottom % pxPageHeight) + 'px'
       }});
-      el.parentNode.insertBefore(pad, el.nextSibling);
+      el.parentNode.insertBefore(afterPad, el.nextSibling);
     }
   });
 
+  document.body.removeChild(iframe);
+
   // Call the original onclone callback.
-  oncloneOrig(doc);
+  oncloneOrig(root);
 }

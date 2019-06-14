@@ -1,5 +1,5 @@
 import Worker from '../worker.js';
-import { unitConvert } from '../utils.js';
+import { unitConvert, createIFrameContainer } from '../utils.js';
 
 // Add hyperlink functionality to the PDF creation.
 
@@ -12,17 +12,21 @@ var orig = {
 
 Worker.prototype.toCanvas = function toCanvas() {
   return this.then(function toCanvas_hyperlink() {
-    // Attach extra behaviour to the html2canvas onclone property.
-    var oncloneOrig = this.opt.html2canvas.onclone || function () {};
-    this.opt.html2canvas.onclone = onclone_hyperlink.bind(this, oncloneOrig);
+    // Attach extra behaviour to the domtoimage onclone property.
+    var oncloneOrig = this.opt.domtoimage.onclone || function () {};
+    this.opt.domtoimage.onclone = onclone_hyperlink.bind(this, oncloneOrig);
   }).then(orig.toCanvas.bind(this));
 };
 
-function onclone_hyperlink(oncloneOrig, doc) {
+function onclone_hyperlink(oncloneOrig, container) {
   // Retrieve hyperlink info if the option is enabled.
   if (this.opt.enableLinks) {
-    // Find all anchor tags and get the container's bounds for reference.
-    var container = doc.body;
+    var iframe = createIFrameContainer();
+    document.body.appendChild(iframe);
+    // We need to add the cloned element to an iframe to calculate client rectangles
+    iframe.contentWindow.document.body.appendChild(container);
+    iframe.contentWindow.document.body.style.margin = '0';
+
     var links = container.querySelectorAll('a');
     var containerRect = unitConvert(container.getBoundingClientRect(), this.prop.pageSize.k);
     linkInfo = [];
@@ -43,10 +47,12 @@ function onclone_hyperlink(oncloneOrig, doc) {
         linkInfo.push({ page, top, left, clientRect, link });
       }
     }, this);
+
+    document.body.removeChild(iframe);
   }
 
   // Call the original onclone callback.
-  oncloneOrig(doc);
+  oncloneOrig(container);
 }
 
 Worker.prototype.toPdf = function toPdf() {

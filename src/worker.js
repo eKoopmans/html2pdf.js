@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
-import { objType, createElement, cloneNode, toPx } from './utils.js';
+import domtoimage from 'dom-to-image-more';
+import { objType, createElement, toPx } from './utils.js';
 
 /* ----- CONSTRUCTOR ----- */
 
@@ -46,7 +46,7 @@ Worker.template = {
     margin: [0,0,0,0],
     image: { type: 'jpeg', quality: 0.95 },
     enableLinks: true,
-    html2canvas: {},
+    domtoimage: {},
     jsPDF: {}
   }
 };
@@ -57,7 +57,7 @@ Worker.prototype.from = function from(src, type) {
   function getType(src) {
     switch (objType(src)) {
       case 'string':  return 'string';
-      case 'element': return src.nodeName.toLowerCase === 'canvas' ? 'canvas' : 'element';
+      case 'element': return src.nodeName.toLowerCase() === 'canvas' ? 'canvas' : 'element';
       default:        return 'unknown';
     }
   }
@@ -98,27 +98,22 @@ Worker.prototype.toCanvas = function toCanvas() {
   // Fulfill prereqs then create the canvas.
   return this.thenList(prereqs).then(function toCanvas_main() {
     // Handle old-fashioned 'onrendered' argument.
-    var options = Object.assign({}, this.opt.html2canvas);
-    delete options.onrendered;
+    var options = Object.assign({}, this.opt.domtoimage);
 
-    // Alter html2canvas options for reflow behaviour.
+    // Alter domtoimage options for reflow behaviour.
     var src = this.prop.src;
-    var ignoreElements_orig = options.ignoreElements || function () {};
-    options.ignoreElements = function (el) {
+    var filter_orig = options.filter || function () {return true};
+    options.filter = function (el) {
       // List of metadata tags:   https://www.w3schools.com/html/html_head.asp
       var metaTags = ['HEAD', 'TITLE', 'BASE', 'LINK', 'META', 'SCRIPT', 'STYLE'];
       var toClone = metaTags.indexOf(el.tagName) !== -1 || el.contains(src) || src.contains(el);
-      return !toClone || ignoreElements_orig(el);
-    }
+      return toClone && filter_orig(el);
+    };
     options.windowWidth = this.prop.pageSize.inner.px.width;
     options.width = options.windowWidth;
 
-    return html2canvas(src, options);
+    return domtoimage.toCanvas(src, options);
   }).then(function toCanvas_post(canvas) {
-    // Handle old-fashioned 'onrendered' argument.
-    var onRendered = this.opt.html2canvas.onrendered || function () {};
-    onRendered(canvas);
-
     this.prop.canvas = canvas;
   });
 };
@@ -150,7 +145,6 @@ Worker.prototype.toPdf = function toPdf() {
     var opt = this.opt;
 
     // Calculate the number of pages.
-    var ctx = canvas.getContext('2d');
     var pxFullHeight = canvas.height;
     var pxPageHeight = Math.floor(canvas.width * this.prop.pageSize.inner.ratio);
     var nPages = Math.ceil(pxFullHeight / pxPageHeight);
@@ -220,7 +214,7 @@ Worker.prototype.outputPdf = function outputPdf(type, options) {
   });
 };
 
-Worker.prototype.outputImg = function outputImg(type, options) {
+Worker.prototype.outputImg = function outputImg(type) {
   // Set up function prerequisites.
   var prereqs = [
     function checkImg() { return this.prop.img || this.toImg(); }
@@ -270,6 +264,8 @@ Worker.prototype.set = function set(opt) {
 
   // Build an array of setter functions to queue.
   var fns = Object.keys(opt || {}).map(function (key) {
+    var self = this;
+
       if (key in Worker.template.prop) {
         // Set pre-defined properties.
         return function set_prop() { this.prop[key] = opt[key]; }
@@ -278,7 +274,7 @@ Worker.prototype.set = function set(opt) {
           case 'margin':
             return this.setMargin.bind(this, opt.margin);
           case 'jsPDF':
-            return function set_jsPDF() { this.opt.jsPDF = opt.jsPDF; return this.setPageSize(); }
+            return function set_jsPDF() { self.opt.jsPDF = opt.jsPDF; return self.setPageSize(); };
           case 'pageSize':
             return this.setPageSize.bind(this, opt.pageSize);
           default:
@@ -308,21 +304,22 @@ Worker.prototype.setMargin = function setMargin(margin) {
     switch (objType(margin)) {
       case 'number':
         margin = [margin, margin, margin, margin];
+        break;
       case 'array':
         if (margin.length === 2) {
           margin = [margin[0], margin[1], margin[0], margin[1]];
         }
-        if (margin.length === 4) {
-          break;
-        }
-      default:
-        return this.error('Invalid margin array.');
+        break;
+    }
+
+    if (margin.length !== 4) {
+      return this.error('Invalid margin array.');
     }
 
     // Set the margin property, then update pageSize.
     this.opt.margin = margin;
   }).then(this.setPageSize);
-}
+};
 
 Worker.prototype.setPageSize = function setPageSize(pageSize) {
   return this.then(function setPageSize_main() {
@@ -345,7 +342,7 @@ Worker.prototype.setPageSize = function setPageSize(pageSize) {
     // Attach pageSize to this.
     this.prop.pageSize = pageSize;
   });
-}
+};
 
 Worker.prototype.setProgress = function setProgress(val, state, n, stack) {
   // Immediately update all progress values.
