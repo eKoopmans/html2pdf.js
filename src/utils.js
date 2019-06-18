@@ -57,7 +57,7 @@ export const cloneNode = function cloneNode(node, javascriptEnabled) {
 
   // Return the cloned node.
   return clone;
-}
+};
 
 // Convert units from px using the conversion value 'k' from jsPDF.
 export const unitConvert = function unitConvert(obj, k) {
@@ -75,4 +75,52 @@ export const unitConvert = function unitConvert(obj, k) {
 // Convert units to px using the conversion value 'k' from jsPDF.
 export const toPx = function toPx(val, k) {
   return Math.floor(val * k / 72 * 96);
-}
+};
+
+export const createIFrameContainer = function createIFrameContainer(rootElement) {
+  if (this.prop.iframe)
+    return Promise.resolve(this.prop.iframe);
+
+  const iframe = document.createElement('iframe');
+
+  iframe.className = 'html2pdf-container';
+  iframe.style.visibility = 'hidden';
+  iframe.style.position = 'fixed';
+  iframe.style.left = '-10000px';
+  iframe.style.top = '0px';
+  iframe.style.border = '0';
+  iframe.width = document.defaultView.innerWidth.toString();
+  iframe.height = document.defaultView.innerHeight.toString();
+
+  document.body.appendChild(iframe);
+
+  iframe.contentWindow.document.body.style.margin = '0';
+  iframe.contentWindow.document.body.appendChild(rootElement);
+
+
+  var cloneWindow = iframe.contentWindow;
+  var documentClone = cloneWindow.document;
+  var docEl = documentClone.documentElement;
+
+  // Following is needed for onload event to be correctly triggered in Firefox and MS Edge
+  documentClone.open();
+  documentClone.write(`<!doctype html><html></html>`);
+  documentClone.replaceChild(documentClone.adoptNode(docEl), documentClone.documentElement);
+  documentClone.close();
+
+  this.prop.iframe = iframe;
+
+  return new Promise(function (resolve) {
+    iframe.onload = function () {
+      iframe.onload = null;
+      resolve(iframe);
+    }
+  });
+};
+
+export const removeIframeContainer = function () {
+  if (this.prop.iframe) {
+    document.body.removeChild(this.prop.iframe);
+    this.prop.iframe = null;
+  }
+};

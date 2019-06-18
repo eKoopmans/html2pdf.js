@@ -1,6 +1,6 @@
 /**
  * html2pdf.js v0.9.1
- * Copyright (c) 2018 Erik Koopmans
+ * Copyright (c) 2019 Erik Koopmans
  * Released under the MIT License.
  */
 'use strict';
@@ -9,7 +9,22 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 require('es6-promise/auto');
 var jsPDF = _interopDefault(require('jspdf'));
-var html2canvas = _interopDefault(require('html2canvas'));
+
+var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+
+
+
+
+function createCommonjsModule(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
+var domToImageMore_min = createCommonjsModule(function (module, exports) {
+/*! dom-to-image-more 17-06-2019 */
+
+!function(e){var s=function(){return{escape:function(e){return e.replace(/([.*+?^${}()|\[\]\/\\])/g,"\\$1")},parseExtension:n,mimeType:function(e){var t=n(e).toLowerCase();return function(){var e="application/font-woff",t="image/jpeg";return{woff:e,woff2:e,ttf:"application/font-truetype",eot:"application/vnd.ms-fontobject",png:"image/png",jpg:t,jpeg:t,gif:"image/gif",tiff:"image/tiff",svg:"image/svg+xml"}}()[t]||""},dataAsUrl:function(e,t){return"data:"+t+";base64,"+e},isDataUrl:function(e){return-1!==e.search(/^(data:)/)},canvasToBlob:function(t){return t.toBlob?new Promise(function(e){t.toBlob(e);}):function(i){return new Promise(function(e){for(var t=window.atob(i.toDataURL().split(",")[1]),n=t.length,r=new Uint8Array(n),o=0;o<n;o++)r[o]=t.charCodeAt(o);e(new Blob([r],{type:"image/png"}));})}(t)},resolveUrl:function(e,t){var n=document.implementation.createHTMLDocument(),r=n.createElement("base");n.head.appendChild(r);var o=n.createElement("a");return n.body.appendChild(o), r.href=t, o.href=e, o.href},getAndEncode:function(i){u.impl.options.cacheBust&&(i+=(/\?/.test(i)?"&":"?")+(new Date).getTime());return new Promise(function(n){var e,r=new XMLHttpRequest;if(r.onreadystatechange=function(){if(4!==r.readyState)return;if(200!==r.status)return void(e?n(e):o("cannot fetch resource: "+i+", status: "+r.status));var t=new FileReader;t.onloadend=function(){var e=t.result.split(/,/)[1];n(e);}, t.readAsDataURL(r.response);}, r.ontimeout=function(){e?n(e):o("timeout of 30000ms occured while fetching resource: "+i);}, r.responseType="blob", r.timeout=3e4, u.impl.options.useCredentials&&(r.withCredentials=!0), r.open("GET",i,!0), r.send(), u.impl.options.imagePlaceholder){var t=u.impl.options.imagePlaceholder.split(/,/);t&&t[1]&&(e=t[1]);}function o(e){console.error(e), n("");}})},uid:function(){var e=0;return function(){return"u"+("0000"+(Math.random()*Math.pow(36,4)<<0).toString(36)).slice(-4)+e++}}(),delay:function(n){return function(t){return new Promise(function(e){setTimeout(function(){e(t);},n);})}},asArray:function(e){for(var t=[],n=e.length,r=0;r<n;r++)t.push(e[r]);return t},escapeXhtml:function(e){return e.replace(/#/g,"%23").replace(/\n/g,"%0A")},makeImage:function(r){return"data:,"===r?Promise.resolve():new Promise(function(e,t){var n=new Image;u.impl.options.useCredentials&&(n.crossOrigin="use-credentials"), n.onload=function(){e(n);}, n.onerror=t, n.src=r;})},width:function(e){var t=r(e,"border-left-width"),n=r(e,"border-right-width");return e.scrollWidth+t+n},height:function(e){var t=r(e,"border-top-width"),n=r(e,"border-bottom-width");return e.scrollHeight+t+n}};function n(e){var t=/\.([^\.\/]*?)(\?|$)/g.exec(e);return t?t[1]:""}function r(e,t){var n=window.getComputedStyle(e).getPropertyValue(t);return parseFloat(n.replace("px",""))}}(),o=function(){var r=/url\(['"]?([^'"]+?)['"]?\)/g;return{inlineAll:function(t,r,o){return e(t)?Promise.resolve(t).then(n).then(function(e){var n=Promise.resolve(t);return e.forEach(function(t){n=n.then(function(e){return i(e,t,r,o)});}), n}):Promise.resolve(t)},shouldProcess:e,impl:{readUrls:n,inline:i}};function e(e){return-1!==e.search(r)}function n(e){for(var t,n=[];null!==(t=r.exec(e));)n.push(t[1]);return n.filter(function(e){return!s.isDataUrl(e)})}function i(t,n,r,e){return Promise.resolve(n).then(function(e){return r?s.resolveUrl(e,r):e}).then(e||s.getAndEncode).then(function(e){return s.dataAsUrl(e,s.mimeType(n))}).then(function(e){return t.replace(function(e){return new RegExp("(url\\(['\"]?)("+s.escape(e)+")(['\"]?\\))","g")}(n),"$1"+e+"$3")})}}(),t=function(){return{resolveAll:function(){return e(document).then(function(e){return Promise.all(e.map(function(e){return e.resolve()}))}).then(function(e){return e.join("\n")})},impl:{readAll:e}};function e(){return Promise.resolve(s.asArray(document.styleSheets)).then(function(e){var n=[];return e.forEach(function(t){if(t.hasOwnProperty("cssRules"))try{s.asArray(t.cssRules||[]).forEach(n.push.bind(n));}catch(e){console.log("Error while reading CSS rules from "+t.href,e.toString());}}), n}).then(function(e){return e.filter(function(e){return e.type===CSSRule.FONT_FACE_RULE}).filter(function(e){return o.shouldProcess(e.style.getPropertyValue("src"))})}).then(function(e){return e.map(t)});function t(t){return{resolve:function(){var e=(t.parentStyleSheet||{}).href;return o.inlineAll(t.cssText,e)},src:function(){return t.style.getPropertyValue("src")}}}}}(),n=function(){return{inlineAll:function t(e){if(!(e instanceof Element))return Promise.resolve(e);return n(e).then(function(){return e instanceof HTMLImageElement?r(e).inline():Promise.all(s.asArray(e.childNodes).map(function(e){return t(e)}))});function n(t){var e=t.style.getPropertyValue("background");return e?o.inlineAll(e).then(function(e){t.style.setProperty("background",e,t.style.getPropertyPriority("background"));}).then(function(){return t}):Promise.resolve(t)}},impl:{newImage:r}};function r(n){return{inline:function(e){return s.isDataUrl(n.src)?Promise.resolve():Promise.resolve(n.src).then(e||s.getAndEncode).then(function(e){return s.dataAsUrl(e,s.mimeType(n.src))}).then(function(t){return new Promise(function(e){n.onload=e, n.onerror=e, n.src=t;})})}}}}(),r={imagePlaceholder:void 0,cacheBust:!1,useCredentials:!1},u={toSvg:a,toPng:function(e,t){return i(e,t||{}).then(function(e){return e.toDataURL()})},toJpeg:function(e,t){return i(e,t=t||{}).then(function(e){return e.toDataURL("image/jpeg",t.quality||1)})},toBlob:function(e,t){return i(e,t||{}).then(s.canvasToBlob)},toPixelData:function(t,e){return i(t,e||{}).then(function(e){return e.getContext("2d").getImageData(0,0,s.width(t),s.height(t)).data})},toCanvas:function(e,t){return i(e,t||{})},impl:{fontFaces:t,images:n,util:s,inliner:o,options:{}}};function a(t,n){return function(e){void 0===e.imagePlaceholder?u.impl.options.imagePlaceholder=r.imagePlaceholder:u.impl.options.imagePlaceholder=e.imagePlaceholder;void 0===e.cacheBust?u.impl.options.cacheBust=r.cacheBust:u.impl.options.cacheBust=e.cacheBust;void 0===e.useCredentials?u.impl.options.useCredentials=r.useCredentials:u.impl.options.useCredentials=e.useCredentials;}(n=n||{}), Promise.resolve(t).then(function(e){return function i(t,n,e){if(!e&&n&&!n(t))return Promise.resolve();return Promise.resolve(t).then(r).then(function(e){return o(t,e,n)}).then(function(e){return u(t,e)});function r(e){return e instanceof HTMLCanvasElement?s.makeImage(e.toDataURL()):e.cloneNode(!1)}function o(e,t,n){var r=e.childNodes;return 0===r.length?Promise.resolve(t):o(t,s.asArray(r),n).then(function(){return t});function o(t,e,n){var r=Promise.resolve();return e.forEach(function(e){r=r.then(function(){return i(e,n)}).then(function(e){e&&t.appendChild(e);});}), r}}function u(a,c){return c instanceof Element?Promise.resolve().then(e).then(t).then(n).then(r).then(function(){return c}):c;function e(){function e(e,t){var n,r;e.cssText?(t.cssText=e.cssText, t.font=e.font):(n=e, r=t, s.asArray(n).forEach(function(e){r.setProperty(e,n.getPropertyValue(e),n.getPropertyPriority(e));}));}e(window.getComputedStyle(a),c.style);}function t(){function t(e){var t=window.getComputedStyle(a,e),n=t.getPropertyValue("content");if(""!==n&&"none"!==n){var r=s.uid(),o=c.getAttribute("class");o&&c.setAttribute("class",o+" "+r);var i=document.createElement("style");i.appendChild(u(r,e,t)), c.appendChild(i);}function u(e,t,n){var r,o,i="."+e+":"+t,u=n.cssText?(o=(r=n).getPropertyValue("content"), r.cssText+" content: "+o+";"):a(n);return document.createTextNode(i+"{"+u+"}");function a(t){return s.asArray(t).map(e).join("; ")+";";function e(e){return e+": "+t.getPropertyValue(e)+(t.getPropertyPriority(e)?" !important":"")}}}}[":before",":after"].forEach(function(e){t(e);});}function n(){a instanceof HTMLTextAreaElement&&(c.innerHTML=a.value), a instanceof HTMLInputElement&&c.setAttribute("value",a.value);}function r(){c instanceof SVGElement&&(c.setAttribute("xmlns","http://www.w3.org/2000/svg"), c instanceof SVGRectElement&&["width","height"].forEach(function(e){var t=c.getAttribute(e);t&&c.style.setProperty(e,t);}));}}}(e,n.filter,!0)}).then(c).then(l).then(function(t){n.bgcolor&&(t.style.backgroundColor=n.bgcolor);n.width&&(t.style.width=n.width+"px");n.height&&(t.style.height=n.height+"px");n.style&&Object.keys(n.style).forEach(function(e){t.style[e]=n.style[e];});var e=null;"function"==typeof n.onclone&&(e=n.onclone(t));return Promise.resolve(e).then(function(){return t})}).then(function(e){return function(e,t,n){return Promise.resolve(e).then(function(e){return e.setAttribute("xmlns","http://www.w3.org/1999/xhtml"), (new XMLSerializer).serializeToString(e)}).then(s.escapeXhtml).then(function(e){return'<foreignObject x="0" y="0" width="100%" height="100%">'+e+"</foreignObject>"}).then(function(e){return'<svg xmlns="http://www.w3.org/2000/svg" width="'+t+'" height="'+n+'">'+e+"</svg>"}).then(function(e){return"data:image/svg+xml;charset=utf-8,"+e})}(e,n.width||s.width(t),n.height||s.height(t))})}function i(o,i){return a(o,i).then(s.makeImage).then(s.delay(100)).then(function(e){var t="number"!=typeof i.scale?1:i.scale,n=function(e,t){var n=document.createElement("canvas");if(n.width=(i.width||s.width(e))*t, n.height=(i.height||s.height(e))*t, i.bgcolor){var r=n.getContext("2d");r.fillStyle=i.bgcolor, r.fillRect(0,0,n.width,n.height);}return n}(o,t),r=n.getContext("2d");return e&&(r.scale(t,t), r.drawImage(e,0,0)), n})}function c(n){return t.resolveAll().then(function(e){var t=document.createElement("style");return n.appendChild(t), t.appendChild(document.createTextNode(e)), n})}function l(e){return n.inlineAll(e).then(function(){return e})}module.exports=u;}(commonjsGlobal);
+});
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
@@ -75,35 +90,7 @@ var createElement = function createElement(tagName, opt) {
 };
 
 // Deep-clone a node and preserve contents/properties.
-var cloneNode = function cloneNode(node, javascriptEnabled) {
-  // Recursively clone the node.
-  var clone = node.nodeType === 3 ? document.createTextNode(node.nodeValue) : node.cloneNode(false);
-  for (var child = node.firstChild; child; child = child.nextSibling) {
-    if (javascriptEnabled === true || child.nodeType !== 1 || child.nodeName !== 'SCRIPT') {
-      clone.appendChild(cloneNode(child, javascriptEnabled));
-    }
-  }
 
-  if (node.nodeType === 1) {
-    // Preserve contents/properties of special nodes.
-    if (node.nodeName === 'CANVAS') {
-      clone.width = node.width;
-      clone.height = node.height;
-      clone.getContext('2d').drawImage(node, 0, 0);
-    } else if (node.nodeName === 'TEXTAREA' || node.nodeName === 'SELECT') {
-      clone.value = node.value;
-    }
-
-    // Preserve the node's scroll position when it loads.
-    clone.addEventListener('load', function () {
-      clone.scrollTop = node.scrollTop;
-      clone.scrollLeft = node.scrollLeft;
-    }, true);
-  }
-
-  // Return the cloned node.
-  return clone;
-};
 
 // Convert units from px using the conversion value 'k' from jsPDF.
 var unitConvert = function unitConvert(obj, k) {
@@ -121,6 +108,52 @@ var unitConvert = function unitConvert(obj, k) {
 // Convert units to px using the conversion value 'k' from jsPDF.
 var toPx = function toPx(val, k) {
   return Math.floor(val * k / 72 * 96);
+};
+
+var createIFrameContainer = function createIFrameContainer(rootElement) {
+  if (this.prop.iframe) return Promise.resolve(this.prop.iframe);
+
+  var iframe = document.createElement('iframe');
+
+  iframe.className = 'html2pdf-container';
+  iframe.style.visibility = 'hidden';
+  iframe.style.position = 'fixed';
+  iframe.style.left = '-10000px';
+  iframe.style.top = '0px';
+  iframe.style.border = '0';
+  iframe.width = document.defaultView.innerWidth.toString();
+  iframe.height = document.defaultView.innerHeight.toString();
+
+  document.body.appendChild(iframe);
+
+  iframe.contentWindow.document.body.style.margin = '0';
+  iframe.contentWindow.document.body.appendChild(rootElement);
+
+  var cloneWindow = iframe.contentWindow;
+  var documentClone = cloneWindow.document;
+  var docEl = documentClone.documentElement;
+
+  // Following is needed for onload event to be correctly triggered in Firefox and MS Edge
+  documentClone.open();
+  documentClone.write('<!doctype html><html></html>');
+  documentClone.replaceChild(documentClone.adoptNode(docEl), documentClone.documentElement);
+  documentClone.close();
+
+  this.prop.iframe = iframe;
+
+  return new Promise(function (resolve) {
+    iframe.onload = function () {
+      iframe.onload = null;
+      resolve(iframe);
+    };
+  });
+};
+
+var removeIframeContainer = function removeIframeContainer() {
+  if (this.prop.iframe) {
+    document.body.removeChild(this.prop.iframe);
+    this.prop.iframe = null;
+  }
 };
 
 /* ----- CONSTRUCTOR ----- */
@@ -150,8 +183,6 @@ Worker.convert = function convert(promise, inherit) {
 Worker.template = {
   prop: {
     src: null,
-    container: null,
-    overlay: null,
     canvas: null,
     img: null,
     pdf: null,
@@ -168,7 +199,7 @@ Worker.template = {
     margin: [0, 0, 0, 0],
     image: { type: 'jpeg', quality: 0.95 },
     enableLinks: true,
-    html2canvas: {},
+    domtoimage: {},
     jsPDF: {}
   }
 };
@@ -181,7 +212,7 @@ Worker.prototype.from = function from(src, type) {
       case 'string':
         return 'string';
       case 'element':
-        return src.nodeName.toLowerCase === 'canvas' ? 'canvas' : 'element';
+        return src.nodeName.toLowerCase() === 'canvas' ? 'canvas' : 'element';
       default:
         return 'unknown';
     }
@@ -207,8 +238,6 @@ Worker.prototype.from = function from(src, type) {
 Worker.prototype.to = function to(target) {
   // Route the 'to' request to the appropriate method.
   switch (target) {
-    case 'container':
-      return this.toContainer();
     case 'canvas':
       return this.toCanvas();
     case 'img':
@@ -220,7 +249,7 @@ Worker.prototype.to = function to(target) {
   }
 };
 
-Worker.prototype.toContainer = function toContainer() {
+Worker.prototype.toCanvas = function toCanvas() {
   // Set up function prerequisites.
   var prereqs = [function checkSrc() {
     return this.prop.src || this.error('Cannot duplicate - no source HTML.');
@@ -228,52 +257,29 @@ Worker.prototype.toContainer = function toContainer() {
     return this.prop.pageSize || this.setPageSize();
   }];
 
-  return this.thenList(prereqs).then(function toContainer_main() {
-    // Define the CSS styles for the container and its overlay parent.
-    var overlayCSS = {
-      position: 'fixed', overflow: 'hidden', zIndex: 1000,
-      left: 0, right: 0, bottom: 0, top: 0,
-      backgroundColor: 'rgba(0,0,0,0.8)'
-    };
-    var containerCSS = {
-      position: 'absolute', width: this.prop.pageSize.inner.width + this.prop.pageSize.unit,
-      left: 0, right: 0, top: 0, height: 'auto', margin: 'auto',
-      backgroundColor: 'white'
-    };
-
-    // Set the overlay to hidden (could be changed in the future to provide a print preview).
-    overlayCSS.opacity = 0;
-
-    // Create and attach the elements.
-    var source = cloneNode(this.prop.src, this.opt.html2canvas.javascriptEnabled);
-    this.prop.overlay = createElement('div', { className: 'html2pdf__overlay', style: overlayCSS });
-    this.prop.container = createElement('div', { className: 'html2pdf__container', style: containerCSS });
-    this.prop.container.appendChild(source);
-    this.prop.overlay.appendChild(this.prop.container);
-    document.body.appendChild(this.prop.overlay);
-  });
-};
-
-Worker.prototype.toCanvas = function toCanvas() {
-  // Set up function prerequisites.
-  var prereqs = [function checkContainer() {
-    return document.body.contains(this.prop.container) || this.toContainer();
-  }];
-
   // Fulfill prereqs then create the canvas.
   return this.thenList(prereqs).then(function toCanvas_main() {
     // Handle old-fashioned 'onrendered' argument.
-    var options = _extends({}, this.opt.html2canvas);
-    delete options.onrendered;
+    var options = _extends({}, this.opt.domtoimage);
 
-    return html2canvas(this.prop.container, options);
+    // Alter domtoimage options for reflow behaviour.
+    var src = this.prop.src;
+    var filter_orig = options.filter || function () {
+      return true;
+    };
+    options.filter = function (el) {
+      // List of metadata tags:   https://www.w3schools.com/html/html_head.asp
+      var metaTags = ['HEAD', 'TITLE', 'BASE', 'LINK', 'META', 'SCRIPT', 'STYLE'];
+      var toClone = metaTags.indexOf(el.tagName) !== -1 || el.contains(src) || src.contains(el);
+      return toClone && filter_orig(el);
+    };
+    options.windowWidth = this.prop.pageSize.inner.px.width;
+    options.width = options.windowWidth;
+
+    return domToImageMore_min.toCanvas(src, options);
   }).then(function toCanvas_post(canvas) {
-    // Handle old-fashioned 'onrendered' argument.
-    var onRendered = this.opt.html2canvas.onrendered || function () {};
-    onRendered(canvas);
-
+    removeIframeContainer.bind(this)();
     this.prop.canvas = canvas;
-    document.body.removeChild(this.prop.overlay);
   });
 };
 
@@ -304,7 +310,6 @@ Worker.prototype.toPdf = function toPdf() {
     var opt = this.opt;
 
     // Calculate the number of pages.
-    var ctx = canvas.getContext('2d');
     var pxFullHeight = canvas.height;
     var pxPageHeight = Math.floor(canvas.width * this.prop.pageSize.inner.ratio);
     var nPages = Math.ceil(pxFullHeight / pxPageHeight);
@@ -323,7 +328,7 @@ Worker.prototype.toPdf = function toPdf() {
 
     for (var page = 0; page < nPages; page++) {
       // Trim the final page to reduce file size.
-      if (page === nPages - 1) {
+      if (page === nPages - 1 && pxFullHeight % pxPageHeight !== 0) {
         pageCanvas.height = pxFullHeight % pxPageHeight;
         pageHeight = pageCanvas.height * this.prop.pageSize.inner.width / pageCanvas.width;
       }
@@ -372,7 +377,7 @@ Worker.prototype.outputPdf = function outputPdf(type, options) {
   });
 };
 
-Worker.prototype.outputImg = function outputImg(type, options) {
+Worker.prototype.outputImg = function outputImg(type) {
   // Set up function prerequisites.
   var prereqs = [function checkImg() {
     return this.prop.img || this.toImg();
@@ -420,6 +425,8 @@ Worker.prototype.set = function set$$1(opt) {
 
   // Build an array of setter functions to queue.
   var fns = Object.keys(opt || {}).map(function (key) {
+    var self = this;
+
     if (key in Worker.template.prop) {
       // Set pre-defined properties.
       return function set_prop() {
@@ -431,7 +438,7 @@ Worker.prototype.set = function set$$1(opt) {
           return this.setMargin.bind(this, opt.margin);
         case 'jsPDF':
           return function set_jsPDF() {
-            this.opt.jsPDF = opt.jsPDF;return this.setPageSize();
+            self.opt.jsPDF = opt.jsPDF;return self.setPageSize();
           };
         case 'pageSize':
           return this.setPageSize.bind(this, opt.pageSize);
@@ -464,15 +471,16 @@ Worker.prototype.setMargin = function setMargin(margin) {
     switch (objType(margin)) {
       case 'number':
         margin = [margin, margin, margin, margin];
+        break;
       case 'array':
         if (margin.length === 2) {
           margin = [margin[0], margin[1], margin[0], margin[1]];
         }
-        if (margin.length === 4) {
-          break;
-        }
-      default:
-        return this.error('Invalid margin array.');
+        break;
+    }
+
+    if (margin.length !== 4) {
+      return this.error('Invalid margin array.');
     }
 
     // Set the margin property, then update pageSize.
@@ -731,7 +739,7 @@ jsPDF.getPageSize = function (orientation, unit, format) {
 
 // Refs to original functions.
 var orig = {
-  toContainer: Worker.prototype.toContainer
+  toCanvas: Worker.prototype.toCanvas
 };
 
 // Add pagebreak default options to the Worker template.
@@ -742,146 +750,178 @@ Worker.template.opt.pagebreak = {
   avoid: []
 };
 
-Worker.prototype.toContainer = function toContainer() {
-  return orig.toContainer.call(this).then(function toContainer_pagebreak() {
-    // Setup root element and inner page height.
-    var root = this.prop.container;
-    var pxPageHeight = this.prop.pageSize.inner.px.height;
+Worker.prototype.toCanvas = function toCanvas() {
+  return this.then(function toCanvas_pagebreak() {
+    // Attach extra behaviour to the domtoimage onclone property.
+    var oncloneOrig = this.opt.domtoimage.onclone || function () {},
+        self = this;
 
-    // Check all requested modes.
-    var modeSrc = [].concat(this.opt.pagebreak.mode);
-    var mode = {
-      avoidAll: modeSrc.indexOf('avoid-all') !== -1,
-      css: modeSrc.indexOf('css') !== -1,
-      legacy: modeSrc.indexOf('legacy') !== -1
+    this.opt.domtoimage.onclone = function (rootElement) {
+      // We need to add the cloned element to an iframe to calculate bounding client rectangle
+      return createIFrameContainer.bind(self)(rootElement).then(function (iframe) {
+        onclone_pagebreak.bind(self)(oncloneOrig, iframe);
+      });
+    };
+  }).then(orig.toCanvas.bind(this));
+};
+
+function onclone_pagebreak(oncloneOrig, iframe) {
+  var root = iframe.contentWindow.document.body;
+
+  var pxPageHeight = this.prop.pageSize.inner.px.height;
+
+  // Check all requested modes.
+  var modeSrc = [].concat(this.opt.pagebreak.mode);
+  var mode = {
+    avoidAll: modeSrc.indexOf('avoid-all') !== -1,
+    css: modeSrc.indexOf('css') !== -1,
+    legacy: modeSrc.indexOf('legacy') !== -1
+  };
+
+  // Get arrays of all explicitly requested elements.
+  var select = {};
+  var self = this;
+  ['before', 'after', 'avoid'].forEach(function (key) {
+    var all = mode.avoidAll && key === 'avoid';
+    select[key] = all ? [] : [].concat(self.opt.pagebreak[key] || []);
+    if (select[key].length > 0) {
+      select[key] = Array.prototype.slice.call(root.querySelectorAll(select[key].join(', ')));
+    }
+  });
+
+  // Get all legacy page-break elements.
+  var legacyEls = root.querySelectorAll('.html2pdf__page-break');
+  legacyEls = Array.prototype.slice.call(legacyEls);
+
+  // Loop through all elements.
+  var els = root.querySelectorAll('*');
+  Array.prototype.forEach.call(els, function pagebreak_loop(el) {
+    // Setup pagebreak rules based on legacy and avoidAll modes.
+    var rules = {
+      before: false,
+      after: mode.legacy && legacyEls.indexOf(el) !== -1,
+      avoid: mode.avoidAll
     };
 
-    // Get arrays of all explicitly requested elements.
-    var select = {};
-    var self = this;
-    ['before', 'after', 'avoid'].forEach(function (key) {
-      var all = mode.avoidAll && key === 'avoid';
-      select[key] = all ? [] : [].concat(self.opt.pagebreak[key] || []);
-      if (select[key].length > 0) {
-        select[key] = Array.prototype.slice.call(root.querySelectorAll(select[key].join(', ')));
-      }
-    });
-
-    // Get all legacy page-break elements.
-    var legacyEls = root.querySelectorAll('.html2pdf__page-break');
-    legacyEls = Array.prototype.slice.call(legacyEls);
-
-    // Loop through all elements.
-    var els = root.querySelectorAll('*');
-    Array.prototype.forEach.call(els, function pagebreak_loop(el) {
-      // Setup pagebreak rules based on legacy and avoidAll modes.
-      var rules = {
-        before: false,
-        after: mode.legacy && legacyEls.indexOf(el) !== -1,
-        avoid: mode.avoidAll
+    // Add rules for css mode.
+    if (mode.css) {
+      // TODO: Check if this is valid with iFrames.
+      var style = window.getComputedStyle(el);
+      // TODO: Handle 'left' and 'right' correctly.
+      // TODO: Add support for 'avoid' on breakBefore/After.
+      var breakOpt = ['always', 'page', 'left', 'right'];
+      var avoidOpt = ['avoid', 'avoid-page'];
+      rules = {
+        before: rules.before || breakOpt.indexOf(style.breakBefore || style.pageBreakBefore) !== -1,
+        after: rules.after || breakOpt.indexOf(style.breakAfter || style.pageBreakAfter) !== -1,
+        avoid: rules.avoid || avoidOpt.indexOf(style.breakInside || style.pageBreakInside) !== -1
       };
+    }
 
-      // Add rules for css mode.
-      if (mode.css) {
-        // TODO: Check if this is valid with iFrames.
-        var style = window.getComputedStyle(el);
-        // TODO: Handle 'left' and 'right' correctly.
-        // TODO: Add support for 'avoid' on breakBefore/After.
-        var breakOpt = ['always', 'page', 'left', 'right'];
-        var avoidOpt = ['avoid', 'avoid-page'];
-        rules = {
-          before: rules.before || breakOpt.indexOf(style.breakBefore || style.pageBreakBefore) !== -1,
-          after: rules.after || breakOpt.indexOf(style.breakAfter || style.pageBreakAfter) !== -1,
-          avoid: rules.avoid || avoidOpt.indexOf(style.breakInside || style.pageBreakInside) !== -1
-        };
-      }
-
-      // Add rules for explicit requests.
-      Object.keys(rules).forEach(function (key) {
-        rules[key] = rules[key] || select[key].indexOf(el) !== -1;
-      });
-
-      // Get element position on the screen.
-      // TODO: Subtract the top of the container from clientRect.top/bottom?
-      var clientRect = el.getBoundingClientRect();
-
-      // Avoid: Check if a break happens mid-element.
-      if (rules.avoid && !rules.before) {
-        var startPage = Math.floor(clientRect.top / pxPageHeight);
-        var endPage = Math.floor(clientRect.bottom / pxPageHeight);
-        var nPages = Math.abs(clientRect.bottom - clientRect.top) / pxPageHeight;
-
-        // Turn on rules.before if the el is broken and is at most one page long.
-        if (endPage !== startPage && nPages <= 1) {
-          rules.before = true;
-        }
-      }
-
-      // Before: Create a padding div to push the element to the next page.
-      if (rules.before) {
-        var pad = createElement('div', { style: {
-            display: 'block',
-            height: pxPageHeight - clientRect.top % pxPageHeight + 'px'
-          } });
-        el.parentNode.insertBefore(pad, el);
-      }
-
-      // After: Create a padding div to fill the remaining page.
-      if (rules.after) {
-        var pad = createElement('div', { style: {
-            display: 'block',
-            height: pxPageHeight - clientRect.bottom % pxPageHeight + 'px'
-          } });
-        el.parentNode.insertBefore(pad, el.nextSibling);
-      }
+    // Add rules for explicit requests.
+    Object.keys(rules).forEach(function (key) {
+      rules[key] = rules[key] || select[key].indexOf(el) !== -1;
     });
+
+    // Get element position on the screen.
+    // TODO: Subtract the top of the container from clientRect.top/bottom?
+    var clientRect = el.getBoundingClientRect();
+
+    // Avoid: Check if a break happens mid-element.
+    if (rules.avoid && !rules.before) {
+      var startPage = Math.floor(clientRect.top / pxPageHeight);
+      var endPage = Math.floor(clientRect.bottom / pxPageHeight);
+      var nPages = Math.abs(clientRect.bottom - clientRect.top) / pxPageHeight;
+
+      // Turn on rules.before if the el is broken and is at most one page long.
+      if (endPage !== startPage && nPages <= 1) {
+        rules.before = true;
+      }
+    }
+
+    // Before: Create a padding div to push the element to the next page.
+    if (rules.before) {
+      var beforePad = createElement('div', { style: {
+          display: 'block',
+          height: pxPageHeight - clientRect.top % pxPageHeight + 'px'
+        } });
+      el.parentNode.insertBefore(beforePad, el);
+    }
+
+    // After: Create a padding div to fill the remaining page.
+    if (rules.after) {
+      var afterPad = createElement('div', { style: {
+          display: 'block',
+          height: pxPageHeight - clientRect.bottom % pxPageHeight + 'px'
+        } });
+      el.parentNode.insertBefore(afterPad, el.nextSibling);
+    }
   });
-};
+
+  // Call the original onclone callback.
+  oncloneOrig(root);
+}
 
 // Add hyperlink functionality to the PDF creation.
 
 // Main link array, and refs to original functions.
 var linkInfo = [];
 var orig$1 = {
-  toContainer: Worker.prototype.toContainer,
+  toCanvas: Worker.prototype.toCanvas,
   toPdf: Worker.prototype.toPdf
 };
 
-Worker.prototype.toContainer = function toContainer() {
-  return orig$1.toContainer.call(this).then(function toContainer_hyperlink() {
-    // Retrieve hyperlink info if the option is enabled.
-    if (this.opt.enableLinks) {
-      // Find all anchor tags and get the container's bounds for reference.
-      var container = this.prop.container;
-      var links = container.querySelectorAll('a');
-      var containerRect = unitConvert(container.getBoundingClientRect(), this.prop.pageSize.k);
-      linkInfo = [];
+Worker.prototype.toCanvas = function toCanvas() {
+  return this.then(function toCanvas_hyperlink() {
+    // Attach extra behaviour to the domtoimage onclone property.
+    var oncloneOrig = this.opt.domtoimage.onclone || function () {},
+        self = this;
 
-      // Loop through each anchor tag.
-      Array.prototype.forEach.call(links, function (link) {
-        // Treat each client rect as a separate link (for text-wrapping).
-        var clientRects = link.getClientRects();
-        for (var i = 0; i < clientRects.length; i++) {
-          var clientRect = unitConvert(clientRects[i], this.prop.pageSize.k);
-          clientRect.left -= containerRect.left;
-          clientRect.top -= containerRect.top;
-
-          var page = Math.floor(clientRect.top / this.prop.pageSize.inner.height) + 1;
-          var top = this.opt.margin[0] + clientRect.top % this.prop.pageSize.inner.height;
-          var left = this.opt.margin[1] + clientRect.left;
-
-          linkInfo.push({ page: page, top: top, left: left, clientRect: clientRect, link: link });
-        }
-      }, this);
-    }
-  });
+    this.opt.domtoimage.onclone = function (rootElement) {
+      // We need to add the cloned element to an iframe to calculate bounding client rectangle
+      return createIFrameContainer.bind(self)(rootElement).then(function (iframe) {
+        onclone_hyperlink.bind(self)(oncloneOrig, iframe);
+      });
+    };
+  }).then(orig$1.toCanvas.bind(this));
 };
+
+function onclone_hyperlink(oncloneOrig, iframe) {
+  // Retrieve hyperlink info if the option is enabled.
+  if (this.opt.enableLinks) {
+    var container = iframe.contentWindow.document.body;
+
+    var links = container.querySelectorAll('a');
+    var containerRect = unitConvert(container.getBoundingClientRect(), this.prop.pageSize.k);
+    linkInfo = [];
+
+    // Loop through each anchor tag.
+    Array.prototype.forEach.call(links, function (link) {
+      // Treat each client rect as a separate link (for text-wrapping).
+      var clientRects = link.getClientRects();
+      for (var i = 0; i < clientRects.length; i++) {
+        var clientRect = unitConvert(clientRects[i], this.prop.pageSize.k);
+        clientRect.left -= containerRect.left;
+        clientRect.top -= containerRect.top;
+
+        var page = Math.floor(clientRect.top / this.prop.pageSize.inner.height) + 1;
+        var top = this.opt.margin[0] + clientRect.top % this.prop.pageSize.inner.height;
+        var left = this.opt.margin[1] + clientRect.left;
+
+        linkInfo.push({ page: page, top: top, left: left, clientRect: clientRect, link: link });
+      }
+    }, this);
+  }
+
+  // Call the original onclone callback.
+  oncloneOrig(container);
+}
 
 Worker.prototype.toPdf = function toPdf() {
   return orig$1.toPdf.call(this).then(function toPdf_hyperlink() {
     // Add hyperlinks if the option is enabled.
     if (this.opt.enableLinks) {
-      // Attach each anchor tag based on info from toContainer().
+      // Attach each anchor tag based on info from the cloned document.
       linkInfo.forEach(function (l) {
         this.prop.pdf.setPage(l.page);
         this.prop.pdf.link(l.left, l.top, l.clientRect.width, l.clientRect.height, { url: l.link.href });
