@@ -13,19 +13,23 @@ var orig = {
 Worker.prototype.toCanvas = function toCanvas() {
   return this.then(function toCanvas_hyperlink() {
     // Attach extra behaviour to the domtoimage onclone property.
-    var oncloneOrig = this.opt.domtoimage.onclone || function () {};
-    this.opt.domtoimage.onclone = onclone_hyperlink.bind(this, oncloneOrig);
+    var oncloneOrig = this.opt.domtoimage.onclone || function () {},
+        self = this;
+
+    this.opt.domtoimage.onclone = function (rootElement) {
+      // We need to add the cloned element to an iframe to calculate bounding client rectangle
+      return createIFrameContainer.bind(self)(rootElement)
+          .then(function (iframe) {
+            onclone_hyperlink.bind(self)(oncloneOrig, iframe);
+          });
+    }
   }).then(orig.toCanvas.bind(this));
 };
 
-function onclone_hyperlink(oncloneOrig, container) {
+function onclone_hyperlink(oncloneOrig, iframe) {
   // Retrieve hyperlink info if the option is enabled.
   if (this.opt.enableLinks) {
-    var iframe = createIFrameContainer();
-    document.body.appendChild(iframe);
-    // We need to add the cloned element to an iframe to calculate client rectangles
-    iframe.contentWindow.document.body.appendChild(container);
-    iframe.contentWindow.document.body.style.margin = '0';
+    var container = iframe.contentWindow.document.body;
 
     var links = container.querySelectorAll('a');
     var containerRect = unitConvert(container.getBoundingClientRect(), this.prop.pageSize.k);
@@ -47,8 +51,6 @@ function onclone_hyperlink(oncloneOrig, container) {
         linkInfo.push({ page, top, left, clientRect, link });
       }
     }, this);
-
-    document.body.removeChild(iframe);
   }
 
   // Call the original onclone callback.

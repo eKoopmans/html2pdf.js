@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import domtoimage from 'dom-to-image-more';
 import { objType, createElement, toPx } from './utils.js';
+import {removeIframeContainer} from "./utils";
 
 /* ----- CONSTRUCTOR ----- */
 
@@ -114,6 +115,7 @@ Worker.prototype.toCanvas = function toCanvas() {
 
     return domtoimage.toCanvas(src, options);
   }).then(function toCanvas_post(canvas) {
+    removeIframeContainer.bind(this)();
     this.prop.canvas = canvas;
   });
 };

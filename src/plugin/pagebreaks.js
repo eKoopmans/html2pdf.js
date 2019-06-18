@@ -39,17 +39,21 @@ Worker.template.opt.pagebreak = {
 Worker.prototype.toCanvas = function toCanvas() {
   return this.then(function toCanvas_pagebreak() {
     // Attach extra behaviour to the domtoimage onclone property.
-    var oncloneOrig = this.opt.domtoimage.onclone || function () {};
-    this.opt.domtoimage.onclone = onclone_pagebreak.bind(this, oncloneOrig);
+    var oncloneOrig = this.opt.domtoimage.onclone || function () {},
+      self = this;
+
+    this.opt.domtoimage.onclone = function (rootElement) {
+      // We need to add the cloned element to an iframe to calculate bounding client rectangle
+      return createIFrameContainer.bind(self)(rootElement)
+          .then(function (iframe) {
+            onclone_pagebreak.bind(self)(oncloneOrig, iframe);
+          });
+    }
   }).then(orig.toCanvas.bind(this));
 };
 
-function onclone_pagebreak(oncloneOrig, root) {
-  var iframe = createIFrameContainer();
-  document.body.appendChild(iframe);
-  // We need to add the cloned element to an iframe to calculate bounding client rectangle
-  iframe.contentWindow.document.body.appendChild(root);
-  iframe.contentWindow.document.body.style.margin = '0';
+function onclone_pagebreak(oncloneOrig, iframe) {
+  var root = iframe.contentWindow.document.body;
 
   var pxPageHeight = this.prop.pageSize.inner.px.height;
 
@@ -141,8 +145,6 @@ function onclone_pagebreak(oncloneOrig, root) {
       el.parentNode.insertBefore(afterPad, el.nextSibling);
     }
   });
-
-  document.body.removeChild(iframe);
 
   // Call the original onclone callback.
   oncloneOrig(root);

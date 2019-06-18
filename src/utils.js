@@ -77,19 +77,50 @@ export const toPx = function toPx(val, k) {
   return Math.floor(val * k / 72 * 96);
 };
 
-export const createIFrameContainer = function createIFrameContainer() {
-  const cloneIframeContainer = document.createElement('iframe');
+export const createIFrameContainer = function createIFrameContainer(rootElement) {
+  if (this.prop.iframe)
+    return Promise.resolve(this.prop.iframe);
 
-  cloneIframeContainer.className = 'html2pdf-container';
-  cloneIframeContainer.style.visibility = 'hidden';
-  cloneIframeContainer.style.position = 'fixed';
-  cloneIframeContainer.style.left = '-10000px';
-  cloneIframeContainer.style.top = '0px';
-  cloneIframeContainer.style.border = '0';
-  cloneIframeContainer.width = document.defaultView.innerWidth.toString();
-  cloneIframeContainer.height = document.defaultView.innerHeight.toString();
-  cloneIframeContainer.scrolling = 'no'; // ios won't scroll without it
+  const iframe = document.createElement('iframe');
 
-  return cloneIframeContainer;
+  iframe.className = 'html2pdf-container';
+  iframe.style.visibility = 'hidden';
+  iframe.style.position = 'fixed';
+  iframe.style.left = '-10000px';
+  iframe.style.top = '0px';
+  iframe.style.border = '0';
+  iframe.width = document.defaultView.innerWidth.toString();
+  iframe.height = document.defaultView.innerHeight.toString();
+
+  document.body.appendChild(iframe);
+
+  iframe.contentWindow.document.body.style.margin = '0';
+  iframe.contentWindow.document.body.appendChild(rootElement);
+
+
+  var cloneWindow = iframe.contentWindow;
+  var documentClone = cloneWindow.document;
+  var docEl = documentClone.documentElement;
+
+  // Following is needed for onload event to be correctly triggered in Firefox and MS Edge
+  documentClone.open();
+  documentClone.write(`<!doctype html><html></html>`);
+  documentClone.replaceChild(documentClone.adoptNode(docEl), documentClone.documentElement);
+  documentClone.close();
+
+  this.prop.iframe = iframe;
+
+  return new Promise(function (resolve) {
+    iframe.onload = function () {
+      iframe.onload = null;
+      resolve(iframe);
+    }
+  });
 };
 
+export const removeIframeContainer = function () {
+  if (this.prop.iframe) {
+    document.body.removeChild(this.prop.iframe);
+    this.prop.iframe = null;
+  }
+};
