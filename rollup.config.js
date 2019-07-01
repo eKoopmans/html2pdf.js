@@ -33,7 +33,6 @@ export default [
     external: [
       'jspdf',
       'html2canvas',
-      'es6-promise/auto'
     ],
     globals: {
       jspdf: 'jsPDF',
@@ -57,7 +56,6 @@ export default [
     external: [
       'jspdf',
       'html2canvas',
-      'es6-promise/auto'
     ],
     globals: {
       jspdf: 'jsPDF',
