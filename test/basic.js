@@ -24,13 +24,13 @@ describe('html2pdf', function () {
 
   // Sample settings to test with.
   var settings = {
-    src: document.body,
+    src: document.createElement('div'),
     container: document.createElement('div'),
     overlay: document.createElement('div'),
     canvas: document.createElement('canvas'),
     img: document.createElement('img'),
     pdf: 'REPLACE WITH NEW JSPDF',
-    pageSize: 'a4',
+    pageSize: { 'width': 595.28, 'height': 841.89, 'unit': 'pt', 'k': 1 },
     filename: 'test.pdf',
     margin: [1,2,3,4],
     image: { type: 'png', quality: 1.0 },
