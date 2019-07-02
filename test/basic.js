@@ -30,7 +30,8 @@ describe('html2pdf', function () {
     canvas: document.createElement('canvas'),
     img: document.createElement('img'),
     pdf: 'REPLACE WITH NEW JSPDF',
-    pageSize: { 'width': 595.28, 'height': 841.89, 'unit': 'pt', 'k': 1 },
+    // Omitting pageSize because of unique behaviour.
+    // pageSize: { 'width': 595.28, 'height': 841.89, 'unit': 'pt', 'k': 1 },
     filename: 'test.pdf',
     margin: [1,2,3,4],
     image: { type: 'png', quality: 1.0 },
