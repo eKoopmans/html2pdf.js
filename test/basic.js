@@ -66,29 +66,4 @@ describe('html2pdf', function () {
       })(key);
     }
   });
-
-  describe('changing settings (individual with delay)', function () {
-    var delay = function () {
-      return new Promise(function (resolve, reject) {
-        setTimeout(resolve, 2000);
-      });
-    }
-
-    var worker = html2pdf().then(delay);
-    for (var key in settings) {
-      it(key + ' should be set to ' + settings[key], function () {
-        worker = worker.set({key: settings[key]}).get(key).then(function (val) {
-          expect(val.to.eql(settings[key]));
-        });
-      });
-    }
-  });
-
-  describe('changing settings 2', function () {
-    it('should set immediately', function () {
-      var worker = html2pdf().set(settings).get('filename').then(function (val) {
-        expect(val).to.eql(settings[key]);
-      });
-    });
-  });
 });
