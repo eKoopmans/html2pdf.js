@@ -43,22 +43,26 @@ describe('html2pdf', function () {
   describe('changing settings (batch)', function () {
     var worker = html2pdf().set(settings);
     for (var key in settings) {
-      it(key + ' should be set to ' + settings[key], function () {
-        worker = worker.get(key).then(function (val) {
-          expect(val.to.eql(settings[key]));
+      (function closure(key) {
+        it(key + ' should be set to ' + settings[key], function () {
+          return worker.get(key).then(function (val) {
+            expect(val).to.eql(settings[key]);
+          });
         });
-      });
+      })(key);
     }
   });
 
   describe('changing settings (individual)', function () {
     var worker = html2pdf();
     for (var key in settings) {
-      it(key + ' should be set to ' + settings[key], function () {
-        worker = worker.set({key: settings[key]}).get(key).then(function (val) {
-          expect(val.to.eql(settings[key]));
+      (function closure(key) {
+        it(key + ' should be set to ' + settings[key], function () {
+          return worker.set({key: settings[key]}).get(key).then(function (val) {
+            expect(val).to.eql(settings[key]);
+          });
         });
-      });
+      })(key);
     }
   });
 
