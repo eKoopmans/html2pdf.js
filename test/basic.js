@@ -59,7 +59,9 @@ describe('html2pdf', function () {
     for (var key in settings) {
       (function closure(key) {
         it(key + ' should be set to ' + settings[key], function () {
-          return worker.set({key: settings[key]}).get(key).then(function (val) {
+          var setting = {};
+          setting[key] = settings[key];
+          return worker.set(setting).get(key).then(function (val) {
             expect(val).to.eql(settings[key]);
           });
         });
