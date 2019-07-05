@@ -58,5 +58,24 @@ describe('html2pdf', function () {
         })(key);
       }
     });
+
+    describe('changing margin', function () {
+      var worker = html2pdf();
+      it('setMargin should work with [1,1,1,1]', function () {
+        return worker.setMargin([1,1,1,1]).get('margin').then(function (val) {
+          expect(val).to.eql([1,1,1,1]);
+        });
+      });
+      it('should convert [2,3] (w,h) to [2,3,2,3] (top,left,bottom,right)', function () {
+        return worker.setMargin([2,3]).get('margin').then(function (val) {
+          expect(val).to.eql([2,3,2,3]);
+        });
+      });
+      it('should convert 4 (margin) to [4,4,4,4] (top,left,bottom,right)', function () {
+        return worker.setMargin(4).get('margin').then(function (val) {
+          expect(val).to.eql([4,4,4,4]);
+        });
+      });
+    });
   });
 });
