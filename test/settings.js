@@ -104,6 +104,23 @@ describe('html2pdf', function () {
           expect(val).to.eql(makePageSize('mm', 72 / 25.4, a4, this.opt.margin));
         });
       });
+      it('changing margin should update pageSize.inner', function () {
+        return worker.set({margin: 1}).get('margin').then(function (val) {
+          expect(val).to.eql([1, 1, 1, 1]);
+        }).get('pageSize').then(function (val) {
+          var a4 = [595.28, 841.89];
+          expect(val).to.eql(makePageSize('mm', 72 / 25.4, a4, this.opt.margin));
+        });
+      });
+      it('changing jsPDF should update pageSize', function () {
+        var jsPDF = {orientation: 'p', unit: 'in', format: 'letter'};
+        return worker.set({jsPDF: jsPDF}).get('jsPDF').then(function (val) {
+          expect(val).to.eql(jsPDF);
+        }).get('pageSize').then(function (val) {
+          var letter = [612, 792];
+          expect(val).to.eql(makePageSize(jsPDF.unit, 72, letter, this.opt.margin));
+        });
+      });
     });
   });
 });
