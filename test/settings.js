@@ -77,5 +77,33 @@ describe('html2pdf', function () {
         });
       });
     });
+
+    describe('changing pageSize', function () {
+      // NOTE: Currently setPageSize() should not be used externally, it's interdependent with the jsPDF setting.
+      function makePageSize(unit, k, format, margin) {
+        var pageSize = {unit: unit, k: k, width: format[0] / k, height: format[1] / k};
+        pageSize.inner = {
+          width:  pageSize.width - margin[1] - margin[3],
+          height: pageSize.height - margin[0] - margin[2]
+        };
+        pageSize.inner.px = {
+          width:  toPx(pageSize.inner.width, pageSize.k),
+          height: toPx(pageSize.inner.height, pageSize.k)
+        };
+        pageSize.inner.ratio = pageSize.inner.height / pageSize.inner.width;
+        return pageSize;
+      }
+      function toPx(val, k) {
+        return Math.floor(val * k / 72 * 96);
+      }
+
+      var worker = html2pdf();
+      it('setPageSize() with no argument should use jsPDF default settings', function () {
+        return worker.setPageSize().get('pageSize').then(function (val) {
+          var a4 = [595.28, 841.89];
+          expect(val).to.eql(makePageSize('mm', 72 / 25.4, a4, this.opt.margin));
+        });
+      });
+    });
   });
 });
