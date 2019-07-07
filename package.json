@@ -7,7 +7,7 @@
   "browser": "dist/html2pdf.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eKoopmans/html2pdf.git"
+    "url": "git+https://github.com/eKoopmans/html2pdf.js.git"
   },
   "keywords": [
     "javascript",
@@ -23,9 +23,9 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/eKoopmans/html2pdf/issues"
+    "url": "https://github.com/eKoopmans/html2pdf.js/issues"
   },
-  "homepage": "https://github.com/eKoopmans/html2pdf",
+  "homepage": "https://ekoopmans.github.io/html2pdf.js/",
   "dependencies": {
     "es6-promise": "^4.2.5",
     "html2canvas": "^1.0.0-alpha.12",
