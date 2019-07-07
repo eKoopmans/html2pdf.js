@@ -23,13 +23,15 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       { pattern: 'src/index.js', watched: false },
+      { pattern: 'test/reference/*.*', included: false, served: true, watched: false },
       'test/**/*.js'
     ],
 
 
     // list of files / patterns to exclude
     exclude: [
-      'test/manual/'
+      'test/manual/',
+      'test/utils/reference-server.js'
     ],
 
 
@@ -65,7 +67,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome', 'Firefox', 'IE'],
+    browsers: ['Chrome'],
 
 
     // Continuous Integration mode
