@@ -1,5 +1,3 @@
 node_modules/
 .archive/
 .devel/
-/.idea/
-package-lock.json
