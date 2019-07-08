@@ -1,5 +1,3 @@
-import 'es6-promise/auto';
-
 import Worker from './worker.js';
 import './plugin/jspdf-plugin.js';
 import './plugin/pagebreaks.js';
