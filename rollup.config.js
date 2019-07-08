@@ -35,6 +35,7 @@ export default [
       'html2canvas',
     ],
     globals: {
+      'es6-promise': 'es6promise',
       jspdf: 'jsPDF',
       html2canvas: 'html2canvas'
     },
@@ -58,6 +59,7 @@ export default [
       'html2canvas',
     ],
     globals: {
+      'es6-promise': 'es6promise',
       jspdf: 'jsPDF',
       html2canvas: 'html2canvas'
     },
@@ -79,6 +81,7 @@ export default [
       { file: pkg.browser.replace(/js$/, 'bundle.js'), format: 'umd' }
     ],
     globals: {
+      'es6-promise': 'es6promise',
       jspdf: 'jsPDF',
       html2canvas: 'html2canvas'
     },
@@ -98,6 +101,7 @@ export default [
       { file: pkg.browser.replace(/js$/, 'bundle.min.js'), format: 'umd' }
     ],
     globals: {
+      'es6-promise': 'es6promise',
       jspdf: 'jsPDF',
       html2canvas: 'html2canvas'
     },
