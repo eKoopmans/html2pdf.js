@@ -23,7 +23,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       { pattern: 'src/index.js', watched: false },
-      { pattern: 'test/reference/*.*', included: false, served: true, watched: false },
+      { pattern: 'test/reference/*.*', included: false, served: true },
       'test/**/*.js'
     ],
 
