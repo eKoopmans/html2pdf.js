@@ -79,6 +79,12 @@ module.exports = function(config) {
     concurrency: Infinity,
 
 
+    // Suppress console.log messages
+    client: {
+      captureConsole: false
+    },
+
+
     // Rollup preprocessor
     // Setup as a normal Rollup config object, just without the input
     // It has its own autoWatch behaviour, so Karma's file watcher must be disabled on its files
