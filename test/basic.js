@@ -1,6 +1,6 @@
 describe('creation', function () {
   it('html2pdf should exist', function () {
-    expect(html2pdf).to.exist;
+    expect(window.html2pdf).to.exist;
   });
   it('html2pdf() should produce a thenable object', function () {
     expect(html2pdf().then).to.be.a('function');
