@@ -11,10 +11,15 @@
 const http = require('http');
 const PORT = 9090;
 const fs = require('fs');
+const path = require('path');
 
 // Create a server
 const server = http.createServer((request, response) => {
-  console.log(request.url);
+  // Create the directory if it doesn't exist.
+  var dir = path.dirname('./' + request.url);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, {recursive: true});
+  }
 
   const wstream = fs.createWriteStream('./' + request.url, {flags: 'w', encoding: 'binary'});
   console.log('Creating reference PDF ' + request.url + '.');
