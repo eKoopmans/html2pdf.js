@@ -1,9 +1,8 @@
 describe('promise', function () {
-  it('should resolve', function () {
+  it('promises should resolve', function () {
     return Promise.resolve();
   });
-
-  it('should preserve its value', function () {
+  it('promises should preserve their value', function () {
     return Promise.resolve(5).then(function (result) {
       expect(result).to.equal(5);
     });
