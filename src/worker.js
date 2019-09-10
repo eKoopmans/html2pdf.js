@@ -51,7 +51,8 @@ Worker.template = {
     image: { type: 'jpeg', quality: 0.95 },
     enableLinks: true,
     html2canvas: {},
-    jsPDF: {}
+    jsPDF: {},
+    scale: 1
   }
 };
 

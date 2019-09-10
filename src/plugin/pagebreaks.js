@@ -99,6 +99,7 @@ Worker.prototype.toContainer = function toContainer() {
       // Get element position on the screen.
       // TODO: Subtract the top of the container from clientRect.top/bottom?
       var clientRect = el.getBoundingClientRect();
+      var scale = self.opt.scale
 
       // Avoid: Check if a break happens mid-element.
       if (rules.avoid && !rules.before) {
@@ -116,7 +117,7 @@ Worker.prototype.toContainer = function toContainer() {
       if (rules.before) {
         var pad = createElement('div', {style: {
           display: 'block',
-          height: pxPageHeight - (clientRect.top % pxPageHeight) + 'px'
+          height: (pxPageHeight - (clientRect.top % pxPageHeight)) * scale + 'px'
         }});
         el.parentNode.insertBefore(pad, el);
       }
@@ -125,7 +126,7 @@ Worker.prototype.toContainer = function toContainer() {
       if (rules.after) {
         var pad = createElement('div', {style: {
           display: 'block',
-          height: pxPageHeight - (clientRect.bottom % pxPageHeight) + 'px'
+          height: (pxPageHeight - (clientRect.bottom % pxPageHeight)) * scale + 'px'
         }});
         el.parentNode.insertBefore(pad, el.nextSibling);
       }
