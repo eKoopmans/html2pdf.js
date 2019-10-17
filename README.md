@@ -192,7 +192,7 @@ html2pdf().set({
 
 // Enable all 'modes', with no explicit elements.
 html2pdf().set({
-  pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+  pagebreak: { mode: ['avoid-all', 'css', 'legacy'], elementType: 'tr', className: 'page_break' } //allow for use of these options see PR  - Update pagebreak.js
 });
 
 // No modes, only explicit elements.
