@@ -28,7 +28,7 @@
   "homepage": "https://ekoopmans.github.io/html2pdf.js/",
   "dependencies": {
     "es6-promise": "^4.2.5",
-    "html2canvas": "^1.0.0-alpha.12",
+    "html2canvas": "git+https://github.com/mcolemanNOW/html2canvas.git",
     "jspdf": "^1.4.1"
   },
   "devDependencies": {
