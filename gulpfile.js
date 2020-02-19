@@ -53,3 +53,7 @@ gulp.task('release', gulp.series('bump-version', function release() {
     return exec('git push --follow-tags ' + repoRoot + ' master:stable')
   });
 }));
+
+gulp.task('publish-gh', function publishGH() {
+  return exec('git push origin master stable');
+});

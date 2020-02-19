@@ -51,7 +51,7 @@
     "clean": "rimraf dist",
     "test": "echo \"Error: no test specified\" && exit 1",
     "release": "gulp release --newversion",
-    "publish": "npm publish",
+    "publish-gh": "gulp publish-gh",
     "prebuild": "npm install && npm run clean"
   }
 }
