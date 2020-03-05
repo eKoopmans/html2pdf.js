@@ -216,6 +216,37 @@ These options are limited to the available settings for [HTMLCanvasElement.toDat
 
 The Worker object returned by `html2pdf()` has a built-in progress-tracking mechanism. It will be updated to allow a progress callback that will be called with each update, however it is currently a work-in-progress.
 
+## Multiple pages
+
+The `html2pdf` would failed with too many pages, because of the canvas limitations.
+For more information check this issue [#19](https://github.com/eKoopmans/html2pdf.js/issues/19)
+
+You can split your page into smaller chunks and individually adding them into the PDF.
+
+```js
+const pages = Array.from(document.querySelectorAll('.page'));
+const opt = {};
+
+let worker = html2pdf()
+  .from(pages[0])
+  .set(opt)
+  .toPdf();
+
+pages.forEach(function(page, idx) {
+  worker = worker
+    .get('pdf')
+    .then(pdf => {
+      if (!idx) return;
+      pdf.addPage();
+    })
+    .from(page)
+    .toContainer()
+    .toCanvas()
+    .toPdf(idx + 1);
+});
+worker = worker.save();
+```
+
 ## Dependencies
 
 html2pdf.js depends on the external packages [html2canvas](https://github.com/niklasvh/html2canvas), [jsPDF](https://github.com/MrRio/jsPDF), and [es6-promise](https://github.com/stefanpenner/es6-promise). These dependencies are automatically loaded when using NPM or the bundled package.
