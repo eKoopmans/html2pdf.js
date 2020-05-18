@@ -10,7 +10,7 @@ var orig = {
   toPdf: Worker.prototype.toPdf,
 };
 
-Worker.prototype.toContainer = function toContainer() {
+Worker.prototype.toContainer = function toContainer(pageNumber) {
   return orig.toContainer.call(this).then(function toContainer_hyperlink() {
     // Retrieve hyperlink info if the option is enabled.
     if (this.opt.enableLinks) {
@@ -29,7 +29,7 @@ Worker.prototype.toContainer = function toContainer() {
           clientRect.left -= containerRect.left;
           clientRect.top -= containerRect.top;
 
-          var page = Math.floor(clientRect.top / this.prop.pageSize.inner.height) + 1;
+          var page = pageNumber || Math.floor(clientRect.top / this.prop.pageSize.inner.height) + 1;
           var top = this.opt.margin[0] + clientRect.top % this.prop.pageSize.inner.height;
           var left = this.opt.margin[1] + clientRect.left;
 
