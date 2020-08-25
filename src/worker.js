@@ -116,7 +116,7 @@ Worker.prototype.toContainer = function toContainer() {
     };
     var containerCSS = {
       position: 'absolute', width: this.prop.pageSize.inner.width + this.prop.pageSize.unit,
-      left: 0, right: 0, top: 0, height: 'auto', //margin: 'auto',
+      left: 0, right: 0, top: 0, height: 'auto',
       backgroundColor: 'white',
     };
 
@@ -125,6 +125,9 @@ Worker.prototype.toContainer = function toContainer() {
 
     // Create and attach the elements.
     var source = cloneNode(this.prop.src, this.opt.renderer.options.javascriptEnabled);
+
+    source.style.display = 'block';
+
     this.prop.overlay = createElement('div',   { className: 'html2pdf__overlay', style: overlayCSS });
     this.prop.container = createElement('div', { className: 'html2pdf__container', style: containerCSS });
     this.prop.container.appendChild(source);
@@ -145,7 +148,6 @@ Worker.prototype.toCanvas = function toCanvas() {
     // Handle old-fashioned 'onrendered' argument.
     var options = Object.assign({}, this.opt.renderer.options);
     delete options.onrendered;
-    
     return this.opt.renderer.class[this.opt.renderer.method](this.prop.container, options);
   }).then(function toCanvas_post(canvas) {
     // Handle old-fashioned 'onrendered' argument.
@@ -219,9 +221,6 @@ Worker.prototype.toPdf = function toPdf() {
       if (page)  this.prop.pdf.addPage();
       var imgData = pageCanvas.toDataURL('image/' + opt.image.type, opt.image.quality);
 
-      var img = new Image
-      img.src = imgData
-      document.body.append(img)
       this.prop.pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0],
                         this.prop.pageSize.inner.width, pageHeight);
     }
