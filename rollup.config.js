@@ -32,12 +32,12 @@ export default [
     ],
     external: [
       'jspdf',
-      'html2canvas',
+      'domtoimage',
     ],
     globals: {
       'es6-promise': 'es6promise',
       jspdf: 'jsPDF',
-      html2canvas: 'html2canvas'
+      domtoimage: 'domtoimage'
     },
     plugins: [
       resolve(),
@@ -56,12 +56,12 @@ export default [
     ],
     external: [
       'jspdf',
-      'html2canvas',
+      'domtoimage',
     ],
     globals: {
       'es6-promise': 'es6promise',
       jspdf: 'jsPDF',
-      html2canvas: 'html2canvas'
+      domtoimage: 'domtoimage'
     },
     plugins: [
       resolve(),
@@ -83,7 +83,7 @@ export default [
     globals: {
       'es6-promise': 'es6promise',
       jspdf: 'jsPDF',
-      html2canvas: 'html2canvas'
+      domtoimage: 'domtoimage'
     },
     plugins: [
       resolve(),
@@ -103,7 +103,7 @@ export default [
     globals: {
       'es6-promise': 'es6promise',
       jspdf: 'jsPDF',
-      html2canvas: 'html2canvas'
+      domtoimage: 'domtoimage'
     },
     plugins: [
       resolve(),

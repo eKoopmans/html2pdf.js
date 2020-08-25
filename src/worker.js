@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { objType, createElement, cloneNode, toPx } from './utils.js';
 import es6promise from 'es6-promise';
+
 var Promise = es6promise.Promise;
 
 /* ----- CONSTRUCTOR ----- */
@@ -50,7 +50,13 @@ Worker.template = {
     margin: [0,0,0,0],
     image: { type: 'jpeg', quality: 0.95 },
     enableLinks: true,
-    html2canvas: {},
+    renderer: {
+      class: null,
+      method: 'toCanvas',
+      options: {
+        quality: 1,
+      }
+    },
     jsPDF: {}
   }
 };
@@ -110,15 +116,15 @@ Worker.prototype.toContainer = function toContainer() {
     };
     var containerCSS = {
       position: 'absolute', width: this.prop.pageSize.inner.width + this.prop.pageSize.unit,
-      left: 0, right: 0, top: 0, height: 'auto', margin: 'auto',
-      backgroundColor: 'white'
+      left: 0, right: 0, top: 0, height: 'auto', //margin: 'auto',
+      backgroundColor: 'white',
     };
 
     // Set the overlay to hidden (could be changed in the future to provide a print preview).
     overlayCSS.opacity = 0;
 
     // Create and attach the elements.
-    var source = cloneNode(this.prop.src, this.opt.html2canvas.javascriptEnabled);
+    var source = cloneNode(this.prop.src, this.opt.renderer.options.javascriptEnabled);
     this.prop.overlay = createElement('div',   { className: 'html2pdf__overlay', style: overlayCSS });
     this.prop.container = createElement('div', { className: 'html2pdf__container', style: containerCSS });
     this.prop.container.appendChild(source);
@@ -137,13 +143,13 @@ Worker.prototype.toCanvas = function toCanvas() {
   // Fulfill prereqs then create the canvas.
   return this.thenList(prereqs).then(function toCanvas_main() {
     // Handle old-fashioned 'onrendered' argument.
-    var options = Object.assign({}, this.opt.html2canvas);
+    var options = Object.assign({}, this.opt.renderer.options);
     delete options.onrendered;
-
-    return html2canvas(this.prop.container, options);
+    
+    return this.renderer.class[this.opt.renderer.method](this.prop.container, options);
   }).then(function toCanvas_post(canvas) {
     // Handle old-fashioned 'onrendered' argument.
-    var onRendered = this.opt.html2canvas.onrendered || function () {};
+    var onRendered = this.opt.renderer.options.onrendered || function () {};
     onRendered(canvas);
 
     this.prop.canvas = canvas;
@@ -188,6 +194,7 @@ Worker.prototype.toPdf = function toPdf() {
     // Create a one-page canvas to split up the full image.
     var pageCanvas = document.createElement('canvas');
     var pageCtx = pageCanvas.getContext('2d');
+
     pageCanvas.width = canvas.width;
     pageCanvas.height = pxPageHeight;
 
@@ -211,6 +218,10 @@ Worker.prototype.toPdf = function toPdf() {
       // Add the page to the PDF.
       if (page)  this.prop.pdf.addPage();
       var imgData = pageCanvas.toDataURL('image/' + opt.image.type, opt.image.quality);
+
+      var img = new Image
+      img.src = imgData
+      document.body.append(img)
       this.prop.pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0],
                         this.prop.pageSize.inner.width, pageHeight);
     }
