@@ -161,7 +161,7 @@ The `opt` parameter has the following optional fields:
 
 ### Page-breaks
 
-html2pdf.js has the ability to automatically add page-breaks to clean up your document. Page-breaks can be added by CSS styles, set on individual elements using selectors, or avoided from breaking inside all elements (`avoid-all` mode).
+html2pdf.js has the ability to automatically add page-breaks to clean up your document. Page-breaks can be added by CSS styles, set on individual elements using selectors or avoided from breaking inside all elements (`avoid-all` mode).
 
 By default, html2pdf.js will respect most CSS [`break-before`](https://developer.mozilla.org/en-US/docs/Web/CSS/break-before), [`break-after`](https://developer.mozilla.org/en-US/docs/Web/CSS/break-after), and [`break-inside`](https://developer.mozilla.org/en-US/docs/Web/CSS/break-inside) rules, and also add page-breaks after any element with class `html2pdf__page-break` (for legacy purposes).
 
@@ -214,7 +214,7 @@ These options are limited to the available settings for [HTMLCanvasElement.toDat
 
 ## Progress tracking
 
-The Worker object returned by `html2pdf()` has a built-in progress-tracking mechanism. It will be updated to allow a progress callback that will be called with each update, however it is currently a work-in-progress.
+The Worker object returned by `html2pdf()` has a built-in progress-tracking mechanism. It will be updated to allow a progress callback that will be called with each update, however, it is currently a work-in-progress.
 
 ## Dependencies
 
