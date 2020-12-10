@@ -1437,7 +1437,7 @@ Worker.prototype.toContainer = function toContainer() {
       left: 0, right: 0, top: 0, height: 'auto', margin: 'auto',
       backgroundColor: 'white'
     };
-    if (opt.transparent) {
+    if (this.opt.transparent) {
       delete containerCSS.backgroundColor;
     }
 
@@ -1519,7 +1519,6 @@ Worker.prototype.toPdf = function toPdf() {
 
     // Initialize the PDF.
     this.prop.pdf = this.prop.pdf || new jsPDF(opt.jsPDF);
-    var stylingEmptyPage = { opt: opt };
 
     for (var page = 0; page < nPages; page++) {
       // Trim the final page to reduce file size.
@@ -1539,8 +1538,8 @@ Worker.prototype.toPdf = function toPdf() {
 
       // Add the page to the PDF.
       if (page) this.prop.pdf.addPage();
-      if (stylingEmptyPage) {
-        stylingEmptyPage(this.prop.pdf);
+      if (opt.stylingEmptyPage) {
+        opt.stylingEmptyPage(this.prop.pdf);
       }
       var imgData = pageCanvas.toDataURL('image/' + opt.image.type, opt.image.quality);
       this.prop.pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0], this.prop.pageSize.inner.width, pageHeight);
