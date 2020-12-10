@@ -1431,6 +1431,9 @@ Worker.prototype.toContainer = function toContainer() {
       left: 0, right: 0, top: 0, height: 'auto', margin: 'auto',
       backgroundColor: 'white'
     };
+    if (opt.transparent) {
+      delete containerCSS.backgroundColor;
+    }
 
     // Set the overlay to hidden (could be changed in the future to provide a print preview).
     overlayCSS.opacity = 0;
@@ -1510,6 +1513,7 @@ Worker.prototype.toPdf = function toPdf() {
 
     // Initialize the PDF.
     this.prop.pdf = this.prop.pdf || new jsPDF(opt.jsPDF);
+    var stylingEmptyPage = { opt: opt };
 
     for (var page = 0; page < nPages; page++) {
       // Trim the final page to reduce file size.
@@ -1521,14 +1525,16 @@ Worker.prototype.toPdf = function toPdf() {
       // Display the page.
       var w = pageCanvas.width;
       var h = pageCanvas.height;
-      pageCtx.fillStyle = 'white';
-      pageCtx.fillRect(0, 0, w, h);
+      if (!opt.transparent) {
+        pageCtx.fillStyle = 'white';
+        pageCtx.fillRect(0, 0, w, h);
+      }
       pageCtx.drawImage(canvas, 0, page * pxPageHeight, w, h, 0, 0, w, h);
 
       // Add the page to the PDF.
       if (page) this.prop.pdf.addPage();
-      if (opt.stylingEmptyPage) {
-        opt.stylingEmptyPage(this.props.pdf);
+      if (stylingEmptyPage) {
+        stylingEmptyPage(this.prop.pdf);
       }
       var imgData = pageCanvas.toDataURL('image/' + opt.image.type, opt.image.quality);
       this.prop.pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0], this.prop.pageSize.inner.width, pageHeight);
