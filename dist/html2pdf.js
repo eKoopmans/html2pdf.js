@@ -1533,6 +1533,8 @@ Worker.prototype.toPdf = function toPdf() {
       if (!opt.transparent) {
         pageCtx.fillStyle = 'white';
         pageCtx.fillRect(0, 0, w, h);
+      } else {
+        pageCtx.clearRect(0, 0, w, h);
       }
       pageCtx.drawImage(canvas, 0, page * pxPageHeight, w, h, 0, 0, w, h);
 
