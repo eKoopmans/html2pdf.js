@@ -65,7 +65,9 @@
   "scripts": {
     "build": "rollup -c",
     "clean": "rimraf dist",
-    "test": "npx karma start karma.conf.js",
+    "test": "start-server-and-test test:serve http://localhost:3000 test:run",
+    "test:serve": "pdftest serve 3000 ./test/reference",
+    "test:run": "npx karma start karma.conf.js",
     "test-training": "node test/utils/reference-server.js",
     "stage-release": "gulp stage-release --newversion",
     "release": "gulp release --tagmessage",
