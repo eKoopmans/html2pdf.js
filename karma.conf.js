@@ -81,7 +81,7 @@ module.exports = function(config) {
 
     // Suppress console.log messages
     client: {
-      captureConsole: false
+      // captureConsole: false
     },
 
 
