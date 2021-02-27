@@ -1,8 +1,9 @@
 describe('legacy mode', function () {
-  // Stub the save functionality.
   beforeEach(function () {
     chai.spy.on(html2pdf.Worker.prototype, 'save', function () {return this.then(function save() {})});
+    return pdftest.api.connect('http://localhost:3000');
   });
+
   afterEach(function () {
     chai.spy.restore();
   });
@@ -13,14 +14,20 @@ describe('legacy mode', function () {
       comparePdf(val, 'blank.pdf');
     });
   });
-  it('should handle a source and settings', function () {
-    var settings = {
+
+  it('should handle a source and settings', async function () {
+    const settings = {
       margin: 1,
-      jsPDF: {unit: 'in'}
+      jsPDF: {unit: 'in'},
+      html2canvas: { logging: false },
     };
-    return html2pdf('<h1>Margin: 1 inch</h1>', settings).outputPdf().then(function (val) {
-      expect(this.save).to.have.been.called.once;
-      comparePdf(val, 'margin-1in.pdf');
-    });
+    const pdftestSettings = { pixelmatch: { threshold: 0.5 } };
+
+    const pdfWorker = html2pdf('<h1>Margin: 1 inch</h1>', settings).outputPdf('arraybuffer');
+    const pdfArrayBuffer = await pdfWorker;
+    expect(pdfWorker.save).to.have.been.called.once;
+
+    const result = await pdftest.compare(pdfArrayBuffer, 'margin-1in.pdf', pdftestSettings);
+    expect(result.match).to.be.true;
   });
 });
