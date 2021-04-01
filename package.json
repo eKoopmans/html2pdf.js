@@ -29,7 +29,7 @@
   "dependencies": {
     "es6-promise": "^4.2.5",
     "html2canvas": "^1.0.0-alpha.12",
-    "jspdf": "^1.4.1"
+    "jspdf": "^2.3.1"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
