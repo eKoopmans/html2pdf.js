@@ -24,12 +24,11 @@ describe('legacy mode', function () {
       jsPDF: {unit: 'in'},
       html2canvas: { logging: false },
     };
-    const pdftestSettings = { pixelmatch: { threshold: 0.5 } };
 
     const pdfWorker = html2pdf('<h1>Margin: 1 inch</h1>', settings).outputPdf('arraybuffer');
     const pdfArrayBuffer = await pdfWorker;
     expect(pdfWorker.save).to.have.been.called.once;
 
-    await expect(pdfArrayBuffer).to.matchPdfSnapshot('margin-1in.pdf', pdftestSettings);
+    await expect(pdfArrayBuffer).to.matchPdfSnapshot('margin-1in.pdf');
   });
 });
