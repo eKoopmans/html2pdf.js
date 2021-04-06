@@ -30,7 +30,6 @@ describe('legacy mode', function () {
     const pdfArrayBuffer = await pdfWorker;
     expect(pdfWorker.save).to.have.been.called.once;
 
-    const result = await pdftest.compare(pdfArrayBuffer, 'margin-1in.pdf', pdftestSettings);
-    expect(result.match).to.be.true;
+    await expect(pdfArrayBuffer).to.matchPdfSnapshot('margin-1in.pdf', pdftestSettings);
   });
 });
