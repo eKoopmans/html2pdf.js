@@ -1,4 +1,7 @@
 describe('legacy mode', function () {
+  // Remove timeouts so the PDF snapshot GUI can wait on user feedback.
+  this.timeout(0);
+
   beforeEach(function () {
     chai.spy.on(html2pdf.Worker.prototype, 'save', function () {return this.then(function save() {})});
     return pdftest.api.connect('http://localhost:3000');

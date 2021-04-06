@@ -82,6 +82,10 @@ module.exports = function(config) {
     concurrency: Infinity,
 
 
+    // Remove timeouts so the PDF snapshot GUI can wait on user feedback.
+    browserNoActivityTimeout: 0,
+
+
     // Suppress console.log messages
     client: {
       // captureConsole: false
