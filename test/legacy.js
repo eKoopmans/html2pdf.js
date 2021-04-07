@@ -1,7 +1,4 @@
 describe('legacy mode', function () {
-  // Remove timeouts so the PDF snapshot GUI can wait on user feedback.
-  this.timeout(0);
-
   beforeEach(function () {
     chai.spy.on(html2pdf.Worker.prototype, 'save', function () {return this.then(function save() {})});
     return pdftest.api.connect('http://localhost:3000');
@@ -29,6 +26,6 @@ describe('legacy mode', function () {
     const pdfArrayBuffer = await pdfWorker;
     expect(pdfWorker.save).to.have.been.called.once;
 
-    await expect(pdfArrayBuffer).to.matchPdfSnapshot('margin-1in.pdf');
+    await expect(pdfArrayBuffer).to.matchPdfSnapshot();
   });
 });
