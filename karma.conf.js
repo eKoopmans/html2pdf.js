@@ -27,7 +27,7 @@ module.exports = function(config) {
       { pattern: 'src/index.js', watched: false },
       { pattern: 'test/reference/*.*', included: false, served: true },
       { pattern: bresolve.sync('pdftest'), watched: false },
-      { pattern: require.resolve('pdftest/dist/chai-pdftest'), watched: true },
+      { pattern: require.resolve('pdftest/dist/chai-pdftest'), watched: false },
       'test/**/*.js'
     ],
 
