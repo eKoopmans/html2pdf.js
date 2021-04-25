@@ -1,7 +1,5 @@
 // Karma configuration
 
-const bresolve = require('browser-resolve')
-
 // Load Rollup dependencies
 const rollupConfig = {
   resolve: require('rollup-plugin-node-resolve'),
@@ -26,8 +24,8 @@ module.exports = function(config) {
     files: [
       { pattern: 'src/index.js', watched: false },
       { pattern: 'test/reference/*.*', included: false, served: true },
-      { pattern: bresolve.sync('pdftest'), watched: false },
-      { pattern: require.resolve('pdftest/dist/chai-pdftest'), watched: false },
+      { pattern: require.resolve('pdftest/dist/pdftest.client.js'), watched: false },
+      { pattern: require.resolve('pdftest/dist/chai-pdftest.js'), watched: false },
       'test/**/*.js'
     ],
 

@@ -36,7 +36,6 @@
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-plugin-transform-object-assign": "^6.22.0",
     "babel-preset-env": "^1.7.0",
-    "browser-resolve": "^2.0.0",
     "chai": "^4.2.0",
     "chai-spies": "^1.0.0",
     "commander": "^7.2.0",
