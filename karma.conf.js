@@ -33,7 +33,6 @@ module.exports = function(config) {
     // list of files / patterns to exclude
     exclude: [
       'test/manual/',
-      'test/utils/reference-server.js'
     ],
 
 
