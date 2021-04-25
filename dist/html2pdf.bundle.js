@@ -1,6 +1,6 @@
 /**
- * html2pdf.js v0.9.2
- * Copyright (c) 2020 Erik Koopmans
+ * html2pdf.js v0.9.3
+ * Copyright (c) 2021 Erik Koopmans
  * Released under the MIT License.
  */
 (function (global, factory) {
