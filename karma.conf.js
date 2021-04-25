@@ -24,8 +24,8 @@ module.exports = function(config) {
     files: [
       { pattern: 'src/index.js', watched: false },
       { pattern: 'test/reference/*.*', included: false, served: true },
-      { pattern: require.resolve('pdftest/dist/pdftest.client.js'), watched: false },
-      { pattern: require.resolve('pdftest/dist/chai-pdftest.js'), watched: false },
+      { pattern: require.resolve('pdftest/dist/pdftest.client.min.js'), watched: false },
+      { pattern: require.resolve('pdftest/dist/chai-pdftest.min.js'), watched: false },
       'test/**/*.js'
     ],
 

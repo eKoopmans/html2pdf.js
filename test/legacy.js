@@ -17,7 +17,7 @@ describe('legacy mode', function () {
   };
 
   it('should make a blank PDF', async function () {
-    const pdfArrayBuffer = await getPdf('<div></div>', settings);
+    const pdfArrayBuffer = await getPdf('<div></div>');
     await expect(pdfArrayBuffer).to.matchPdfSnapshot({ interactive: true });
   });
 
