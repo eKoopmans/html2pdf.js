@@ -42,7 +42,8 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'src/index.js': ['rollup']
+      'src/index.js': ['rollup'],
+      'test/**/*.js': ['rollupTests'],
     },
 
 
@@ -111,6 +112,21 @@ module.exports = function(config) {
         rollupConfig.replace({ 'process.env.NODE_ENV': JSON.stringify('production') }),
         rollupConfig.babel({ exclude: 'node_modules/**' })
       ]
-    }
+    },
+
+    customPreprocessors: {
+      rollupTests: {
+        base: 'rollup',
+        options: {
+          output: {
+            name: 'html2pdf_test',
+            format: 'iife',
+            globals: {
+              html2pdf: 'html2pdf',
+            },
+          },
+        },
+      },
+    },
   })
 }
