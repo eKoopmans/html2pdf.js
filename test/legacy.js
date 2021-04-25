@@ -26,6 +26,6 @@ describe('legacy mode', function () {
     const pdfArrayBuffer = await pdfWorker;
     expect(pdfWorker.save).to.have.been.called.once;
 
-    await expect(pdfArrayBuffer).to.matchPdfSnapshot();
+    await expect(pdfArrayBuffer).to.matchPdfSnapshot({ interactive: true });
   });
 });
