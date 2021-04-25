@@ -29,15 +29,14 @@
   "dependencies": {
     "es6-promise": "^4.2.5",
     "html2canvas": "^1.0.0-alpha.12",
-    "jspdf": "^1.4.1"
+    "jspdf": "1.4.1"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-plugin-transform-object-assign": "^6.22.0",
     "babel-preset-env": "^1.7.0",
-    "gulp": "^4.0.0",
-    "minimist": "^1.2.0",
+    "commander": "^7.2.0",
     "rimraf": "^2.6.2",
     "rollup": "^0.51.8",
     "rollup-plugin-babel": "^3.0.2",
@@ -50,8 +49,8 @@
     "build": "rollup -c",
     "clean": "rimraf dist",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "release": "gulp release --newversion",
-    "publish-gh": "gulp publish-gh",
+    "release": "node ./build-scripts.js release",
+    "publish-gh": "node ./build-scripts.js publish-gh",
     "prebuild": "npm install && npm run clean"
   }
 }
