@@ -1,13 +1,13 @@
 {
   "name": "html2pdf.js",
-  "version": "0.9.1",
+  "version": "0.9.3",
   "description": "Client-side HTML-to-PDF rendering using pure JS",
   "main": "dist/require/html2pdf.cjs.js",
   "module": "dist/include/html2pdf.es.js",
   "browser": "dist/html2pdf.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eKoopmans/html2pdf.git"
+    "url": "git+https://github.com/eKoopmans/html2pdf.js.git"
   },
   "keywords": [
     "javascript",
@@ -23,13 +23,13 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/eKoopmans/html2pdf/issues"
+    "url": "https://github.com/eKoopmans/html2pdf.js/issues"
   },
-  "homepage": "https://github.com/eKoopmans/html2pdf",
+  "homepage": "https://ekoopmans.github.io/html2pdf.js/",
   "dependencies": {
     "es6-promise": "^4.2.5",
     "html2canvas": "^1.0.0-alpha.12",
-    "jspdf": "^1.4.1"
+    "jspdf": "1.4.1"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
@@ -39,7 +39,7 @@
     "browser-resolve": "^2.0.0",
     "chai": "^4.2.0",
     "chai-spies": "^1.0.0",
-    "gulp": "^4.0.0",
+    "commander": "^7.2.0",
     "karma": "^4.1.0",
     "karma-chai": "^0.1.0",
     "karma-chai-spies": "^0.1.4",
@@ -51,7 +51,6 @@
     "karma-mocha-reporter": "^2.2.5",
     "karma-rollup-preprocessor": "^7.0.0",
     "karma-sauce-launcher": "^2.0.2",
-    "minimist": "^1.2.0",
     "mocha": "^6.1.4",
     "pdftest": "0.2.0",
     "rimraf": "^2.6.2",
@@ -70,9 +69,8 @@
     "test:serve": "pdftest serve 3000 ./test/reference",
     "test:run": "npx karma start karma.conf.js",
     "test-training": "node test/utils/reference-server.js",
-    "stage-release": "gulp stage-release --newversion",
-    "release": "gulp release --tagmessage",
-    "publish": "npm publish",
+    "release": "node ./build-scripts.js release",
+    "publish-gh": "node ./build-scripts.js publish-gh",
     "prebuild": "npm install && npm run clean"
   }
 }
