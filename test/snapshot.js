@@ -31,6 +31,7 @@ describe('snapshot', () => {
   const filesToTest = {
     'blank': [ 'default' ],
     'lorem-ipsum': [ 'default', 'legacy', 'margin' ],
+    'all-tags': [ 'default' ],
   };
 
   Object.keys(filesToTest).forEach(file => describe(file, () => {
