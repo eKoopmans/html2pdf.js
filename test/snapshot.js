@@ -19,25 +19,38 @@ describe('snapshot', () => {
   };
 
   const conditions = {
-    default: defaultCondition,
-    legacy: window => window.html2pdf(window.document.body, defaultSettings).outputPdf('arraybuffer'),
-    margin: window => defaultCondition(window, { margin: 1, jsPDF: { unit: 'in' } }),
-    selectMainId: window => defaultCondition(window, {}, window.document.getElementById('main')),
-    pagebreakLegacy: window => defaultCondition(window, pageBreakSettings({ mode: 'legacy' })),
-    pagebreakCss: window => defaultCondition(window, pageBreakSettings({ mode: 'css' })),
-    pagebreakAvoidAll: window => defaultCondition(window, pageBreakSettings({ mode: 'avoid-all' })),
-    pagebreakSpecify: window => defaultCondition(window, pageBreakSettings({ before: '.before', after: '.after', avoid: '.avoid' })),
-  };
-
-  const snapshotNames = {
-    default: file => `${file}.pdf`,
-    legacy: file => `${file}.pdf`,
-    margin: file => `${file}_margin.pdf`,
-    selectMainId: file => `${file}.pdf`,
-    pagebreakLegacy: file => `${file}_legacy.pdf`,
-    pagebreakCss: file => `${file}_css.pdf`,
-    pagebreakAvoidAll: file => `${file}_avoid-all.pdf`,
-    pagebreakSpecify: file => `${file}_specify.pdf`,
+    default: {
+      runner: defaultCondition,
+      name: file => `${file}.pdf`,
+    },
+    legacy: {
+      runner: window => window.html2pdf(window.document.body, defaultSettings).outputPdf('arraybuffer'),
+      name: file => `${file}.pdf`,
+    },
+    margin: {
+      runner: window => defaultCondition(window, { margin: 1, jsPDF: { unit: 'in' } }),
+      name: file => `${file}_margin.pdf`,
+    },
+    selectMainId: {
+      runner: window => defaultCondition(window, {}, window.document.getElementById('main')),
+      name: file => `${file}.pdf`,
+    },
+    pagebreakLegacy: {
+      runner: window => defaultCondition(window, pageBreakSettings({ mode: 'legacy' })),
+      name: file => `${file}_legacy.pdf`,
+    },
+    pagebreakCss: {
+      runner: window => defaultCondition(window, pageBreakSettings({ mode: 'css' })),
+      name: file => `${file}_css.pdf`,
+    },
+    pagebreakAvoidAll: {
+      runner: window => defaultCondition(window, pageBreakSettings({ mode: 'avoid-all' })),
+      name: file => `${file}_avoid-all.pdf`,
+    },
+    pagebreakSpecify: {
+      runner: window => defaultCondition(window, pageBreakSettings({ before: '.before', after: '.after', avoid: '.avoid' })),
+      name: file => `${file}_specify.pdf`,
+    },
   };
 
   const filesToTest = {
@@ -62,8 +75,8 @@ describe('snapshot', () => {
     });
 
     filesToTest[file].forEach(condition => it(`should match snapshot for ${condition} settings`, async () => {
-      const pdf = await conditions[condition](iframe.contentWindow);
-      await expect(pdf).to.matchPdfSnapshot({ interactive: true, customSnapshotIdentifier: snapshotNames[condition](file) });
+      const pdf = await conditions[condition].runner(iframe.contentWindow);
+      await expect(pdf).to.matchPdfSnapshot({ interactive: true, customSnapshotIdentifier: conditions[condition].name(file) });
     }));
   }));
 });
