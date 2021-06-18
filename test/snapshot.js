@@ -12,6 +12,7 @@ describe('snapshot', () => {
   }
 
   const defaultSettings = { html2canvas: { logging: false } };
+  const pageBreakSettings = pagebreak => Object.assign({}, defaultSettings, { pagebreak, jsPDF: { orientation: 'portrait', unit: 'in', format: 'letter' } });
   const defaultCondition = (window, customSettings, src) => {
     const settings = Object.assign({}, defaultSettings, customSettings);
     return window.html2pdf().set(settings).from(src || window.document.body).outputPdf('arraybuffer');
@@ -22,6 +23,10 @@ describe('snapshot', () => {
     legacy: window => window.html2pdf(window.document.body, defaultSettings).outputPdf('arraybuffer'),
     margin: window => defaultCondition(window, { margin: 1, jsPDF: { unit: 'in' } }),
     selectMainId: window => defaultCondition(window, {}, window.document.getElementById('main')),
+    pagebreakLegacy: window => defaultCondition(window, pageBreakSettings({ mode: 'legacy' })),
+    pagebreakCss: window => defaultCondition(window, pageBreakSettings({ mode: 'css' })),
+    pagebreakAvoidAll: window => defaultCondition(window, pageBreakSettings({ mode: 'avoid-all' })),
+    pagebreakSpecify: window => defaultCondition(window, pageBreakSettings({ before: '.before', after: '.after', avoid: '.avoid' })),
   };
 
   const snapshotNames = {
@@ -29,6 +34,10 @@ describe('snapshot', () => {
     legacy: file => `${file}.pdf`,
     margin: file => `${file}_margin.pdf`,
     selectMainId: file => `${file}.pdf`,
+    pagebreakLegacy: file => `${file}_legacy.pdf`,
+    pagebreakCss: file => `${file}_css.pdf`,
+    pagebreakAvoidAll: file => `${file}_avoid-all.pdf`,
+    pagebreakSpecify: file => `${file}_specify.pdf`,
   };
 
   const filesToTest = {
@@ -36,6 +45,7 @@ describe('snapshot', () => {
     'lorem-ipsum': [ 'default', 'legacy', 'margin' ],
     'all-tags': [ 'default' ],
     'css-selectors': [ 'selectMainId' ],
+    'pagebreaks': [ 'pagebreakLegacy', 'pagebreakCss', 'pagebreakAvoidAll', 'pagebreakSpecify' ],
   };
 
   Object.keys(filesToTest).forEach(file => describe(file, () => {
@@ -52,7 +62,7 @@ describe('snapshot', () => {
     });
 
     filesToTest[file].forEach(condition => it(`should match snapshot for ${condition} settings`, async () => {
-      const pdf = await conditions[condition](iframe.contentWindow, iframe.contentDocument);
+      const pdf = await conditions[condition](iframe.contentWindow);
       await expect(pdf).to.matchPdfSnapshot({ interactive: true, customSnapshotIdentifier: snapshotNames[condition](file) });
     }));
   }));
