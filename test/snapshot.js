@@ -20,18 +20,21 @@ describe('snapshot', () => {
       const settings = Object.assign({}, defaultSettings, { margin: 1, jsPDF: { unit: 'in' } });
       return window.html2pdf().set(settings).from(document.body).outputPdf('arraybuffer');
     },
+    selectMainId: (window, document) => window.html2pdf().set(defaultSettings).from(document.getElementById('main')).outputPdf('arraybuffer'),
   };
 
   const snapshotNames = {
     default: file => `${file}.pdf`,
     legacy: file => `${file}.pdf`,
     margin: file => `${file}_margin.pdf`,
+    selectMainId: file => `${file}.pdf`,
   };
 
   const filesToTest = {
     'blank': [ 'default' ],
     'lorem-ipsum': [ 'default', 'legacy', 'margin' ],
     'all-tags': [ 'default' ],
+    'css-selectors': [ 'selectMainId' ],
   };
 
   Object.keys(filesToTest).forEach(file => describe(file, () => {
