@@ -33,28 +33,24 @@ describe('settings', function () {
   describe('changing settings (batch)', function () {
     var worker = html2pdf().set(settings);
     for (var key in settings) {
-      (function closure(key) {
-        it(key + ' should be set to ' + settings[key], function () {
-          return worker.get(key).then(function (val) {
-            expect(val).to.eql(settings[key]);
-          });
+      it(key + ' should be set to ' + settings[key], function () {
+        return worker.get(key).then(function (val) {
+          expect(val).to.eql(settings[key]);
         });
-      })(key);
+      });
     }
   });
 
   describe('changing settings (individual)', function () {
     var worker = html2pdf();
     for (var key in settings) {
-      (function closure(key) {
-        it(key + ' should be set to ' + settings[key], function () {
-          var setting = {};
-          setting[key] = settings[key];
-          return worker.set(setting).get(key).then(function (val) {
-            expect(val).to.eql(settings[key]);
-          });
+      it(key + ' should be set to ' + settings[key], function () {
+        var setting = {};
+        setting[key] = settings[key];
+        return worker.set(setting).get(key).then(function (val) {
+          expect(val).to.eql(settings[key]);
         });
-      })(key);
+      });
     }
   });
 
@@ -96,28 +92,30 @@ describe('settings', function () {
       return Math.floor(val * k / 72 * 96);
     }
 
-    var worker = html2pdf();
     it('setPageSize() with no argument should use jsPDF default settings', function () {
+      var worker = html2pdf();
       return worker.setPageSize().get('pageSize').then(function (val) {
         var a4 = [595.28, 841.89];
-        expect(val).to.eql(makePageSize('mm', 72 / 25.4, a4, this.opt.margin));
+        expect(val).to.eql(makePageSize('mm', 72 / 25.4, a4, [0,0,0,0]));
       });
     });
     it('changing margin should update pageSize.inner', function () {
+      var worker = html2pdf();
       return worker.set({margin: 1}).get('margin').then(function (val) {
         expect(val).to.eql([1, 1, 1, 1]);
       }).get('pageSize').then(function (val) {
         var a4 = [595.28, 841.89];
-        expect(val).to.eql(makePageSize('mm', 72 / 25.4, a4, this.opt.margin));
+        expect(val).to.eql(makePageSize('mm', 72 / 25.4, a4, [1,1,1,1]));
       });
     });
     it('changing jsPDF should update pageSize', function () {
+      var worker = html2pdf();
       var jsPDF = {orientation: 'p', unit: 'in', format: 'letter'};
       return worker.set({jsPDF: jsPDF}).get('jsPDF').then(function (val) {
         expect(val).to.eql(jsPDF);
       }).get('pageSize').then(function (val) {
         var letter = [612, 792];
-        expect(val).to.eql(makePageSize(jsPDF.unit, 72, letter, this.opt.margin));
+        expect(val).to.eql(makePageSize(jsPDF.unit, 72, letter, [0,0,0,0]));
       });
     });
   });
