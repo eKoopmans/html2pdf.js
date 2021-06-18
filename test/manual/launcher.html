@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      html, body {
+        height: 100%;
+      }
+      #iframe {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <p>This is for testing on localhost (run npx serve at project root). Does not work on file:// protocol.</p>
+    <p>
+      Target test file: <input id="target" value="../reference/lorem-ipsum.html">
+      <button onclick="loadIframe()">Load in iframe</button>
+      <button onclick="loadPopup()">Load in popup</button>
+      <span id="ready"></span>
+    </p>
+    <p>
+      Document querySelector: <input id="selector" value="body">
+      <button onclick="savePdf()">Make PDF and save</button>
+      <button onclick="makeContainer()">Make PDF container and set visible</button>
+    </p>
+
+    <iframe id="iframe"></iframe>
+
+    <script>
+      var html2pdf;
+      var _window;
+      var popup;
+      var target = document.getElementById('target');
+      var iframe = document.getElementById('iframe');
+      var ready = document.getElementById('ready');
+      var selector = document.getElementById('selector');
+
+      function loadIframe () {
+        ready.innerHTML = '';
+        iframe.onload = function () { _window = iframe.contentWindow; testLoaded(); };
+        iframe.src = target.value;
+      }
+
+      function loadPopup () {
+        ready.innerHTML = '';
+        _window = window.open(target.value, 'html2pdf testing', 'location=0');
+        _window.addEventListener('load', testLoaded);
+        _window.focus();
+      }
+
+      function testLoaded () {
+        var _document = _window.document;
+        var script = _document.createElement('script');
+        script.addEventListener('load', scriptLoaded);
+        script.src = '../../dist/html2pdf.bundle.js';
+        _document.body.appendChild(script);
+      }
+
+      function scriptLoaded () {
+        html2pdf = _window.html2pdf;
+        ready.innerHTML = 'Ready';
+      }
+
+      function savePdf () {
+        _window.focus();
+        var element = _window.document.querySelector(selector.value);
+        html2pdf().from(element).save();
+      }
+
+      function makeContainer () {
+        _window.focus();
+        var element = _window.document.querySelector(selector.value);
+        html2pdf().from(element).toContainer().then(function () {
+          _window.document.querySelector('.html2pdf__overlay').style.opacity = 1;
+        });
+      }
+    </script>
+  </body>
+</html>
