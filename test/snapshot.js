@@ -12,15 +12,16 @@ describe('snapshot', () => {
   }
 
   const defaultSettings = { html2canvas: { logging: false } };
+  const defaultCondition = (window, customSettings, src) => {
+    const settings = Object.assign({}, defaultSettings, customSettings);
+    return window.html2pdf().set(settings).from(src || window.document.body).outputPdf('arraybuffer');
+  };
 
   const conditions = {
-    default: (window, document) => window.html2pdf().set(defaultSettings).from(document.body).outputPdf('arraybuffer'),
-    legacy: (window, document) => window.html2pdf(document.body, defaultSettings).outputPdf('arraybuffer'),
-    margin: (window, document) => {
-      const settings = Object.assign({}, defaultSettings, { margin: 1, jsPDF: { unit: 'in' } });
-      return window.html2pdf().set(settings).from(document.body).outputPdf('arraybuffer');
-    },
-    selectMainId: (window, document) => window.html2pdf().set(defaultSettings).from(document.getElementById('main')).outputPdf('arraybuffer'),
+    default: defaultCondition,
+    legacy: window => window.html2pdf(window.document.body, defaultSettings).outputPdf('arraybuffer'),
+    margin: window => defaultCondition(window, { margin: 1, jsPDF: { unit: 'in' } }),
+    selectMainId: window => defaultCondition(window, {}, window.document.getElementById('main')),
   };
 
   const snapshotNames = {
