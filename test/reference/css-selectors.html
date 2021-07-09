@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="baseline.css">
+    <style>
+      p {
+        background-color: red;
+        margin: 0;
+        min-height: 18px;
+      }
+      .test-class-selector {
+        background-color: orange;
+      }
+      #test-id-selector {
+        background-color: yellow;
+      }
+      [data-attribute="test-attribute-selector"] {
+        background-color: green;
+      }
+      .test-after-empty-selectors::after {
+        content: "Test after and empty selectors";
+        background-color: blue;
+      }
+      p:empty {
+        background-color: indigo;
+      }
+      #main .test-ancestor-selector {
+        background-color: violet;
+      }
+      #main > .test-parent-selector {
+        background-color: #eee;
+      }
+      .test-parent-selector + .test-direct-sibling-selector {
+        background-color: #ddd;
+      }
+      .test-parent-selector ~ .test-sibling-selector {
+        background-color: #ccc;
+      }
+      #unincluded-ancestor .test-unincluded-ancestor {
+        background-color: #bbb;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="unincluded-ancestor">
+      <div id="main">
+        <!-- The parent divs here are for the "test-untargeted-ancestor" condition. -->
+        <p>Test element selector</p>
+        <p class="test-class-selector">Test class selector</p>
+        <p id="test-id-selector">Test ID selector</p>
+        <p data-attribute="test-attribute-selector">Test attribute selector</p>
+        <p class="test-after-empty-selectors"></p>
+        <p class="test-empty-selector"></p>
+        <p class="test-ancestor-selector">Test ancestor selector</p>
+        <p class="test-parent-selector">Test parent selector</p>
+        <p class="test-direct-sibling-selector">Test direct sibling selector</p>
+        <p class="test-sibling-selector">Test general sibling selector</p>
+        <p class="test-unincluded-ancestor">Test unincluded ancestor (KNOWN FAILURE - WILL APPEAR RED)</p>
+      </div>
+    </div>
+  </body>
+</html>
