@@ -92,6 +92,14 @@ describe('settings', function () {
       return Math.floor(val * k / 72 * 96);
     }
 
+    it('set({ pageSize }) should call setPageSize', function () {
+      var worker = html2pdf();
+      chai.spy.on(worker, 'setPageSize', function () { return this.then(function () {}); });
+      return worker.set({ pageSize: 'test' }).then(function () {
+        expect(worker.setPageSize).to.have.been.called.with('test');
+        chai.spy.restore();
+      });
+    });
     it('setPageSize() with no argument should use jsPDF default settings', function () {
       var worker = html2pdf();
       return worker.setPageSize().get('pageSize').then(function (val) {
