@@ -51,7 +51,7 @@
     "karma-rollup-preprocessor": "^7.0.0",
     "karma-sauce-launcher": "^2.0.2",
     "mocha": "^6.1.4",
-    "pdftest": "0.2.0",
+    "pdftest": "^0.3.0",
     "rimraf": "^2.6.2",
     "rollup": "^1.10.1",
     "rollup-plugin-babel": "^3.0.2",
