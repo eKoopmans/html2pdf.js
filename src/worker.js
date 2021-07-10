@@ -297,22 +297,22 @@ Worker.prototype.set = function set(opt) {
 
   // Build an array of setter functions to queue.
   var fns = Object.keys(opt || {}).map(function (key) {
-      if (key in Worker.template.prop) {
-        // Set pre-defined properties.
-        return function set_prop() { this.prop[key] = opt[key]; }
-      } else {
-        switch (key) {
-          case 'margin':
-            return this.setMargin.bind(this, opt.margin);
-          case 'jsPDF':
-            return function set_jsPDF() { this.opt.jsPDF = opt.jsPDF; return this.setPageSize(); }
-          case 'pageSize':
-            return this.setPageSize.bind(this, opt.pageSize);
-          default:
-            // Set any other properties in opt.
-            return function set_opt() { this.opt[key] = opt[key] };
+    switch (key) {
+      case 'margin':
+        return this.setMargin.bind(this, opt.margin);
+      case 'jsPDF':
+        return function set_jsPDF() { this.opt.jsPDF = opt.jsPDF; return this.setPageSize(); }
+      case 'pageSize':
+        return this.setPageSize.bind(this, opt.pageSize);
+      default:
+        if (key in Worker.template.prop) {
+          // Set pre-defined properties in prop.
+          return function set_prop() { this.prop[key] = opt[key]; }
+        } else {
+          // Set any other properties in opt.
+          return function set_opt() { this.opt[key] = opt[key] };
         }
-      }
+    }
   }, this);
 
   // Set properties within the promise chain.
