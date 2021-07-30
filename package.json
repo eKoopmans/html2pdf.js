@@ -50,6 +50,7 @@
     "karma-mocha-reporter": "^2.2.5",
     "karma-rollup-preprocessor": "^7.0.0",
     "karma-sauce-launcher": "^2.0.2",
+    "karma-webpack": "^5.0.0",
     "mocha": "^6.1.4",
     "pdftest": "^0.3.0",
     "rimraf": "^2.6.2",
@@ -59,16 +60,21 @@
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-plugin-replace": "^2.0.0",
     "rollup-plugin-uglify": "^2.0.1",
-    "start-server-and-test": "^1.12.0"
+    "start-server-and-test": "^1.12.0",
+    "webpack": "^5.45.1",
+    "webpack-bundle-analyzer": "^4.4.2",
+    "webpack-cli": "^4.7.2"
   },
   "scripts": {
-    "build": "rollup -c",
-    "clean": "rimraf dist",
+    "build": "npm run clean && webpack --env=prod",
+    "build:analyze": "npm run clean && webpack --env=prod --env=analyzer",
+    "clean": "rimraf dist/*",
+    "dev": "webpack --env=dev",
+    "dev:analyze": "webpack --env=dev --env=analyzer",
     "test": "start-server-and-test test:serve http://localhost:3000 test:run",
     "test:serve": "pdftest serve 3000 ./test/reference/snapshot",
     "test:run": "npx karma start karma.conf.js",
     "release": "node ./build-scripts.js release",
-    "publish-gh": "node ./build-scripts.js publish-gh",
-    "prebuild": "npm install && npm run clean"
+    "publish-gh": "node ./build-scripts.js publish-gh"
   }
 }
