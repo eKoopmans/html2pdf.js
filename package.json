@@ -32,9 +32,13 @@
     "jspdf": "^2.3.1"
   },
   "devDependencies": {
+    "@babel/core": "^7.14.8",
+    "@babel/preset-env": "^7.14.8",
+    "babel-loader": "^8.2.2",
     "chai": "^4.2.0",
     "chai-spies": "^1.0.0",
     "commander": "^7.2.0",
+    "core-js": "^3.16.0",
     "karma": "^6.3.4",
     "karma-chai": "^0.1.0",
     "karma-chai-spies": "^0.1.4",

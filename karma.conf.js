@@ -89,9 +89,18 @@ module.exports = function(config) {
         library: 'html2pdf',
         libraryExport: 'default',
       },
+      target: 'browserslist',
       optimization: { minimize: false },
-      mode: 'development',
       watch: true,
+      module: {
+        rules: [
+          {
+            test: /\.m?js$/,
+            exclude: /node_modules/,
+            use: ['babel-loader'],
+          },
+        ],
+      },
     },
 
     customPreprocessors: {

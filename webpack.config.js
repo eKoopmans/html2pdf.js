@@ -80,5 +80,14 @@ module.exports = env => {
       new BundleAnalyzerPlugin(build.bundleAnalyzer || { analyzerMode: 'disabled' }),
     ],
     experiments: build.experiments,
+    module: {
+      rules: [
+        {
+          test: /\.m?js$/,
+          exclude: /node_modules/,
+          use: ['babel-loader'],
+        },
+      ],
+    },
   }));
 };
