@@ -1,0 +1,9 @@
+{
+  "presets": [
+    [ "@babel/preset-env", {
+      "useBuiltIns": "usage",
+      "corejs": { "version": "3.10", "proposals": true }
+    }]
+  ],
+  "sourceType": "unambiguous"
+}

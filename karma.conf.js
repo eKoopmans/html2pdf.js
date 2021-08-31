@@ -1,13 +1,5 @@
 // Karma configuration
 
-// Load Rollup dependencies
-const rollupConfig = {
-  resolve: require('rollup-plugin-node-resolve'),
-  commonjs: require('rollup-plugin-commonjs'),
-  replace: require('rollup-plugin-replace'),
-  babel: require('rollup-plugin-babel')
-}
-
 module.exports = function(config) {
   config.set({
 
@@ -22,11 +14,11 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      { pattern: 'src/index.js', watched: false },
+      { pattern: 'src/index.js', watched: false, served: true },
+      { pattern: 'test/**/*.js', watched: true },
       { pattern: 'test/reference/*.*', included: false, served: true },
       { pattern: require.resolve('pdftest/dist/pdftest.client.min.js'), watched: false },
       { pattern: require.resolve('pdftest/dist/chai-pdftest.min.js'), watched: false },
-      'test/**/*.js'
     ],
 
 
@@ -39,8 +31,8 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'src/index.js': ['rollup'],
-      'test/**/*.js': ['rollupTests'],
+      'src/index.js': ['webpack'],
+      'test/**/*.js': ['webpackTests'],
     },
 
 
@@ -91,39 +83,34 @@ module.exports = function(config) {
     },
 
 
-    // Rollup preprocessor
-    // Setup as a normal Rollup config object, just without the input
-    // It has its own autoWatch behaviour, so Karma's file watcher must be disabled on its files
-    rollupPreprocessor: {
+    webpackPreprocessor: {
       output: {
-        name: 'html2pdf',
-        format: 'iife',
-        globals: {
-          jspdf: 'jsPDF',
-          html2canvas: 'html2canvas'
-        }
+        library: 'html2pdf',
+        libraryExport: 'default',
       },
-      plugins: [
-        rollupConfig.resolve(),
-        rollupConfig.commonjs(),
-        rollupConfig.replace({ 'process.env.NODE_ENV': JSON.stringify('production') }),
-        rollupConfig.babel({ exclude: 'node_modules/**' })
-      ]
+      target: 'browserslist',
+      optimization: { minimize: false },
+      watch: true,
+      module: {
+        rules: [
+          {
+            test: /\.m?js$/,
+            exclude: /node_modules/,
+            use: ['babel-loader'],
+          },
+        ],
+      },
     },
 
     customPreprocessors: {
-      rollupTests: {
-        base: 'rollup',
+      webpackTests: {
+        base: 'webpack',
         options: {
-          output: {
-            name: 'html2pdf_test',
-            format: 'iife',
-            globals: {
-              html2pdf: 'html2pdf',
-            },
-          },
+          output: {},
+          externals: ['html2pdf'],
+          externalsType: 'global',
         },
       },
     },
-  })
+  });
 }
