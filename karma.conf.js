@@ -84,7 +84,6 @@ module.exports = function(config) {
 
 
     webpackPreprocessor: {
-      configPath: './webpack.config.js',
       output: {
         library: 'html2pdf',
         libraryExport: 'default',
