@@ -1,6 +1,11 @@
 const path = require('path');
 const webpack = require('webpack');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const pkg = require('./package.json');
+
+const banner = `${pkg.name} v${pkg.version}
+Copyright (c) ${(new Date).getFullYear()} Erik Koopmans
+Released under the ${pkg.license} License.`;
 
 module.exports = env => {
   const isDev = env.dev;
@@ -77,6 +82,7 @@ module.exports = env => {
     devtool: build.devtool || false,
     plugins: [
       new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
+      new webpack.BannerPlugin(banner),
       new BundleAnalyzerPlugin(build.bundleAnalyzer || { analyzerMode: 'disabled' }),
     ],
     experiments: build.experiments,
