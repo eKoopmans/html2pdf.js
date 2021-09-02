@@ -1,5 +1,5 @@
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
+import * as html2canvas from 'html2canvas';
 import { objType, createElement, cloneNode, toPx } from './utils.js';
 import es6promise from 'es6-promise';
 var Promise = es6promise.Promise;
