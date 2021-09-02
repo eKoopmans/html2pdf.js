@@ -3,6 +3,7 @@ const webpack = require('webpack');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const pkg = require('./package.json');
 
+const externals = [ 'jspdf', 'html2canvas' ];
 const banner = `${pkg.name} v${pkg.version}
 Copyright (c) ${(new Date).getFullYear()} Erik Koopmans
 Released under the ${pkg.license} License.`;
@@ -24,8 +25,8 @@ module.exports = env => {
       }
     },
     target: 'browserslist',
-    externals: bundle ? [] : ['jspdf', 'html2canvas'],
-    externalsType: 'global',
+    externals: bundle ? [] : externals,
+    externalsType: 'umd',
     optimization: { minimize: min },
     devtool: min ? 'source-map' : false,
     bundleAnalyzer: {
@@ -41,7 +42,7 @@ module.exports = env => {
       libraryTarget,
     },
     target,
-    externals: ['jspdf', 'html2canvas'],
+    externals: externals,
     externalsType,
     babelOptions: {
       presets: ['@babel/preset-env'],
