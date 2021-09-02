@@ -14,7 +14,7 @@ module.exports = env => {
   const watch = isDev;
   const useAnalyzer = env.analyzer;
 
-  const makeBrowserConfig = (filename, { bundle, min } = {}) => ({
+  const makeUMDConfig = (filename, { bundle, min } = {}) => ({
     output: {
       filename,
       library: {
@@ -36,30 +36,12 @@ module.exports = env => {
     },
   });
 
-  const makeNodeConfig = (filename, { libraryTarget, target, externalsType, ...config }) => ({
-    output: {
-      filename,
-      libraryTarget,
-    },
-    target,
-    externals: externals,
-    externalsType,
-    babelOptions: {
-      presets: ['@babel/preset-env'],
-      targets: { node: "current" },
-    },
-    ...config,
-  });
-
-
   const builds = {
-    browser: makeBrowserConfig('html2pdf.js'),
-    browserBundle: makeBrowserConfig('html2pdf.bundle.js', { bundle: true }),
-    node: makeNodeConfig('require/html2pdf.cjs.js', { libraryTarget: 'commonjs2', target: 'node', externalsType: 'commonjs' }),
-    es: makeNodeConfig('include/html2pdf.es.js', { libraryTarget: 'module', target: 'es6', externalsType: 'module', experiments: { outputModule: true } }),
+    umd: makeUMDConfig('html2pdf.js'),
+    umdBundle: makeUMDConfig('html2pdf.bundle.js', { bundle: true }),
     ...(isDev ? {} : {
-      browserMin: makeBrowserConfig('html2pdf.min.js', { min: true }),
-      browserBundleMin: makeBrowserConfig('html2pdf.bundle.min.js', { bundle: true, min: true }),
+      umdMin: makeUMDConfig('html2pdf.min.js', { min: true }),
+      umdBundleMin: makeUMDConfig('html2pdf.bundle.min.js', { bundle: true, min: true }),
     }),
   };
 
