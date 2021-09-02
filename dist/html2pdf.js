@@ -1,18 +1,18 @@
 /*!
- * html2pdf.js v0.10.0
+ * html2pdf.js v0.10.1
  * Copyright (c) 2021 Erik Koopmans
  * Released under the MIT License.
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
+		module.exports = factory(require("jspdf"), require("html2canvas"));
 	else if(typeof define === 'function' && define.amd)
-		define("html2pdf", [], factory);
+		define("html2pdf", ["jspdf", "html2canvas"], factory);
 	else if(typeof exports === 'object')
-		exports["html2pdf"] = factory();
+		exports["html2pdf"] = factory(require("jspdf"), require("html2canvas"));
 	else
-		root["html2pdf"] = factory();
-})(self, function() {
+		root["html2pdf"] = factory(root["jspdf"], root["html2canvas"]);
+})(self, function(__WEBPACK_EXTERNAL_MODULE_jspdf__, __WEBPACK_EXTERNAL_MODULE_html2canvas__) {
 return /******/ (function() { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -133,7 +133,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 // Import dependencies.
  // Get dimensions of a PDF page, as determined by jsPDF.
 
-(jspdf__WEBPACK_IMPORTED_MODULE_7___default().getPageSize) = function (orientation, unit, format) {
+jspdf__WEBPACK_IMPORTED_MODULE_7__.jsPDF.getPageSize = function (orientation, unit, format) {
   // Decode options object
   if (_typeof(orientation) === 'object') {
     var options = orientation;
@@ -273,7 +273,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
   return info;
 };
 
-/* harmony default export */ __webpack_exports__["default"] = ((jspdf__WEBPACK_IMPORTED_MODULE_7___default()));
+/* harmony default export */ __webpack_exports__["default"] = (jspdf__WEBPACK_IMPORTED_MODULE_7__.jsPDF);
 
 /***/ }),
 
@@ -772,7 +772,7 @@ Worker.prototype.toCanvas = function toCanvas() {
     // Handle old-fashioned 'onrendered' argument.
     var options = Object.assign({}, this.opt.html2canvas);
     delete options.onrendered;
-    return html2canvas__WEBPACK_IMPORTED_MODULE_9___default()(this.prop.container, options);
+    return html2canvas__WEBPACK_IMPORTED_MODULE_9__(this.prop.container, options);
   }).then(function toCanvas_post(canvas) {
     // Handle old-fashioned 'onrendered' argument.
     var onRendered = this.opt.html2canvas.onrendered || function () {};
@@ -818,7 +818,7 @@ Worker.prototype.toPdf = function toPdf() {
     pageCanvas.width = canvas.width;
     pageCanvas.height = pxPageHeight; // Initialize the PDF.
 
-    this.prop.pdf = this.prop.pdf || new (jspdf__WEBPACK_IMPORTED_MODULE_8___default())(opt.jsPDF);
+    this.prop.pdf = this.prop.pdf || new jspdf__WEBPACK_IMPORTED_MODULE_8__.jsPDF(opt.jsPDF);
 
     for (var page = 0; page < nPages; page++) {
       // Trim the final page to reduce file size.
@@ -990,7 +990,7 @@ Worker.prototype.setMargin = function setMargin(margin) {
 Worker.prototype.setPageSize = function setPageSize(pageSize) {
   return this.then(function setPageSize_main() {
     // Retrieve page-size based on jsPDF settings, if not explicitly provided.
-    pageSize = pageSize || jspdf__WEBPACK_IMPORTED_MODULE_8___default().getPageSize(this.opt.jsPDF); // Add 'inner' field if not present.
+    pageSize = pageSize || jspdf__WEBPACK_IMPORTED_MODULE_8__.jsPDF.getPageSize(this.opt.jsPDF); // Add 'inner' field if not present.
 
     if (!pageSize.hasOwnProperty('inner')) {
       pageSize.inner = {
@@ -5738,7 +5738,7 @@ return Promise$1;
 /***/ (function(module) {
 
 "use strict";
-module.exports = self["html2canvas"];
+module.exports = __WEBPACK_EXTERNAL_MODULE_html2canvas__;
 
 /***/ }),
 
@@ -5749,7 +5749,7 @@ module.exports = self["html2canvas"];
 /***/ (function(module) {
 
 "use strict";
-module.exports = self["jspdf"];
+module.exports = __WEBPACK_EXTERNAL_MODULE_jspdf__;
 
 /***/ })
 

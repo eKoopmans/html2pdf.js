@@ -1,5 +1,5 @@
 /*!
- * html2pdf.js v0.10.0
+ * html2pdf.js v0.10.1
  * Copyright (c) 2021 Erik Koopmans
  * Released under the MIT License.
  */
@@ -1229,7 +1229,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 // Import dependencies.
  // Get dimensions of a PDF page, as determined by jsPDF.
 
-jspdf__WEBPACK_IMPORTED_MODULE_7__.default.getPageSize = function (orientation, unit, format) {
+jspdf__WEBPACK_IMPORTED_MODULE_7__.jsPDF.getPageSize = function (orientation, unit, format) {
   // Decode options object
   if (_typeof(orientation) === 'object') {
     var options = orientation;
@@ -1369,7 +1369,7 @@ jspdf__WEBPACK_IMPORTED_MODULE_7__.default.getPageSize = function (orientation, 
   return info;
 };
 
-/* harmony default export */ __webpack_exports__["default"] = (jspdf__WEBPACK_IMPORTED_MODULE_7__.default);
+/* harmony default export */ __webpack_exports__["default"] = (jspdf__WEBPACK_IMPORTED_MODULE_7__.jsPDF);
 
 /***/ }),
 
@@ -1867,7 +1867,7 @@ Worker.prototype.toCanvas = function toCanvas() {
     // Handle old-fashioned 'onrendered' argument.
     var options = Object.assign({}, this.opt.html2canvas);
     delete options.onrendered;
-    return html2canvas__WEBPACK_IMPORTED_MODULE_9___default()(this.prop.container, options);
+    return html2canvas__WEBPACK_IMPORTED_MODULE_9__(this.prop.container, options);
   }).then(function toCanvas_post(canvas) {
     // Handle old-fashioned 'onrendered' argument.
     var onRendered = this.opt.html2canvas.onrendered || function () {};
@@ -1913,7 +1913,7 @@ Worker.prototype.toPdf = function toPdf() {
     pageCanvas.width = canvas.width;
     pageCanvas.height = pxPageHeight; // Initialize the PDF.
 
-    this.prop.pdf = this.prop.pdf || new jspdf__WEBPACK_IMPORTED_MODULE_8__.default(opt.jsPDF);
+    this.prop.pdf = this.prop.pdf || new jspdf__WEBPACK_IMPORTED_MODULE_8__.jsPDF(opt.jsPDF);
 
     for (var page = 0; page < nPages; page++) {
       // Trim the final page to reduce file size.
@@ -2085,7 +2085,7 @@ Worker.prototype.setMargin = function setMargin(margin) {
 Worker.prototype.setPageSize = function setPageSize(pageSize) {
   return this.then(function setPageSize_main() {
     // Retrieve page-size based on jsPDF settings, if not explicitly provided.
-    pageSize = pageSize || jspdf__WEBPACK_IMPORTED_MODULE_8__.default.getPageSize(this.opt.jsPDF); // Add 'inner' field if not present.
+    pageSize = pageSize || jspdf__WEBPACK_IMPORTED_MODULE_8__.jsPDF.getPageSize(this.opt.jsPDF); // Add 'inner' field if not present.
 
     if (!pageSize.hasOwnProperty('inner')) {
       pageSize.inner = {
