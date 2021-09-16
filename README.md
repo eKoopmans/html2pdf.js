@@ -2,10 +2,13 @@
 
 html2pdf.js converts any webpage or element into a printable PDF entirely client-side using [html2canvas](https://github.com/niklasvh/html2canvas) and [jsPDF](https://github.com/MrRio/jsPDF).
 
+> :warning: There have been several issues reported in v0.10. They are being investigated but in the meantime you may wish to remain on v0.9.3 ("^0.9.3" in npm, or [use cdnjs for HTML script tags](https://cdnjs.com/libraries/html2pdf.js/0.9.3)).
+
 ## Table of contents
 
 - [Getting started](#getting-started)
-  - [HTML](#html)
+  - [CDN](#cdn)
+  - [Raw JS](#raw-js)
   - [NPM](#npm)
   - [Bower](#bower)
   - [Console](#console)
@@ -30,15 +33,25 @@ html2pdf.js converts any webpage or element into a printable PDF entirely client
 
 ## Getting started
 
-#### HTML
+#### CDN
 
-The simplest way to use html2pdf.js is to download `dist/html2pdf.bundle.min.js` to your project folder and include it in your HTML with:
+The simplest way to use html2pdf.js is to include it as a script in your HTML by using cdnjs:
+
+```html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+```
+
+Using a CDN URL will lock you to a specific version, which should ensure stability and give you control over when to change versions. cdnjs gives you access to [all past versions of html2pdf.js](https://cdnjs.com/libraries/html2pdf.js).
+
+*Note: [Read about dependences](#dependencies) for more information about using the unbundled version `dist/html2canvas.min.js`.*
+
+#### Raw JS
+
+ You may also download `dist/html2pdf.bundle.min.js` directly to your project folder and include it in your HTML with:
 
 ```html
 <script src="html2pdf.bundle.min.js"></script>
 ```
-
-*Note: [Click here](#dependencies) for more information about using the unbundled version `dist/html2canvas.min.js`.*
 
 #### NPM
 
@@ -63,7 +76,7 @@ If you're on a webpage that you can't modify directly and wish to use html2pdf.j
         script.src = url;
         document.head.appendChild(script);
     }
-    addScript('https://raw.githack.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js');
+    addScript('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js');
     ```
 3. You may now execute html2pdf.js commands directly from the console. To capture a default PDF of the entire page, use `html2pdf(document.body)`.
 
