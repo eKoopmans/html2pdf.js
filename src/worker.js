@@ -1,6 +1,7 @@
 import { jsPDF } from 'jspdf';
 import * as html2canvas from 'html2canvas';
 import { objType, createElement, cloneNode, toPx } from './utils.js';
+import * as UPNG from 'upng-js';
 import es6promise from 'es6-promise';
 var Promise = es6promise.Promise;
 
@@ -210,7 +211,8 @@ Worker.prototype.toPdf = function toPdf() {
 
       // Add the page to the PDF.
       if (page)  this.prop.pdf.addPage();
-      var imgData = pageCanvas.toDataURL('image/' + opt.image.type, opt.image.quality);
+	  var imgData = opt.image.type.toLowerCase() === 'png' ? this.toPNG(pageCanvas, opt.image.quality) : pageCanvas.toDataURL(
+        'image/' + opt.image.type, opt.image.quality);
       this.prop.pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0],
                         this.prop.pageSize.inner.width, pageHeight);
     }
@@ -466,6 +468,27 @@ Worker.prototype.error = function error(msg) {
   });
 };
 
+/**
+ * Custom method to process PNG output for the generated PDF
+ * @param canvas
+ * @return compressed PNG
+ * @author Michal Skala (michal@lincware.com)
+ */
+Worker.prototype.toPNG = function (canvas, quality) {
+  const colors = quality === 0 || quality === 1 ? 0 : getColorsFromQuality(quality);
+
+  const dt = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+  const png = UPNG.encode([dt.buffer], canvas.width, canvas.height, colors);
+  return 'data:image/png;base64,' + btoa(new Uint8Array(png).reduce((data, byte) => {
+    return data + String.fromCharCode(byte);
+  }, ''));
+
+  function getColorsFromQuality(qual) {
+    // we need to get int value between 2 to 8
+    const pow = Math.min(8, Math.max(2, Math.floor(qual * 10)));
+    return Math.pow(2, pow);
+  }
+}
 
 /* ----- ALIASES ----- */
 
