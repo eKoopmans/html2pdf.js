@@ -1,5 +1,5 @@
 {
-  "name": "html2pdf.js",
+  "name": "html2pdf-dom-to-image-more",
   "version": "0.9.2",
   "description": "Client-side HTML-to-PDF rendering using pure JS",
   "main": "dist/require/html2pdf.cjs.js",
@@ -7,7 +7,7 @@
   "browser": "dist/html2pdf.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eKoopmans/html2pdf.js.git"
+    "url": "git+https://github.com/Quoin/html2pdf.js.git"
   },
   "keywords": [
     "javascript",
@@ -17,20 +17,17 @@
     "canvas"
   ],
   "author": {
-    "name": "Erik Koopmans",
-    "email": "erik@erik-koopmans.com",
-    "url": "https://www.erik-koopmans.com"
+    "name": "primeroIMS",
+    "email": "primero.dev@quoininc.com"
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/eKoopmans/html2pdf.js/issues"
+    "url": "https://github.com/Quoin/html2pdf.js/issues"
   },
-  "homepage": "https://ekoopmans.github.io/html2pdf.js/",
   "dependencies": {
-    "dom-to-image-more": "^2.8.0",
-    "es6-promise": "^4.2.5",
-    "html2canvas": "^1.0.0-alpha.12",
-    "jspdf": "^1.4.1"
+    "dom-to-image-more": "^2.9.1",
+    "es6-promise": "^4.2.8",
+    "jspdf": "^2.4.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
