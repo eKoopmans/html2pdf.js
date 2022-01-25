@@ -29,6 +29,9 @@ Worker.prototype.toPdf = function toPdf() {
     opt.html2canvas.width = pxPageWidth;
     opt.html2canvas.height = pxPageHeight;
 
+    opt.html2canvas.windowWidth = pxPageWidth;
+    opt.html2canvas.windowHeight = pxPageHeight;
+
     // Initialize the PDF.
     this.prop.pdf = this.prop.pdf || new jsPDF(opt.jsPDF);
 
@@ -37,7 +40,8 @@ Worker.prototype.toPdf = function toPdf() {
       delete options.onrendered;
 
       // Increase the y value to capture only the 'current' page
-      opt.html2canvas.y = (page + 1) * pxPageHeight;
+      options.x = 0;
+      options.y = page * pxPageHeight;
 
       var canvas = await html2canvas(this.prop.container, options);
 
@@ -45,7 +49,7 @@ Worker.prototype.toPdf = function toPdf() {
       if (page)  this.prop.pdf.addPage();
       var imgData = canvas.toDataURL('image/' + opt.image.type, opt.image.quality);
       this.prop.pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0],
-        pxPageWidth, pxPageHeight);
+                        this.prop.pageSize.inner.width, this.prop.pageSize.inner.height);
     }
     
     document.body.removeChild(this.prop.overlay);
