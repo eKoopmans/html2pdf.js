@@ -1,6 +1,6 @@
 {
   "name": "html2pdf-dom-to-image-more",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "description": "Client-side HTML-to-PDF rendering using pure JS",
   "main": "dist/html2pdf.js",
   "files": [
@@ -27,7 +27,7 @@
     "url": "https://github.com/Quoin/html2pdf.js/issues"
   },
   "dependencies": {
-    "dom-to-image-more": "^2.9.5",
+    "dom-to-image-more": "2.8.0",
     "es6-promise": "^4.2.8",
     "jspdf": "^2.5.1"
   },
