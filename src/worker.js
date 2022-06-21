@@ -1,15 +1,15 @@
 import { jsPDF } from 'jspdf';
 import * as html2canvas from 'html2canvas';
 import { objType, createElement, cloneNode, toPx } from './utils.js';
-import es6promise from 'es6-promise';
-var Promise = es6promise.Promise;
 
 /* ----- CONSTRUCTOR ----- */
 
 var Worker = function Worker(opt) {
   // Create the root parent for the proto chain, and the starting Worker.
-  var root = Object.assign(Worker.convert(Promise.resolve()),
-                           JSON.parse(JSON.stringify(Worker.template)));
+  var root = Object.assign(
+    Worker.convert(Promise.resolve()),
+    JSON.parse(JSON.stringify(Worker.template))
+  );
   var self = Worker.convert(Promise.resolve(), root);
 
   // Set progress, optional settings, and return.
@@ -37,22 +37,22 @@ Worker.template = {
     canvas: null,
     img: null,
     pdf: null,
-    pageSize: null
+    pageSize: null,
   },
   progress: {
     val: 0,
     state: null,
     n: 0,
-    stack: []
+    stack: [],
   },
   opt: {
     filename: 'file.pdf',
-    margin: [0,0,0,0],
+    margin: [0, 0, 0, 0],
     image: { type: 'jpeg', quality: 0.95 },
     enableLinks: true,
     html2canvas: {},
-    jsPDF: {}
-  }
+    jsPDF: {},
+  },
 };
 
 /* ----- FROM / TO ----- */
@@ -60,20 +60,28 @@ Worker.template = {
 Worker.prototype.from = function from(src, type) {
   function getType(src) {
     switch (objType(src)) {
-      case 'string':  return 'string';
-      case 'element': return src.nodeName.toLowerCase === 'canvas' ? 'canvas' : 'element';
-      default:        return 'unknown';
+      case 'string':
+        return 'string';
+      case 'element':
+        return src.nodeName.toLowerCase === 'canvas' ? 'canvas' : 'element';
+      default:
+        return 'unknown';
     }
   }
 
   return this.then(function from_main() {
     type = type || getType(src);
     switch (type) {
-      case 'string':  return this.set({ src: createElement('div', {innerHTML: src}) });
-      case 'element': return this.set({ src: src });
-      case 'canvas':  return this.set({ canvas: src });
-      case 'img':     return this.set({ img: src });
-      default:        return this.error('Unknown source type.');
+      case 'string':
+        return this.set({ src: createElement('div', { innerHTML: src }) });
+      case 'element':
+        return this.set({ src: src });
+      case 'canvas':
+        return this.set({ canvas: src });
+      case 'img':
+        return this.set({ img: src });
+      default:
+        return this.error('Unknown source type.');
     }
   });
 };
@@ -97,21 +105,35 @@ Worker.prototype.to = function to(target) {
 Worker.prototype.toContainer = function toContainer() {
   // Set up function prerequisites.
   var prereqs = [
-    function checkSrc() { return this.prop.src || this.error('Cannot duplicate - no source HTML.'); },
-    function checkPageSize() { return this.prop.pageSize || this.setPageSize(); }
+    function checkSrc() {
+      return this.prop.src || this.error('Cannot duplicate - no source HTML.');
+    },
+    function checkPageSize() {
+      return this.prop.pageSize || this.setPageSize();
+    },
   ];
 
   return this.thenList(prereqs).then(function toContainer_main() {
     // Define the CSS styles for the container and its overlay parent.
     var overlayCSS = {
-      position: 'fixed', overflow: 'hidden', zIndex: 1000,
-      left: 0, right: 0, bottom: 0, top: 0,
-      backgroundColor: 'rgba(0,0,0,0.8)'
+      position: 'fixed',
+      overflow: 'hidden',
+      zIndex: 1000,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      top: 0,
+      backgroundColor: 'rgba(0,0,0,0.8)',
     };
     var containerCSS = {
-      position: 'absolute', width: this.prop.pageSize.inner.width + this.prop.pageSize.unit,
-      left: 0, right: 0, top: 0, height: 'auto', margin: 'auto',
-      backgroundColor: 'white'
+      position: 'absolute',
+      width: '100%',
+      left: 0,
+      right: 0,
+      top: 0,
+      height: 'auto',
+      margin: 'auto',
+      backgroundColor: 'white',
     };
 
     // Set the overlay to hidden (could be changed in the future to provide a print preview).
@@ -119,8 +141,11 @@ Worker.prototype.toContainer = function toContainer() {
 
     // Create and attach the elements.
     var source = cloneNode(this.prop.src, this.opt.html2canvas.javascriptEnabled);
-    this.prop.overlay = createElement('div',   { className: 'html2pdf__overlay', style: overlayCSS });
-    this.prop.container = createElement('div', { className: 'html2pdf__container', style: containerCSS });
+    this.prop.overlay = createElement('div', { className: 'html2pdf__overlay', style: overlayCSS });
+    this.prop.container = createElement('div', {
+      className: 'html2pdf__container',
+      style: containerCSS,
+    });
     this.prop.container.appendChild(source);
     this.prop.overlay.appendChild(this.prop.container);
     document.body.appendChild(this.prop.overlay);
@@ -130,36 +155,44 @@ Worker.prototype.toContainer = function toContainer() {
 Worker.prototype.toCanvas = function toCanvas() {
   // Set up function prerequisites.
   var prereqs = [
-    function checkContainer() { return document.body.contains(this.prop.container)
-                               || this.toContainer(); }
+    function checkContainer() {
+      return document.body.contains(this.prop.container) || this.toContainer();
+    },
   ];
 
   // Fulfill prereqs then create the canvas.
-  return this.thenList(prereqs).then(function toCanvas_main() {
-    // Handle old-fashioned 'onrendered' argument.
-    var options = Object.assign({}, this.opt.html2canvas);
-    delete options.onrendered;
+  return this.thenList(prereqs)
+    .then(function toCanvas_main() {
+      // Handle old-fashioned 'onrendered' argument.
+      var options = Object.assign({}, this.opt.html2canvas);
+      delete options.onrendered;
 
-    return html2canvas(this.prop.container, options);
-  }).then(function toCanvas_post(canvas) {
-    // Handle old-fashioned 'onrendered' argument.
-    var onRendered = this.opt.html2canvas.onrendered || function () {};
-    onRendered(canvas);
+      return html2canvas(this.prop.container, options);
+    })
+    .then(function toCanvas_post(canvas) {
+      // Handle old-fashioned 'onrendered' argument.
+      var onRendered = this.opt.html2canvas.onrendered || function () {};
+      onRendered(canvas);
 
-    this.prop.canvas = canvas;
-    document.body.removeChild(this.prop.overlay);
-  });
+      this.prop.canvas = canvas;
+      document.body.removeChild(this.prop.overlay);
+    });
 };
 
 Worker.prototype.toImg = function toImg() {
   // Set up function prerequisites.
   var prereqs = [
-    function checkCanvas() { return this.prop.canvas || this.toCanvas(); }
+    function checkCanvas() {
+      return this.prop.canvas || this.toCanvas();
+    },
   ];
 
   // Fulfill prereqs then create the image.
   return this.thenList(prereqs).then(function toImg_main() {
-    var imgData = this.prop.canvas.toDataURL('image/' + this.opt.image.type, this.opt.image.quality);
+    var imgData = this.prop.canvas.toDataURL(
+      'image/' + this.opt.image.type,
+      this.opt.image.quality
+    );
     this.prop.img = document.createElement('img');
     this.prop.img.src = imgData;
   });
@@ -168,7 +201,9 @@ Worker.prototype.toImg = function toImg() {
 Worker.prototype.toPdf = function toPdf() {
   // Set up function prerequisites.
   var prereqs = [
-    function checkCanvas() { return this.prop.canvas || this.toCanvas(); }
+    function checkCanvas() {
+      return this.prop.canvas || this.toCanvas();
+    },
   ];
 
   // Fulfill prereqs then create the image.
@@ -194,11 +229,11 @@ Worker.prototype.toPdf = function toPdf() {
     // Initialize the PDF.
     this.prop.pdf = this.prop.pdf || new jsPDF(opt.jsPDF);
 
-    for (var page=0; page<nPages; page++) {
+    for (var page = 0; page < nPages; page++) {
       // Trim the final page to reduce file size.
-      if (page === nPages-1 && pxFullHeight % pxPageHeight !== 0) {
+      if (page === nPages - 1 && pxFullHeight % pxPageHeight !== 0) {
         pageCanvas.height = pxFullHeight % pxPageHeight;
-        pageHeight = pageCanvas.height * this.prop.pageSize.inner.width / pageCanvas.width;
+        pageHeight = (pageCanvas.height * this.prop.pageSize.inner.width) / pageCanvas.width;
       }
 
       // Display the page.
@@ -206,17 +241,24 @@ Worker.prototype.toPdf = function toPdf() {
       var h = pageCanvas.height;
       pageCtx.fillStyle = 'white';
       pageCtx.fillRect(0, 0, w, h);
-      pageCtx.drawImage(canvas, 0, page*pxPageHeight, w, h, 0, 0, w, h);
+      pageCtx.drawImage(canvas, 0, page * pxPageHeight, w, h, 0, 0, w, h);
 
       // Add the page to the PDF.
-      if (page)  this.prop.pdf.addPage();
+      if (page) this.prop.pdf.addPage();
       var imgData = pageCanvas.toDataURL('image/' + opt.image.type, opt.image.quality);
-      this.prop.pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0],
-                        this.prop.pageSize.inner.width, pageHeight);
+      this.prop.pdf.addImage(
+        imgData,
+        opt.image.type,
+        opt.margin[1],
+        opt.margin[0],
+        this.prop.pageSize.inner.width,
+        pageHeight,
+        undefined,
+        'FAST'
+      );
     }
   });
 };
-
 
 /* ----- OUTPUT / SAVE ----- */
 
@@ -233,7 +275,9 @@ Worker.prototype.output = function output(type, options, src) {
 Worker.prototype.outputPdf = function outputPdf(type, options) {
   // Set up function prerequisites.
   var prereqs = [
-    function checkPdf() { return this.prop.pdf || this.toPdf(); }
+    function checkPdf() {
+      return this.prop.pdf || this.toPdf();
+    },
   ];
 
   // Fulfill prereqs then perform the appropriate output.
@@ -250,7 +294,9 @@ Worker.prototype.outputPdf = function outputPdf(type, options) {
 Worker.prototype.outputImg = function outputImg(type, options) {
   // Set up function prerequisites.
   var prereqs = [
-    function checkImg() { return this.prop.img || this.toImg(); }
+    function checkImg() {
+      return this.prop.img || this.toImg();
+    },
   ];
 
   // Fulfill prereqs then perform the appropriate output.
@@ -264,7 +310,7 @@ Worker.prototype.outputImg = function outputImg(type, options) {
         return this.prop.img.src;
       case 'datauri':
       case 'dataurl':
-        return document.location.href = this.prop.img.src;
+        return (document.location.href = this.prop.img.src);
       default:
         throw 'Image output type "' + type + '" is not supported.';
     }
@@ -274,15 +320,17 @@ Worker.prototype.outputImg = function outputImg(type, options) {
 Worker.prototype.save = function save(filename) {
   // Set up function prerequisites.
   var prereqs = [
-    function checkPdf() { return this.prop.pdf || this.toPdf(); }
+    function checkPdf() {
+      return this.prop.pdf || this.toPdf();
+    },
   ];
 
   // Fulfill prereqs, update the filename (if provided), and save the PDF.
-  return this.thenList(prereqs).set(
-    filename ? { filename: filename } : null
-  ).then(function save_main() {
-    this.prop.pdf.save(this.opt.filename);
-  });
+  return this.thenList(prereqs)
+    .set(filename ? { filename: filename } : null)
+    .then(function save_main() {
+      this.prop.pdf.save(this.opt.filename);
+    });
 };
 
 /* ----- SET / GET ----- */
@@ -301,16 +349,23 @@ Worker.prototype.set = function set(opt) {
       case 'margin':
         return this.setMargin.bind(this, opt.margin);
       case 'jsPDF':
-        return function set_jsPDF() { this.opt.jsPDF = opt.jsPDF; return this.setPageSize(); }
+        return function set_jsPDF() {
+          this.opt.jsPDF = opt.jsPDF;
+          return this.setPageSize();
+        };
       case 'pageSize':
         return this.setPageSize.bind(this, opt.pageSize);
       default:
         if (key in Worker.template.prop) {
           // Set pre-defined properties in prop.
-          return function set_prop() { this.prop[key] = opt[key]; }
+          return function set_prop() {
+            this.prop[key] = opt[key];
+          };
         } else {
           // Set any other properties in opt.
-          return function set_opt() { this.opt[key] = opt[key] };
+          return function set_opt() {
+            this.opt[key] = opt[key];
+          };
         }
     }
   }, this);
@@ -324,7 +379,7 @@ Worker.prototype.set = function set(opt) {
 Worker.prototype.get = function get(key, cbk) {
   return this.then(function get_main() {
     // Fetch the requested property, either as a predefined prop or in opt.
-    var val = (key in Worker.template.prop) ? this.prop[key] : this.opt[key];
+    var val = key in Worker.template.prop ? this.prop[key] : this.opt[key];
     return cbk ? cbk(val) : val;
   });
 };
@@ -349,7 +404,7 @@ Worker.prototype.setMargin = function setMargin(margin) {
     // Set the margin property, then update pageSize.
     this.opt.margin = margin;
   }).then(this.setPageSize);
-}
+};
 
 Worker.prototype.setPageSize = function setPageSize(pageSize) {
   return this.then(function setPageSize_main() {
@@ -359,12 +414,12 @@ Worker.prototype.setPageSize = function setPageSize(pageSize) {
     // Add 'inner' field if not present.
     if (!pageSize.hasOwnProperty('inner')) {
       pageSize.inner = {
-        width:  pageSize.width - this.opt.margin[1] - this.opt.margin[3],
-        height: pageSize.height - this.opt.margin[0] - this.opt.margin[2]
+        width: pageSize.width - this.opt.margin[1] - this.opt.margin[3],
+        height: pageSize.height - this.opt.margin[0] - this.opt.margin[2],
       };
       pageSize.inner.px = {
-        width:  toPx(pageSize.inner.width, pageSize.k),
-        height: toPx(pageSize.inner.height, pageSize.k)
+        width: toPx(pageSize.inner.width, pageSize.k),
+        height: toPx(pageSize.inner.height, pageSize.k),
       };
       pageSize.inner.ratio = pageSize.inner.height / pageSize.inner.width;
     }
@@ -372,14 +427,14 @@ Worker.prototype.setPageSize = function setPageSize(pageSize) {
     // Attach pageSize to this.
     this.prop.pageSize = pageSize;
   });
-}
+};
 
 Worker.prototype.setProgress = function setProgress(val, state, n, stack) {
   // Immediately update all progress values.
-  if (val != null)    this.progress.val = val;
-  if (state != null)  this.progress.state = state;
-  if (n != null)      this.progress.n = n;
-  if (stack != null)  this.progress.stack = stack;
+  if (val != null) this.progress.val = val;
+  if (state != null) this.progress.state = state;
+  if (n != null) this.progress.n = n;
+  if (stack != null) this.progress.stack = stack;
   this.progress.ratio = this.progress.val / this.progress.state;
 
   // Return this for command chaining.
@@ -405,13 +460,16 @@ Worker.prototype.then = function then(onFulfilled, onRejected) {
   return this.thenCore(onFulfilled, onRejected, function then_main(onFulfilled, onRejected) {
     // Update progress while queuing, calling, and resolving `then`.
     self.updateProgress(null, null, 1, [onFulfilled]);
-    return Promise.prototype.then.call(this, function then_pre(val) {
-      self.updateProgress(null, onFulfilled);
-      return val;
-    }).then(onFulfilled, onRejected).then(function then_post(val) {
-      self.updateProgress(1);
-      return val;
-    });
+    return Promise.prototype.then
+      .call(this, function then_pre(val) {
+        self.updateProgress(null, onFulfilled);
+        return val;
+      })
+      .then(onFulfilled, onRejected)
+      .then(function then_post(val) {
+        self.updateProgress(1);
+        return val;
+      });
   });
 };
 
@@ -421,8 +479,12 @@ Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected, thenBase)
 
   // Wrap `this` for encapsulation and bind it to the promise handlers.
   var self = this;
-  if (onFulfilled)  { onFulfilled = onFulfilled.bind(self); }
-  if (onRejected)   { onRejected = onRejected.bind(self); }
+  if (onFulfilled) {
+    onFulfilled = onFulfilled.bind(self);
+  }
+  if (onRejected) {
+    onRejected = onRejected.bind(self);
+  }
 
   // Cast self into a Promise to avoid polyfills recursively defining `then`.
   var isNative = Promise.toString().indexOf('[native code]') !== -1 && Promise.name === 'Promise';
@@ -449,7 +511,9 @@ Worker.prototype.thenList = function thenList(fns) {
 
 Worker.prototype['catch'] = function (onRejected) {
   // Bind `this` to the promise handler, call `catch`, and return a Worker.
-  if (onRejected)   { onRejected = onRejected.bind(this); }
+  if (onRejected) {
+    onRejected = onRejected.bind(this);
+  }
   var returnVal = Promise.prototype['catch'].call(this, onRejected);
   return Worker.convert(returnVal, this);
 };
@@ -466,14 +530,12 @@ Worker.prototype.error = function error(msg) {
   });
 };
 
-
 /* ----- ALIASES ----- */
 
 Worker.prototype.using = Worker.prototype.set;
 Worker.prototype.saveAs = Worker.prototype.save;
 Worker.prototype.export = Worker.prototype.output;
 Worker.prototype.run = Worker.prototype.then;
-
 
 /* ----- FINISHING ----- */
 
