@@ -25,7 +25,7 @@ import { objType, createElement } from '../utils.js';
 
 // Refs to original functions.
 var orig = {
-  toContainer: Worker.prototype.toContainer
+  toContainer: Worker.prototype.toContainer,
 };
 
 // Add pagebreak default options to the Worker template.
@@ -33,32 +33,43 @@ Worker.template.opt.pagebreak = {
   mode: ['css', 'legacy'],
   before: [],
   after: [],
-  avoid: []
+  avoid: [],
 };
 
 Worker.prototype.toContainer = function toContainer() {
   return orig.toContainer.call(this).then(function toContainer_pagebreak() {
     // Setup root element and inner page height.
     var root = this.prop.container;
-    var pxPageHeight = this.prop.pageSize.inner.px.height;
+    const containerWidth = root.getBoundingClientRect().width;
+
+    // This value is slightly off if the browser console is open on one of the sides
+    const zoomLevel = window.outerWidth / window.innerWidth;
+
+    /**
+     * Why is this number 10?
+     * I have no idea, but it works...
+     * This person inspired me to use 10: @link https://stackoverflow.com/a/38606030
+     */
+    const magicNumber = 10;
+
+    var pxPageHeight = containerWidth * this.prop.pageSize.inner.ratio + magicNumber / zoomLevel;
 
     // Check all requested modes.
     var modeSrc = [].concat(this.opt.pagebreak.mode);
     var mode = {
-      avoidAll:   modeSrc.indexOf('avoid-all') !== -1,
-      css:        modeSrc.indexOf('css') !== -1,
-      legacy:     modeSrc.indexOf('legacy') !== -1
+      avoidAll: modeSrc.indexOf('avoid-all') !== -1,
+      css: modeSrc.indexOf('css') !== -1,
+      legacy: modeSrc.indexOf('legacy') !== -1,
     };
 
     // Get arrays of all explicitly requested elements.
     var select = {};
     var self = this;
-    ['before', 'after', 'avoid'].forEach(function(key) {
+    ['before', 'after', 'avoid'].forEach(function (key) {
       var all = mode.avoidAll && key === 'avoid';
       select[key] = all ? [] : [].concat(self.opt.pagebreak[key] || []);
       if (select[key].length > 0) {
-        select[key] = Array.prototype.slice.call(
-          root.querySelectorAll(select[key].join(', ')));
+        select[key] = Array.prototype.slice.call(root.querySelectorAll(select[key].join(', ')));
       }
     });
 
@@ -72,8 +83,8 @@ Worker.prototype.toContainer = function toContainer() {
       // Setup pagebreak rules based on legacy and avoidAll modes.
       var rules = {
         before: false,
-        after:  mode.legacy && legacyEls.indexOf(el) !== -1,
-        avoid:  mode.avoidAll
+        after: mode.legacy && legacyEls.indexOf(el) !== -1,
+        avoid: mode.avoidAll,
       };
 
       // Add rules for css mode.
@@ -85,14 +96,15 @@ Worker.prototype.toContainer = function toContainer() {
         var breakOpt = ['always', 'page', 'left', 'right'];
         var avoidOpt = ['avoid', 'avoid-page'];
         rules = {
-          before: rules.before || breakOpt.indexOf(style.breakBefore || style.pageBreakBefore) !== -1,
-          after:  rules.after || breakOpt.indexOf(style.breakAfter || style.pageBreakAfter) !== -1,
-          avoid:  rules.avoid || avoidOpt.indexOf(style.breakInside || style.pageBreakInside) !== -1
+          before:
+            rules.before || breakOpt.indexOf(style.breakBefore || style.pageBreakBefore) !== -1,
+          after: rules.after || breakOpt.indexOf(style.breakAfter || style.pageBreakAfter) !== -1,
+          avoid: rules.avoid || avoidOpt.indexOf(style.breakInside || style.pageBreakInside) !== -1,
         };
       }
 
       // Add rules for explicit requests.
-      Object.keys(rules).forEach(function(key) {
+      Object.keys(rules).forEach(function (key) {
         rules[key] = rules[key] || select[key].indexOf(el) !== -1;
       });
 
@@ -114,19 +126,23 @@ Worker.prototype.toContainer = function toContainer() {
 
       // Before: Create a padding div to push the element to the next page.
       if (rules.before) {
-        var pad = createElement('div', {style: {
-          display: 'block',
-          height: pxPageHeight - (clientRect.top % pxPageHeight) + 'px'
-        }});
+        var pad = createElement('div', {
+          style: {
+            display: 'block',
+            height: pxPageHeight - (clientRect.top % pxPageHeight) + 'px',
+          },
+        });
         el.parentNode.insertBefore(pad, el);
       }
 
       // After: Create a padding div to fill the remaining page.
       if (rules.after) {
-        var pad = createElement('div', {style: {
-          display: 'block',
-          height: pxPageHeight - (clientRect.bottom % pxPageHeight) + 'px'
-        }});
+        var pad = createElement('div', {
+          style: {
+            display: 'block',
+            height: pxPageHeight - (clientRect.bottom % pxPageHeight) + 'px',
+          },
+        });
         el.parentNode.insertBefore(pad, el.nextSibling);
       }
     });
