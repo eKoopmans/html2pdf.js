@@ -363,8 +363,10 @@ Worker.prototype.setPageSize = function setPageSize(pageSize) {
         height: pageSize.height - this.opt.margin[0] - this.opt.margin[2]
       };
       pageSize.inner.px = {
-        width:  toPx(pageSize.inner.width, pageSize.k),
-        height: toPx(pageSize.inner.height, pageSize.k)
+        width:  toPx(pageSize.inner.width, pageSize.k, true),
+        height: toPx(pageSize.inner.height, pageSize.k, true),
+        widthExact:toPx(pageSize.inner.width, pageSize.k, false),
+        heightExact: toPx(pageSize.inner.height, pageSize.k, false),
       };
       pageSize.inner.ratio = pageSize.inner.height / pageSize.inner.width;
     }
