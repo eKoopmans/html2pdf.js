@@ -22,7 +22,8 @@ module.exports = env => {
         type: 'umd',
         export: 'default',
         umdNamedDefine: true,
-      }
+      },
+      globalObject: 'this',
     },
     target: 'browserslist',
     externals: bundle ? [] : externals,
@@ -56,6 +57,7 @@ module.exports = env => {
     output: {
       path: path.resolve(__dirname, 'dist'),
       chunkFormat: false,
+      globalObject: 'this',
       ...build.output,
     },
     node: false,
