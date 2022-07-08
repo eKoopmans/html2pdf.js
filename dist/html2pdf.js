@@ -1,6 +1,6 @@
 /*!
  * html2pdf.js v0.10.1
- * Copyright (c) 2021 Erik Koopmans
+ * Copyright (c) 2022 Erik Koopmans
  * Released under the MIT License.
  */
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -12,7 +12,7 @@
 		exports["html2pdf"] = factory(require("jspdf"), require("html2canvas"));
 	else
 		root["html2pdf"] = factory(root["jspdf"], root["html2canvas"]);
-})(self, function(__WEBPACK_EXTERNAL_MODULE_jspdf__, __WEBPACK_EXTERNAL_MODULE_html2canvas__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_jspdf__, __WEBPACK_EXTERNAL_MODULE_html2canvas__) {
 return /******/ (function() { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
