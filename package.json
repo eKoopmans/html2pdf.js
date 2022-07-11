@@ -3,6 +3,7 @@
   "version": "0.10.1",
   "description": "Client-side HTML-to-PDF rendering using pure JS",
   "main": "dist/html2pdf.js",
+  "types": "index.d.ts",
   "files": [
     "/src",
     "/dist"
