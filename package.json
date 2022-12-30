@@ -52,7 +52,7 @@
     "karma-mocha-reporter": "^2.2.5",
     "karma-sauce-launcher": "^2.0.2",
     "karma-webpack-preprocessor": "ekoopmans/karma-webpack-preprocessor#update-2021",
-    "mocha": "^6.1.4",
+    "mocha": "^10.2.0",
     "pdftest": "^0.3.0",
     "rimraf": "^2.6.2",
     "start-server-and-test": "^1.12.0",
