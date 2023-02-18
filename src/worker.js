@@ -4,38 +4,21 @@ import { objType, createElement, cloneNode, toPx } from './utils.js';
 import es6promise from 'es6-promise';
 var Promise = es6promise.Promise;
 
-/* ----- CONSTRUCTOR ----- */
+// Helpers for Workers
 
-var Worker = function Worker(opt) {
-  // Create the root parent for the proto chain, and the starting Worker.
-  var root = Object.assign(convert(Promise.resolve()),
-                           JSON.parse(JSON.stringify(Worker.template)));
-  var self = convert(Promise.resolve(), root);
-
-  // Set progress, optional settings, and return.
-  this.progress = {
-    val: 1,
-    state: Worker,
-    n: 1,
-    stack: [Worker],
-    ratio: 1 / Worker
-  }
-  self = self.set(opt);
-  return self;
-};
-
-// Boilerplate for subclassing Promise.
-Worker.prototype = Object.create(Promise.prototype);
-Worker.prototype.constructor = Worker;
-
-// Converts/casts promises into Workers.
+/**
+ * Converts/casts promises into Workers
+ * @param {Promise} promise 
+ * @param {*} [inherit]  prototype to inherit from for the new worker, defaults to Worker.prototype 
+ * @returns {worker}
+ */
 function convert(promise, inherit) {
   // Uses prototypal inheritance to receive changes made to ancestors' properties.
   promise.__proto__ = inherit || Worker.prototype;
   return promise;
 }
 
-Worker.template = {
+var workerTemplate = {
   prop: {
     src: null,
     container: null,
@@ -311,7 +294,7 @@ Worker.prototype.set = function set(opt) {
       case 'pageSize':
         return this.setPageSize.bind(this, opt.pageSize);
       default:
-        if (key in Worker.template.prop) {
+        if (key in workerTemplate.prop) {
           // Set pre-defined properties in prop.
           return function set_prop() { this.prop[key] = opt[key]; }
         } else {
@@ -330,7 +313,7 @@ Worker.prototype.set = function set(opt) {
 Worker.prototype.get = function get(key, cbk) {
   return this.then(function get_main() {
     // Fetch the requested property, either as a predefined prop or in opt.
-    var val = (key in Worker.template.prop) ? this.prop[key] : this.opt[key];
+    var val = (key in workerTemplate.prop) ? this.prop[key] : this.opt[key];
     return cbk ? cbk(val) : val;
   });
 };
