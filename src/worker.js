@@ -33,7 +33,7 @@ function convert(promise, inherit) {
   // Uses prototypal inheritance to receive changes made to ancestors' properties.
   promise.__proto__ = inherit || Worker.prototype;
   return promise;
-};
+}
 
 Worker.template = {
   prop: {
@@ -136,8 +136,8 @@ Worker.prototype.toContainer = function toContainer() {
 Worker.prototype.toCanvas = function toCanvas() {
   // Set up function prerequisites.
   var prereqs = [
-    function checkContainer() { return document.body.contains(this.prop.container)
-                               || this.toContainer(); }
+    function checkContainer() { return document.body.contains(this.prop.container) ||
+                                this.toContainer(); }
   ];
 
   // Fulfill prereqs then create the canvas.
@@ -385,7 +385,7 @@ Worker.prototype.updateProgress = function updateProgress(val, state, n, stack) 
   if (state) this.progress.state = state;
   if (n) this.progress.n += n;
   if (stack) this.progress.stack = this.progress.stack.concat(stack);
-  this.progress.ratio = this.progress.val / this.progress.state;
+  this.progress.ratio = this.progress.val / this.progress.state;  // This doesn't work right now but it's okay - it just gets set to NaN and isn't used.
 
   // Return this for command chaining.
   return this
