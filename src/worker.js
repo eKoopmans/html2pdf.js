@@ -8,9 +8,9 @@ var Promise = es6promise.Promise;
 
 var Worker = function Worker(opt) {
   // Create the root parent for the proto chain, and the starting Worker.
-  var root = Object.assign(Worker.convert(Promise.resolve()),
+  var root = Object.assign(convert(Promise.resolve()),
                            JSON.parse(JSON.stringify(Worker.template)));
-  var self = Worker.convert(Promise.resolve(), root);
+  var self = convert(Promise.resolve(), root);
 
   // Set progress, optional settings, and return.
   self = self.setProgress(1, Worker, 1, [Worker]);
@@ -23,7 +23,7 @@ Worker.prototype = Object.create(Promise.prototype);
 Worker.prototype.constructor = Worker;
 
 // Converts/casts promises into Workers.
-Worker.convert = function convert(promise, inherit) {
+function convert(promise, inherit) {
   // Uses prototypal inheritance to receive changes made to ancestors' properties.
   promise.__proto__ = inherit || Worker.prototype;
   return promise;
@@ -426,11 +426,11 @@ Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected, thenBase)
 
   // Cast self into a Promise to avoid polyfills recursively defining `then`.
   var isNative = Promise.toString().indexOf('[native code]') !== -1 && Promise.name === 'Promise';
-  var selfPromise = isNative ? self : Worker.convert(Object.assign({}, self), Promise.prototype);
+  var selfPromise = isNative ? self : convert(Object.assign({}, self), Promise.prototype);
 
   // Return the promise, after casting it into a Worker and preserving props.
   var returnVal = thenBase.call(selfPromise, onFulfilled, onRejected);
-  return Worker.convert(returnVal, self.__proto__);
+  return convert(returnVal, self.__proto__);
 };
 
 Worker.prototype.thenExternal = function thenExternal(onFulfilled, onRejected) {
@@ -451,7 +451,7 @@ Worker.prototype['catch'] = function (onRejected) {
   // Bind `this` to the promise handler, call `catch`, and return a Worker.
   if (onRejected)   { onRejected = onRejected.bind(this); }
   var returnVal = Promise.prototype['catch'].call(this, onRejected);
-  return Worker.convert(returnVal, this);
+  return convert(returnVal, this);
 };
 
 Worker.prototype.catchExternal = function catchExternal(onRejected) {
