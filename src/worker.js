@@ -13,7 +13,13 @@ var Worker = function Worker(opt) {
   var self = convert(Promise.resolve(), root);
 
   // Set progress, optional settings, and return.
-  self = self.setProgress(1, Worker, 1, [Worker]);
+  this.progress = {
+    val: 1,
+    state: Worker,
+    n: 1,
+    stack: [Worker],
+    ratio: 1 / Worker
+  }
   self = self.set(opt);
   return self;
 };
@@ -374,26 +380,15 @@ Worker.prototype.setPageSize = function setPageSize(pageSize) {
   });
 }
 
-Worker.prototype.setProgress = function setProgress(val, state, n, stack) {
-  // Immediately update all progress values.
-  if (val != null)    this.progress.val = val;
-  if (state != null)  this.progress.state = state;
-  if (n != null)      this.progress.n = n;
-  if (stack != null)  this.progress.stack = stack;
+Worker.prototype.updateProgress = function updateProgress(val, state, n, stack) {
+  if (val) this.progress.val += val;
+  if (state) this.progress.state = state;
+  if (n) this.progress.n += n;
+  if (stack) this.progress.stack = this.progress.stack.concat(stack);
   this.progress.ratio = this.progress.val / this.progress.state;
 
   // Return this for command chaining.
-  return this;
-};
-
-Worker.prototype.updateProgress = function updateProgress(val, state, n, stack) {
-  // Immediately update all progress values, using setProgress.
-  return this.setProgress(
-    val ? this.progress.val + val : null,
-    state ? state : null,
-    n ? this.progress.n + n : null,
-    stack ? this.progress.stack.concat(stack) : null
-  );
+  return this
 };
 
 /* ----- PROMISE MAPPING ----- */
