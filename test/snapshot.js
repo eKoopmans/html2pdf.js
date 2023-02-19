@@ -1,6 +1,6 @@
 describe('snapshot', () => {
   before(() => {
-    return pdftest.api.connect('http://localhost:3000');
+    return pdftest.api.connect('http://localhost:3001');
   });
 
   function loadElement({ document, tagName, src }) {
