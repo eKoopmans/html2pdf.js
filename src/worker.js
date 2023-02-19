@@ -18,30 +18,97 @@ function convert(promise, inherit) {
   return promise;
 }
 
-var workerTemplate = {
-  prop: {
-    src: null,
-    container: null,
-    overlay: null,
-    canvas: null,
-    img: null,
-    pdf: null,
-    pageSize: null
-  },
-  progress: {
-    val: 0,
-    state: null,
-    n: 0,
-    stack: []
-  },
-  opt: {
-    filename: 'file.pdf',
-    margin: [0,0,0,0],
-    image: { type: 'jpeg', quality: 0.95 },
-    enableLinks: true,
-    html2canvas: {},
-    jsPDF: {}
+/**
+ * @typedef {Object} workerProp
+ * @property {HTMLElement} src - The source HTML element.
+ * @property {HTMLElement} container - The container element.
+ * @property {HTMLElement} overlay - The overlay element.
+ * @property {HTMLCanvasElement} canvas - The canvas element.
+ * @property {HTMLImageElement} img - The image element.
+ * @property {jsPDF} pdf - The jsPDF object.
+ * @property {Array} pageSize - The page size.
+ */
+
+/**
+ * @typedef {Object} workerProgress
+ * @property {Number} val - The current progress value.
+ * @property {String} state - The current progress state.
+ * @property {Number} n - The current progress step.
+ * @property {Array} stack - The current progress stack.
+ * @property {Number} ratio - The current progress ratio.
+ */
+
+/**
+ * @typedef {Object} workerOpt
+ * @property {String} filename - The filename of the PDF.
+ * @property {Array} margin - The page margins.
+ * @property {Object} image - The image options.
+ * @property {String} image.type - The image type.
+ * @property {Number} image.quality - The image quality.
+ * @property {Boolean} enableLinks - Whether to enable links.
+ * @property {Object} html2canvas - The html2canvas options.
+ * @property {Object} jsPDF - The jsPDF options.
+ */
+
+
+/* ----- CONSTRUCTOR ----- */
+/**
+ * @constructs worker
+ */
+var Worker = function Worker(opt) {
+  // Create the root parent for the proto chain, and the starting Worker.
+  var root = Object.assign(convert(Promise.resolve()),
+                           JSON.parse(JSON.stringify(Worker.template)));
+  var self = convert(Promise.resolve(), root);
+
+  // Set progress, optional settings, and return.
+  this.progress = {
+    val: 1,
+    state: Worker,
+    n: 1,
+    stack: [Worker],
+    ratio: 1 / Worker
   }
+  self = self.set(opt);
+  return self;
+};
+
+// Boilerplate for subclassing Promise.
+Worker.prototype = Object.create(Promise.prototype);
+Worker.prototype.constructor = Worker;
+
+
+/**
+* @type {object}
+* @property {workerProp} prop
+* @property {workerProgress} progress
+* @property {workerOpt} opt
+*/
+Worker.template = {
+ prop: {
+   src: null,
+   container: null,
+   overlay: null,
+   canvas: null,
+   img: null,
+   pdf: null,
+   pageSize: null
+ },
+ progress: {
+   val: 0,
+   state: null,
+   n: 0,
+   stack: [],
+   ratio: NaN
+ },
+ opt: {
+   filename: 'file.pdf',
+   margin: [0,0,0,0],
+   image: { type: 'jpeg', quality: 0.95 },
+   enableLinks: true,
+   html2canvas: {},
+   jsPDF: {}
+ }
 };
 
 /* ----- FROM / TO ----- */
@@ -253,7 +320,8 @@ Worker.prototype.outputImg = function outputImg(type, options) {
         return this.prop.img.src;
       case 'datauri':
       case 'dataurl':
-        return document.location.href = this.prop.img.src;
+        document.location.href = this.prop.img.src;
+        return this.prop.img.src;
       default:
         throw 'Image output type "' + type + '" is not supported.';
     }
@@ -294,7 +362,7 @@ Worker.prototype.set = function set(opt) {
       case 'pageSize':
         return this.setPageSize.bind(this, opt.pageSize);
       default:
-        if (key in workerTemplate.prop) {
+        if (key in Worker.template.prop) {
           // Set pre-defined properties in prop.
           return function set_prop() { this.prop[key] = opt[key]; }
         } else {
@@ -313,7 +381,7 @@ Worker.prototype.set = function set(opt) {
 Worker.prototype.get = function get(key, cbk) {
   return this.then(function get_main() {
     // Fetch the requested property, either as a predefined prop or in opt.
-    var val = (key in workerTemplate.prop) ? this.prop[key] : this.opt[key];
+    var val = (key in Worker.template.prop) ? this.prop[key] : this.opt[key];
     return cbk ? cbk(val) : val;
   });
 };
@@ -376,6 +444,7 @@ Worker.prototype.updateProgress = function updateProgress(val, state, n, stack) 
 
 /* ----- PROMISE MAPPING ----- */
 
+
 Worker.prototype.then = function then(onFulfilled, onRejected) {
   // Wrap `this` for encapsulation.
   var self = this;
@@ -392,6 +461,7 @@ Worker.prototype.then = function then(onFulfilled, onRejected) {
     });
   });
 };
+
 
 Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected, thenBase) {
   // Handle optional thenBase parameter.
