@@ -1,3 +1,15 @@
+# Fork notes:
+- Fully updated all the dependencies.  All npm scripts run (tested all except publish/release with npm v9 and node v18).
+- Pulled .convert() out of the Worker object, I don't think they need to be part of it and it simplifies the Worker  
+- jsdoc comments for all Worker methods and properties, and the function in utils.js  
+- Removed `setProgress` function in favour of just using `updateProgress` and manually setting the initial properties - helps the type checker & reduces # of methods  
+
+To do:
+- Look through PRs on github, pull in some of them.
+- Finish the progress api (might fix my bug!)
+- If not fixed by the progress api - fix my bug (keeps hanging without ever resolving the promise chain)
+
+
 # html2pdf.js
 
 html2pdf.js converts any webpage or element into a printable PDF entirely client-side using [html2canvas](https://github.com/niklasvh/html2canvas) and [jsPDF](https://github.com/MrRio/jsPDF).
