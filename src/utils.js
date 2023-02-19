@@ -1,4 +1,8 @@
-// Determine the type of a variable/object.
+/**
+ * Determine the type of a variable/object. Includes "array" and "element" beyond the normal types.
+ * @param {Object} obj - The object to determine the type of.
+ * @returns {"undefined"|"string"|"number"|"function"|"array"|"element"|"object"|"unknown"} The type of the object.
+ */ 
 export const objType = function objType(obj) {
   var type = typeof obj;
   if (type === 'undefined')                                 return 'undefined';
@@ -11,7 +15,16 @@ export const objType = function objType(obj) {
   else                                                      return 'unknown';
 };
 
-// Create an HTML element with optional className, innerHTML, and style.
+
+/** 
+ * Create an HTML element with optional className, innerHTML, and style.
+ * @param {string} tagName - The tag name of the element to create.
+ * @param {Object} opt - The options for the element.
+ * @param {string} opt.className - The class name of the element.
+ * @param {string} opt.innerHTML - The inner HTML of the element.
+ * @param {Object} opt.style - The style of the element.
+ * @returns {Element} The created element.
+ */
 export const createElement = function createElement(tagName, opt) {
   var el = document.createElement(tagName);
   if (opt.className)  el.className = opt.className;
@@ -28,7 +41,13 @@ export const createElement = function createElement(tagName, opt) {
   return el;
 };
 
-// Deep-clone a node and preserve contents/properties.
+
+/**
+ * Deep-clone a node and preserve contents/properties.
+ * @param {Element} node - The node to clone.
+ * @param {boolean} javascriptEnabled - Whether to clone script nodes.
+ * @returns {Element} The cloned node.
+ */
 export const cloneNode = function cloneNode(node, javascriptEnabled) {
   // Recursively clone the node.
   var clone = node.nodeType === 3 ? document.createTextNode(node.nodeValue) : node.cloneNode(false);
@@ -59,7 +78,13 @@ export const cloneNode = function cloneNode(node, javascriptEnabled) {
   return clone;
 }
 
-// Convert units from px using the conversion value 'k' from jsPDF.
+
+/**
+ * Convert units from px using the conversion value 'k' from jsPDF.  If an object is passed in, the conversion is applied to all properties.
+ * @param {number|Object} obj - The value or object to convert.
+ * @param {number} k - The conversion value from jsPDF.
+ * @returns {number|Object} The converted value or object.
+ */
 export const unitConvert = function unitConvert(obj, k) {
   if (objType(obj) === 'number') {
     return obj * 72 / 96 / k;
@@ -72,7 +97,13 @@ export const unitConvert = function unitConvert(obj, k) {
   }
 };
 
-// Convert units to px using the conversion value 'k' from jsPDF.
+
+/**
+ * Convert units to px using the conversion value 'k' from jsPDF.
+ * @param {number} val - The value to convert.
+ * @param {number} k - The conversion value from jsPDF.
+ * @returns {number} The converted value.
+ */ 
 export const toPx = function toPx(val, k) {
   return Math.floor(val * k / 72 * 96);
 }
