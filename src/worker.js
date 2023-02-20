@@ -4,7 +4,6 @@ import { objType, createElement, cloneNode, toPx } from './utils.js';
 import es6promise from 'es6-promise';
 var Promise = es6promise.Promise;
 
-// Helpers for Workers
 
 /**
  * Converts/casts promises into Workers
@@ -113,6 +112,14 @@ Worker.template = {
 
 /* ----- FROM / TO ----- */
 
+
+/**
+ * Sets the source (HTML string or element) for the PDF
+ * Adds a promise to the promise chain, which modifies calls this.set() to update src, canvas, or img.
+ * @param {*} src 
+ * @param {"string"|"element"|"canvas"|"img"} [type] 
+ * @returns {worker} returns itself for chaining.
+ */
 Worker.prototype.from = function from(src, type) {
   function getType(src) {
     switch (objType(src)) {
@@ -134,6 +141,21 @@ Worker.prototype.from = function from(src, type) {
   });
 };
 
+
+/**
+ * Wrapper for toContainer, toCanvas, toImg, and toPdf.
+ * 
+ * How the 'to' system works:
+ * To create the pdf, we create a container element, convert it to a canvas, convert the canvas to an image, and then convert the image to a pdf.
+ * Therefore, .toContainer, .toCanvas, .toImg, and .toPdf must all be called, in that order.
+ * To create a user-friendly API, we do not require the user to call all four functions.
+ * Instead, there is a "prereq" system:
+ * Each function has a list of prereq functions, which are passed into the .thenList() function, and THEN the main function is passed into .then().
+ * Each prereq function checks to see if its condition is met, and if not, it returns a promise to run the necessary function, which gets put on the chain by .thenList
+ * 
+ * @param {"container"|"canvas"|"img"|"pdf"} target
+ * @returns {worker} returns itself for chaining.
+ */
 Worker.prototype.to = function to(target) {
   // Route the 'to' request to the appropriate method.
   switch (target) {
@@ -150,6 +172,15 @@ Worker.prototype.to = function to(target) {
   }
 };
 
+/**
+ * Creates the container element that the pdf will be generated from.  this.prop.src must be set.
+ * The container element is like this, and it gets appended to the document body:
+ * <div class="html2pdf__overlay">
+ *  <div class="html2pdf__container"></div>
+ * </div>
+ * The overlay and container divs are assigned to this.prop.overlay and this.prop.container, respectively.
+ * @returns {worker} returns itself for chaining.
+ */
 Worker.prototype.toContainer = function toContainer() {
   // Set up function prerequisites.
   var prereqs = [
@@ -183,6 +214,12 @@ Worker.prototype.toContainer = function toContainer() {
   });
 };
 
+
+/**
+ * Creates a canvas element from the container element, by calling html2canvas.
+ * removes the overlay div from the body when done.
+ * @returns {worker} returns itself for chaining.
+ */
 Worker.prototype.toCanvas = function toCanvas() {
   // Set up function prerequisites.
   var prereqs = [
@@ -207,6 +244,11 @@ Worker.prototype.toCanvas = function toCanvas() {
   });
 };
 
+
+/**
+ * Converts the canvas to an image by setting the data URL as the src of a new image element.
+ * @returns {worker} returns itself for chaining.
+ */
 Worker.prototype.toImg = function toImg() {
   // Set up function prerequisites.
   var prereqs = [
@@ -221,6 +263,11 @@ Worker.prototype.toImg = function toImg() {
   });
 };
 
+
+/**
+ * Creates the pdf by setting this.prop.pdf to a new jsPDF object, splitting the canvas into pages, and adding each page to the pdf using the jspdf addImage function.
+ * @returns {worker} returns itself for chaining.
+ */
 Worker.prototype.toPdf = function toPdf() {
   // Set up function prerequisites.
   var prereqs = [
@@ -276,6 +323,13 @@ Worker.prototype.toPdf = function toPdf() {
 
 /* ----- OUTPUT / SAVE ----- */
 
+/**
+ * Wrapper for outputPdf and outputImg.
+ * @param {"arraybuffer"|"blob"|"bloburi"|"bloburl"|"datauristring"|"dataurlstring"|"dataurlnewwindow"|"datauri"|"dataurl"|"img"} type
+ * @param {*} options if pdf - options for jsPDF.output, if img, unused.
+ * @param {"img"|"image"|"pdf"} src 
+ * @returns {worker} returns itself for chaining.  
+ */
 Worker.prototype.output = function output(type, options, src) {
   // Redirect requests to the correct function (outputPdf / outputImg).
   src = src || 'pdf';
@@ -286,6 +340,13 @@ Worker.prototype.output = function output(type, options, src) {
   }
 };
 
+
+/**
+ * Make sure the pdf is available, then call the jsPDF output function.
+ * @param {"arraybuffer"|"blob"|"bloburi"|"bloburl"|"datauristring"|"dataurlstring"|"dataurlnewwindow"|"datauri"|"dataurl"} type
+ * @param {*} options options for jsPDF.output
+ * @returns {worker} returns itself for chaining.  
+ */
 Worker.prototype.outputPdf = function outputPdf(type, options) {
   // Set up function prerequisites.
   var prereqs = [
@@ -303,6 +364,13 @@ Worker.prototype.outputPdf = function outputPdf(type, options) {
   });
 };
 
+
+/**
+ * Add a function to the promise chain that will return the image data
+ * @param {"datauristring"|"dataurlstring"|"datauri"|"dataurl"|"img"} type desired output type
+ * @param {*} options unused, but included for consistency with outputPdf
+ * @returns {worker} returns itself for chaining. 
+ */
 Worker.prototype.outputImg = function outputImg(type, options) {
   // Set up function prerequisites.
   var prereqs = [
@@ -328,6 +396,12 @@ Worker.prototype.outputImg = function outputImg(type, options) {
   });
 };
 
+
+/**
+ * Adds a promise to the chain which will call jsPDF.save() to save the PDF to the user's computer.
+ * @param {string} [filename] optional filename, if not included the jsPDF default will be used
+ * @returns {worker} returns itself for chaining.
+ */
 Worker.prototype.save = function save(filename) {
   // Set up function prerequisites.
   var prereqs = [
@@ -344,6 +418,11 @@ Worker.prototype.save = function save(filename) {
 
 /* ----- SET / GET ----- */
 
+/**
+ * Queue up functions on the promise chain that will set properties of the worker.
+ * @param {object} opt name-value pairs of the new property values to set
+ * @returns {worker} returns itself for chaining.
+ */
 Worker.prototype.set = function set(opt) {
   // TODO: Implement ordered pairs?
 
@@ -378,6 +457,13 @@ Worker.prototype.set = function set(opt) {
   });
 };
 
+
+/**
+ * Add a function to the promise chain that gets a value of one one of the worker's options or properties - you can also provide a callback to receive the value
+ * @param {string} key property to get
+ * @param {Function} [cbk] If included, called with the value and this method returns the return value of cbk.
+ * @returns {worker} returns itself for chaining.
+ */
 Worker.prototype.get = function get(key, cbk) {
   return this.then(function get_main() {
     // Fetch the requested property, either as a predefined prop or in opt.
@@ -386,6 +472,13 @@ Worker.prototype.get = function get(key, cbk) {
   });
 };
 
+
+/**
+ * Adds a set margin function to the promise chain, which modifies this.opt.margin.
+ * Also adds this.setPageSize to the promise chain immediately after.
+ * @param {number|Array} margin number sets all four margins.  array length 2 sets [vertical, horizontal].  array length 4 sets all margins.  Otherwise, calls this.error().
+ * @returns {worker} returns itself for chaining.
+ */
 Worker.prototype.setMargin = function setMargin(margin) {
   return this.then(function setMargin_main() {
     // Parse the margin property: [top, left, bottom, right].
@@ -408,6 +501,12 @@ Worker.prototype.setMargin = function setMargin(margin) {
   }).then(this.setPageSize);
 }
 
+
+/**
+ * Adds a set page size function to the promise chain, which modifies this.prop.pageSize.
+ * @param {object} [pageSize] Optional, finds the page size based on jsPDF settings if not provided.
+ * @returns {worker} returns itself for chaining.
+ */
 Worker.prototype.setPageSize = function setPageSize(pageSize) {
   return this.then(function setPageSize_main() {
     // Retrieve page-size based on jsPDF settings, if not explicitly provided.
@@ -431,6 +530,15 @@ Worker.prototype.setPageSize = function setPageSize(pageSize) {
   });
 }
 
+
+/**
+ * Update the progress properties of the worker - I believe the goal here is to take the entire promise chain, and after each one resolves, we update the progress properties with how far along the chain we are.
+ * @param {number} val ??
+ * @param {*} state ??
+ * @param {number} n current progress step
+ * @param {Array} stack stack of objects that do something ??
+ * @returns {worker} returns itself for chaining.
+ */
 Worker.prototype.updateProgress = function updateProgress(val, state, n, stack) {
   if (val) this.progress.val += val;
   if (state) this.progress.state = state;
@@ -445,6 +553,12 @@ Worker.prototype.updateProgress = function updateProgress(val, state, n, stack) 
 /* ----- PROMISE MAPPING ----- */
 
 
+/**
+ * .then but with extras!  .updateProgress gets called every time, and thenCore gets called instead of the native Promise .then
+ * @param {Function} onFulfilled  resolve
+ * @param {Function} onRejected   reject
+ * @returns {worker} returns itself for chaining.
+ */
 Worker.prototype.then = function then(onFulfilled, onRejected) {
   // Wrap `this` for encapsulation.
   var self = this;
@@ -463,6 +577,13 @@ Worker.prototype.then = function then(onFulfilled, onRejected) {
 };
 
 
+/**
+ * the core of the .then method - this is what gets called instead of the native Promise .then
+ * @param {Function} onFulfilled 
+ * @param {Function} onRejected 
+ * @param {Function} [thenBase]  optional replacement for Promise.prototype.then
+ * @returns {worker} returns itself for chaining.
+ */
 Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected, thenBase) {
   // Handle optional thenBase parameter.
   thenBase = thenBase || Promise.prototype.then;
@@ -481,34 +602,60 @@ Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected, thenBase)
   return convert(returnVal, self.__proto__);
 };
 
+
+/**
+ * Call `then` and return a standard promise (exits the Worker chain).
+ * @param {Function} onFulfilled  'resolve' in a normal promise.
+ * @param {Function} onRejected   'reject' in a normal promise.
+ * @returns {Promise}
+ */
 Worker.prototype.thenExternal = function thenExternal(onFulfilled, onRejected) {
-  // Call `then` and return a standard promise (exits the Worker chain).
   return Promise.prototype.then.call(this, onFulfilled, onRejected);
 };
 
+
+/**
+ * Queue a series of promise 'factories' into the promise chain.
+ * @param {Function[]} fns array of functions that may return promises, to add to the promise chain.
+ * @returns {worker} returns itself for chaining.
+ */
 Worker.prototype.thenList = function thenList(fns) {
-  // Queue a series of promise 'factories' into the promise chain.
   var self = this;
   fns.forEach(function thenList_forEach(fn) {
-    self = self.thenCore(fn);
+    self = self.thenCore(fn);  // Don't need to pass onRejected because errors will be caught by any .catch() in the chain.
   });
   return self;
 };
 
+
+/**
+ * Bind `this` to the promise handler, call `catch`, and return a Worker.
+ * @param {Function} onRejected 
+ * @returns {worker} 
+ */
 Worker.prototype['catch'] = function (onRejected) {
-  // Bind `this` to the promise handler, call `catch`, and return a Worker.
   if (onRejected)   { onRejected = onRejected.bind(this); }
   var returnVal = Promise.prototype['catch'].call(this, onRejected);
   return convert(returnVal, this);
 };
 
+
+/**
+ * Call `catch` and return a standard promise (exits the Worker chain).
+ * @param {Function} onRejected 
+ * @returns {Promise}
+ */
 Worker.prototype.catchExternal = function catchExternal(onRejected) {
-  // Call `catch` and return a standard promise (exits the Worker chain).
   return Promise.prototype['catch'].call(this, onRejected);
 };
 
+
+/**
+ * Throw the error in the Promise chain.
+ * @param {string} msg 
+ * @returns {worker} returns itself for chaining (although in this case 'chaining' just means it will skip ahead to any .catch once it throws the error)
+ */
 Worker.prototype.error = function error(msg) {
-  // Throw the error in the Promise chain.
   return this.then(function error_main() {
     throw new Error(msg);
   });
