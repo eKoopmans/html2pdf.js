@@ -1,13 +1,15 @@
 # Fork notes:
-- Fully updated all the dependencies.  All npm scripts run (tested all except publish/release with npm v9 and node v18).
-- Pulled .convert() out of the Worker object, I don't think they need to be part of it and it simplifies the Worker  
-- jsdoc comments for all Worker methods and properties, and the function in utils.js  
-- Removed `setProgress` function in favour of just using `updateProgress` and manually setting the initial properties - helps the type checker & reduces # of methods  
+- Fully updated all the dependencies.  All npm scripts run (tested all except publish/release, with npm v9 and node v18).
+- Pulled .convert() out of the Worker object, I don't think it needs to be part of it and this simplifies the Worker.
+- jsdoc comments for all Worker methods and properties, and the functions in utils.js.  Installed jsdoc as devDependency and created docs.
+- Dropped support for environments that don't have native Promises.  This proved to be a significant bug fix for my use case.
+- Removed `setProgress` function in favour of just using `updateProgress` and manually setting the initial properties - helps the type checker & reduces # of methods.
+- Initial implementation of the progress-tracking feature.  I don't think it's quite right, but the basics are there.
 
 To do:
-- Look through PRs on github, pull in some of them.
-- Finish the progress api (might fix my bug!)
-- If not fixed by the progress api - fix my bug (keeps hanging without ever resolving the promise chain)
+- Look through the author's notes on Contributing and known issues, at bottom of this document.
+- Look through PRs and issues on github, pull in some of the PRs.
+- Finish the progress api
 
 
 # html2pdf.js
@@ -141,6 +143,7 @@ The basic workflow of html2pdf.js tasks (enforced by the prereq system) is:
 | thenExternal | onFulfilled, onRejected | True Promise method. Using this 'exits' the Worker chain - you will not be able to continue chaining Worker methods after `.thenExternal`. |
 | catch, catchExternal | onRejected | Standard Promise method. `catchExternal` exits the Worker chain - you will not be able to continue chaining Worker methods after `.catchExternal`. |
 | error        | msg                | Throws an error in the Worker's Promise chain. |
+| listen       | (progress) => void | Lets you pass a callback that will be called after each step of the html2pdf process completes.  Useful for making progress bars, etc. |
 
 A few aliases are also provided for convenience:
 
@@ -150,6 +153,25 @@ A few aliases are also provided for convenience:
 | set       | using     |
 | output    | export    |
 | then      | run       |
+
+
+#### Listening to progress updates
+Call the .listen() method at the end of your chain, e.g:  
+```
+html2pdf().set(opt).from(element).save().listen(progressCallback);
+```
+
+The `progressCallback` should be a void function that accepts a single argument, which is this object:
+```
+ {
+  val:    number   -  The current progress step.
+  state:  string   -  A string describing the current step.
+  n:      number   -  The number of total steps that will be completed.
+  stack:  string[] -  The current stack of functions to be executed.
+  ratio:  number   -  The current progress ratio. (val/n) -> Use this for progress bars!
+ }
+```
+
 
 ## Options
 
@@ -243,12 +265,11 @@ The Worker object returned by `html2pdf()` has a built-in progress-tracking mech
 
 ## Dependencies
 
-html2pdf.js depends on the external packages [html2canvas](https://github.com/niklasvh/html2canvas), [jsPDF](https://github.com/MrRio/jsPDF), and [es6-promise](https://github.com/stefanpenner/es6-promise). These dependencies are automatically loaded when using NPM or the bundled package.
+html2pdf.js depends on the external packages [html2canvas](https://github.com/niklasvh/html2canvas), and [jsPDF](https://github.com/MrRio/jsPDF)). These dependencies are automatically loaded when using NPM or the bundled package.
 
 If using the unbundled `dist/html2pdf.min.js` (or its un-minified version), you must also include each dependency. Order is important, otherwise html2canvas will be overridden by jsPDF's own internal implementation:
 
 ```html
-<script src="es6-promise.auto.min.js"></script>
 <script src="jspdf.min.js"></script>
 <script src="html2canvas.min.js"></script>
 <script src="html2pdf.min.js"></script>

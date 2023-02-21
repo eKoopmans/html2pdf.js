@@ -62,7 +62,7 @@ var Worker = function Worker(opt) {
     val: 1,
     state: Worker,
     n: 1,
-    stack: [Worker],
+    stack: [],
     ratio: 1 / Worker
   }
   self = self.set(opt);
@@ -95,7 +95,8 @@ Worker.template = {
    state: null,
    n: 0,
    stack: [],
-   ratio: NaN
+   ratio: NaN,
+   observers: []
  },
  opt: {
    filename: 'file.pdf',
@@ -530,19 +531,30 @@ Worker.prototype.setPageSize = function setPageSize(pageSize) {
 
 /**
  * Update the progress properties of the worker - I believe the goal here is to take the entire promise chain, and after each one resolves, we update the progress properties with how far along the chain we are.
- * @param {number} val ??
+ * @param {number} val current step number
  * @param {*} state ??
- * @param {number} n current progress step
+ * @param {number} n total number of steps 
  */
 Worker.prototype.updateProgress = function updateProgress(val, state, n) {
   if (val) this.progress.val += val;
   if (state) this.progress.state = state;
   if (n) this.progress.n += n;
-  this.progress.ratio = this.progress.val / this.progress.state;  // This doesn't work right now but it's okay - it just gets set to NaN and isn't used.
-
-  // Return this for command chaining.
-  return this
+  this.progress.ratio = this.progress.val / this.progress.n;
+  for (const observer of this.progress.observers) {
+    observer(this.progress);
+  }
 };
+
+
+/**
+ * Attach a function to listen to progress updates.
+ * @param {Function} cbk the function to register, that will listen to progress updates
+ * @returns {worker} returns itself for chaining.
+ */
+Worker.prototype.listen = function listen(cbk) {
+  this.progress.observers.push(cbk);
+  return this;
+}
 
 /* ----- PROMISE MAPPING ----- */
 
@@ -559,9 +571,10 @@ Worker.prototype.then = function then(onFulfilled, onRejected) {
 
   return this.thenCore(onFulfilled, onRejected, function then_main(onFulfilled, onRejected) {
     // Update progress while queuing, calling, and resolving `then`.
-    self.updateProgress(null, null, 1, [onFulfilled]);
+    self.updateProgress(null, null, 1);
     return Promise.prototype.then.call(this, function then_pre(val) {
-      self.updateProgress(null, onFulfilled);
+      const funcName = onFulfilled.name.startsWith('bound ') ? onFulfilled.name.slice(6) : onFulfilled.name;
+      self.updateProgress(null, funcName);
       return val;
     }).then(onFulfilled, onRejected).then(function then_post(val) {
       self.updateProgress(1);
@@ -585,8 +598,8 @@ Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected, thenBase)
   // Wrap `this` for encapsulation and bind it to the promise handlers.
   var self = this;
   if (onFulfilled) {
-    onFulfilled = onFulfilled.bind(self);
     this.progress.stack.push(onFulfilled.name)
+    onFulfilled = onFulfilled.bind(self);
   }
   if (onRejected) {
     onRejected = onRejected.bind(self);
