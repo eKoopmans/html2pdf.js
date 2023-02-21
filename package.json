@@ -1,16 +1,12 @@
 {
-  "name": "html2pdf.js",
-  "version": "0.10.1",
-  "description": "Client-side HTML-to-PDF rendering using pure JS",
+  "name": "html2pdf",
+  "version": "0.11.0",
+  "description": "Fork of html2pdf.js by eKoopmans",
   "main": "dist/html2pdf.js",
   "files": [
     "/src",
     "/dist"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/eKoopmans/html2pdf.js.git"
-  },
   "keywords": [
     "javascript",
     "pdf-generation",
@@ -18,16 +14,10 @@
     "client-side",
     "canvas"
   ],
-  "author": {
-    "name": "Erik Koopmans",
-    "email": "erik@erik-koopmans.com",
-    "url": "https://www.erik-koopmans.com"
+  "directories": {
+    "doc": "docs",
+    "test": "test"
   },
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/eKoopmans/html2pdf.js/issues"
-  },
-  "homepage": "https://ekoopmans.github.io/html2pdf.js/",
   "dependencies": {
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1"
@@ -71,5 +61,15 @@
     "test:run": "npx karma start karma.conf.js",
     "release": "node ./build-scripts.js release",
     "publish-gh": "node ./build-scripts.js publish-gh"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidnbooth/html2pdf.js.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/davidnbooth/html2pdf.js/issues"
+  },
+  "homepage": "https://github.com/davidnbooth/html2pdf.js#readme"
 }
