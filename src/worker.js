@@ -573,8 +573,10 @@ Worker.prototype.then = function then(onFulfilled, onRejected) {
     // Update progress while queuing, calling, and resolving `then`.
     self.updateProgress(null, null, 1);
     return Promise.prototype.then.call(this, function then_pre(val) {
-      const funcName = onFulfilled.name.startsWith('bound ') ? onFulfilled.name.slice(6) : onFulfilled.name;
-      self.updateProgress(null, funcName);
+      if (onFulfilled) {
+        const funcName = onFulfilled.name.startsWith('bound ') ? onFulfilled.name.slice(6) : onFulfilled.name;
+        self.updateProgress(null, funcName);
+      }
       return val;
     }).then(onFulfilled, onRejected).then(function then_post(val) {
       self.updateProgress(1);

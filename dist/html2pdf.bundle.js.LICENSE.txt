@@ -1,13 +1,13 @@
 /*!
- * html2canvas 1.4.1 <https://html2canvas.hertzen.com>
- * Copyright (c) 2022 Niklas von Hertzen <https://hertzen.com>
- * Released under MIT License
+ * @davidnbooth/html2pdf v0.11.0
+ * Copyright (c) 2023 Erik Koopmans
+ * Released under the MIT License.
  */
 
 /*!
- * html2pdf.js v0.10.1
- * Copyright (c) 2023 Erik Koopmans
- * Released under the MIT License.
+ * html2canvas 1.4.1 <https://html2canvas.hertzen.com>
+ * Copyright (c) 2022 Niklas von Hertzen <https://hertzen.com>
+ * Released under MIT License
  */
 
 /*! *****************************************************************************
