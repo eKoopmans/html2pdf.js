@@ -1,9 +1,6 @@
 import { jsPDF } from 'jspdf';
 import * as html2canvas from 'html2canvas';
 import { objType, createElement, cloneNode, toPx } from './utils.js';
-import es6promise from 'es6-promise';
-var Promise = es6promise.Promise;
-
 
 /**
  * Converts/casts promises into Workers
@@ -33,7 +30,7 @@ function convert(promise, inherit) {
  * @property {Number} val - The current progress value.
  * @property {String} state - The current progress state.
  * @property {Number} n - The current progress step.
- * @property {Array} stack - The current progress stack.
+ * @property {Array} stack - The current stack of functions to be executed.
  * @property {Number} ratio - The current progress ratio.
  */
 
@@ -536,14 +533,11 @@ Worker.prototype.setPageSize = function setPageSize(pageSize) {
  * @param {number} val ??
  * @param {*} state ??
  * @param {number} n current progress step
- * @param {Array} stack stack of objects that do something ??
- * @returns {worker} returns itself for chaining.
  */
-Worker.prototype.updateProgress = function updateProgress(val, state, n, stack) {
+Worker.prototype.updateProgress = function updateProgress(val, state, n) {
   if (val) this.progress.val += val;
   if (state) this.progress.state = state;
   if (n) this.progress.n += n;
-  if (stack) this.progress.stack = this.progress.stack.concat(stack);
   this.progress.ratio = this.progress.val / this.progress.state;  // This doesn't work right now but it's okay - it just gets set to NaN and isn't used.
 
   // Return this for command chaining.
@@ -590,15 +584,16 @@ Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected, thenBase)
 
   // Wrap `this` for encapsulation and bind it to the promise handlers.
   var self = this;
-  if (onFulfilled)  { onFulfilled = onFulfilled.bind(self); }
-  if (onRejected)   { onRejected = onRejected.bind(self); }
-
-  // Cast self into a Promise to avoid polyfills recursively defining `then`.
-  var isNative = Promise.toString().indexOf('[native code]') !== -1 && Promise.name === 'Promise';
-  var selfPromise = isNative ? self : convert(Object.assign({}, self), Promise.prototype);
+  if (onFulfilled) {
+    onFulfilled = onFulfilled.bind(self);
+    this.progress.stack.push(onFulfilled.name)
+  }
+  if (onRejected) {
+    onRejected = onRejected.bind(self);
+  }
 
   // Return the promise, after casting it into a Worker and preserving props.
-  var returnVal = thenBase.call(selfPromise, onFulfilled, onRejected);
+  var returnVal = thenBase.call(self, onFulfilled, onRejected);
   return convert(returnVal, self.__proto__);
 };
 
