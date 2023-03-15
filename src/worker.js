@@ -51,7 +51,8 @@ Worker.template = {
     image: { type: 'jpeg', quality: 0.95 },
     enableLinks: true,
     html2canvas: {},
-    jsPDF: {}
+    jsPDF: {},
+    documentProperties: {}
   }
 };
 
@@ -271,16 +272,28 @@ Worker.prototype.outputImg = function outputImg(type, options) {
   });
 };
 
-Worker.prototype.save = function save(filename) {
+Worker.prototype.save = function save(filename, documentProperties) {
   // Set up function prerequisites.
   var prereqs = [
     function checkPdf() { return this.prop.pdf || this.toPdf(); }
   ];
 
+  var setProps = {};
+  if (filename) {
+    setProps.filename = filename;
+  }
+  if (documentProperties && Object.keys(documentProperties).length) {
+    setProps.documentProperties = documentProperties
+  }
+
   // Fulfill prereqs, update the filename (if provided), and save the PDF.
   return this.thenList(prereqs).set(
-    filename ? { filename: filename } : null
+    Object.keys(setProps).length ? setProps : null,
   ).then(function save_main() {
+    if (this.opt.documentProperties && Object.keys(this.opt.documentProperties).length) {
+      this.prop.pdf.setProperties({...this.opt.documentProperties});
+    }
+
     this.prop.pdf.save(this.opt.filename);
   });
 };
