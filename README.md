@@ -121,7 +121,7 @@ The basic workflow of html2pdf.js tasks (enforced by the prereq system) is:
 | output       | type, options, src | Routes to the appropriate `outputPdf` or `outputImg` method based on specified `src` (`'pdf'` (default) or `'img'`). |
 | outputPdf    | type, options      | Sends `type` and `options` to the jsPDF object's `output` method, and returns the result as a Promise (use `.then` to access). See the [jsPDF source code](https://rawgit.com/MrRio/jsPDF/master/docs/jspdf.js.html#line992) for more info. |
 | outputImg    | type, options      | Returns the specified data type for the image as a Promise (use `.then` to access). Supported types: `'img'`, `'datauristring'`/`'dataurlstring'`, and `'datauri'`/`'dataurl'`. |
-| save         | filename           | Saves the PDF object with the optional filename (creates user download prompt). |
+| save         | filename, documentProperties           | Saves the PDF object (creates user download prompt) with the optional filename and document properties (see [jsPDF DocumentProperties](https://github.com/parallax/jsPDF/blob/2d9a91916471f1fbe465dbcdc05db0cf22d720ec/types/index.d.ts#L677)). Ex. `html2pdf().save('output.pdf', { title: 'My PDF' })` |
 | set          | opt                | Sets the specified properties. See [Options](#options) below for more details. |
 | get          | key, cbk           | Returns the property specified in `key`, either as a Promise (use `.then` to access), or by calling `cbk` if provided. |
 | then         | onFulfilled, onRejected | Standard Promise method, with `this` re-bound to the Worker, and with added progress-tracking (see [Progress](#progress) below). Note that `.then` returns a `Worker`, which is a subclass of Promise. |
@@ -146,11 +146,12 @@ html2pdf.js can be configured using an optional `opt` parameter:
 ```js
 var element = document.getElementById('element-to-print');
 var opt = {
-  margin:       1,
-  filename:     'myfile.pdf',
-  image:        { type: 'jpeg', quality: 0.98 },
-  html2canvas:  { scale: 2 },
-  jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+  margin:             1,
+  filename:           'myfile.pdf',
+  image:              { type: 'jpeg', quality: 0.98 },
+  html2canvas:        { scale: 2 },
+  jsPDF:              { unit: 'in', format: 'letter', orientation: 'portrait' }
+  documentProperties: { title: 'My PDF' }
 };
 
 // New Promise-based usage:
@@ -171,6 +172,7 @@ The `opt` parameter has the following optional fields:
 |enableLinks |boolean         |`true`                          |If enabled, PDF hyperlinks are automatically added ontop of all anchor tags.                                |
 |html2canvas |object          |`{ }`                           |Configuration options sent directly to `html2canvas` ([see here](https://html2canvas.hertzen.com/configuration) for usage).|
 |jsPDF       |object          |`{ }`                           |Configuration options sent directly to `jsPDF` ([see here](http://rawgit.com/MrRio/jsPDF/master/docs/jsPDF.html) for usage).|
+|documentProperties |object |`{ }` | Configuration options applied directly to `jsPDF` pdf ([see here](https://www.rotisedapsales.com/snr/cloud_staging/website/jsPDF-master/docs/global.html#setProperties) for usage).
 
 ### Page-breaks
 
