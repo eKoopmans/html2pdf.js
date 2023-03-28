@@ -10,7 +10,7 @@ Released under the ${pkg.license} License.`;
 
 module.exports = env => {
   const isDev = env.dev;
-  const mode = isDev ? 'production' : 'development';
+  const mode = isDev ? 'development' : 'production';
   const watch = isDev;
   const useAnalyzer = env.analyzer;
 

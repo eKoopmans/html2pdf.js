@@ -1,3 +1,35 @@
+# FORK NOTES:
+
+THIS IS JUST A FORK OF [html2pdf.js](https://github.com/eKoopmans/html2pdf.js), it is not an original work.  I needed some changes for my own project, so I am working on it here.
+
+My changes so far:  
+- Fully updated all the dependencies.  All npm scripts run (tested all except publish/release, with npm v9 and node v18).
+- Pulled .convert() out of the Worker object, I don't think it needs to be part of it and this simplifies the Worker.
+- jsdoc comments for all Worker methods and properties, and the functions in utils.js.  Installed jsdoc as devDependency and created docs.
+- Dropped support for environments that don't have native Promises.  This proved to be a significant bug fix for my use case.
+- Removed `setProgress` function in favour of just using `updateProgress` and manually setting the initial properties - helps the type checker & reduces # of methods.
+- Initial implementation of the progress-tracking feature.  I don't think it's quite right, but the basics are there.
+
+Notes on current PRs:
+- All the dependabot ones should be resolved by my changes here.
+- #569 looks good, combine with #340 and document why the calculation is done that way
+- I think #531 looks good, need to jsdoc the new function
+- #516 is interesting - one canvas per page.  This is a resolution for issue #5 listed at the bottom of this document.  #300 also discusses this issue.  Also seems related to #314.  All that said, maybe the real solution is to do what's discussed in issue #4 at the bottom of this document, and use new jsPDF features instead of using html2canvas at all.  
+- #503 is super trivial but good
+- #354 is no longer relevant
+- #170 looks good, probably need to document the option?
+- #447 is probably good
+- #260/#261 seem reasonable
+- #235, meh, as eKoopmans said, changing the renderer is a bigger project
+- #228, meh, sounds like its a problem with how the other library exposes the html2pdf object?
+- #179, meh, see existing response.
+- #41, idk, it might be too old to be still relevant?
+
+
+To do:
+- Finish the progress api
+
+
 # html2pdf.js
 
 html2pdf.js converts any webpage or element into a printable PDF entirely client-side using [html2canvas](https://github.com/niklasvh/html2canvas) and [jsPDF](https://github.com/MrRio/jsPDF).
@@ -129,6 +161,7 @@ The basic workflow of html2pdf.js tasks (enforced by the prereq system) is:
 | thenExternal | onFulfilled, onRejected | True Promise method. Using this 'exits' the Worker chain - you will not be able to continue chaining Worker methods after `.thenExternal`. |
 | catch, catchExternal | onRejected | Standard Promise method. `catchExternal` exits the Worker chain - you will not be able to continue chaining Worker methods after `.catchExternal`. |
 | error        | msg                | Throws an error in the Worker's Promise chain. |
+| listen       | (progress) => void | Lets you pass a callback that will be called after each step of the html2pdf process completes.  Useful for making progress bars, etc. |
 
 A few aliases are also provided for convenience:
 
@@ -138,6 +171,8 @@ A few aliases are also provided for convenience:
 | set       | using     |
 | output    | export    |
 | then      | run       |
+
+
 
 ## Options
 
@@ -227,16 +262,29 @@ These options are limited to the available settings for [HTMLCanvasElement.toDat
 
 ## Progress tracking
 
-The Worker object returned by `html2pdf()` has a built-in progress-tracking mechanism. It will be updated to allow a progress callback that will be called with each update, however it is currently a work-in-progress.
+The Worker object returned by `html2pdf()` has a built-in progress-tracking mechanism. Call the .listen() method at the end of your chain, e.g:  
+```
+html2pdf().set(opt).from(element).save().listen(progressCallback);
+```
+
+The `progressCallback` should be a void function that accepts a single argument, which is this object:
+```
+ {
+  val:    number   -  The current progress step.
+  state:  string   -  A string describing the current step.
+  n:      number   -  The number of total steps that will be completed.
+  stack:  string[] -  The current stack of functions to be executed.
+  ratio:  number   -  The current progress ratio. (val/n) -> Use this for progress bars!
+ }
+```
 
 ## Dependencies
 
-html2pdf.js depends on the external packages [html2canvas](https://github.com/niklasvh/html2canvas), [jsPDF](https://github.com/MrRio/jsPDF), and [es6-promise](https://github.com/stefanpenner/es6-promise). These dependencies are automatically loaded when using NPM or the bundled package.
+html2pdf.js depends on the external packages [html2canvas](https://github.com/niklasvh/html2canvas), and [jsPDF](https://github.com/MrRio/jsPDF)). These dependencies are automatically loaded when using NPM or the bundled package.
 
 If using the unbundled `dist/html2pdf.min.js` (or its un-minified version), you must also include each dependency. Order is important, otherwise html2canvas will be overridden by jsPDF's own internal implementation:
 
 ```html
-<script src="es6-promise.auto.min.js"></script>
 <script src="jspdf.min.js"></script>
 <script src="html2canvas.min.js"></script>
 <script src="html2pdf.min.js"></script>
@@ -268,11 +316,7 @@ When submitting an issue, please provide reproducible code that highlights the i
     - This is currently unavoidable, however recent improvements in jsPDF mean that it may soon be possible to render straight into vector graphics.
     - Related project: [Feature: New renderer](https://github.com/eKoopmans/html2pdf.js/projects/4)
 
-5. **Promise clashes:** html2pdf.js relies on specific Promise behaviour, and can fail when used with custom Promise libraries.
-    - In the next release, Promises will be sandboxed in html2pdf.js to remove this issue.
-    - Related project: [Bugfix: Sandboxed promises](https://github.com/eKoopmans/html2pdf.js/projects/11)
-
-6. **Maximum size:** HTML5 canvases have a [maximum height/width](https://stackoverflow.com/a/11585939/4080966). Anything larger will fail to render.
+5. **Maximum size:** HTML5 canvases have a [maximum height/width](https://stackoverflow.com/a/11585939/4080966). Anything larger will fail to render.
     - This is a limitation of HTML5 itself, and results in large PDFs rendering completely blank in html2pdf.js.
     - The jsPDF canvas renderer (mentioned in Known Issue #4) may be able to fix this issue!
     - Related project: [Bugfix: Maximum canvas size](https://github.com/eKoopmans/html2pdf.js/projects/5)

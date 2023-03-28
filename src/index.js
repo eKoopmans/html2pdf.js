@@ -10,6 +10,7 @@ import './plugin/hyperlinks.js';
  * @param {Object=} opt An object of optional settings: 'margin', 'filename',
  *    'image' ('type' and 'quality'), and 'html2canvas' / 'jspdf', which are
  *    sent as settings to their corresponding functions.
+ * @returns {worker}
  */
 var html2pdf = function html2pdf(src, opt) {
   // Create a new worker with the given options.
