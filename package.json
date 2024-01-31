@@ -30,8 +30,8 @@
   "homepage": "https://ekoopmans.github.io/html2pdf.js/",
   "dependencies": {
     "es6-promise": "^4.2.5",
-    "html2canvas": "^1.0.0",
-    "jspdf": "^2.3.1"
+    "html2canvas": "https://github.com/eKoopmans/html2canvas/tarball/develop",
+    "jspdf": "^2.5.1"
   },
   "devDependencies": {
     "@babel/core": "^7.14.8",
