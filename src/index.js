@@ -12,7 +12,6 @@ import './plugin/hyperlinks.js';
  *    sent as settings to their corresponding functions.
  */
 var html2pdf = function html2pdf(src, opt) {
-  console.log("---SSG TESTING---");
   // Create a new worker with the given options.
   var worker = new html2pdf.Worker(opt);
 
