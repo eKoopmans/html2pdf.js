@@ -1,6 +1,6 @@
 {
-  "name": "@ssamilg/html2pdf.js",
-  "description": "A fork of html2pdf.js with dependency updates",
+  "name": "html2pdf.js",
+  "description": "Client-side HTML-to-PDF rendering using pure JS",
   "main": "dist/html2pdf.bundle.js",
   "moduleType": [
     "amd",
@@ -8,7 +8,6 @@
     "node"
   ],
   "authors": [
-    "Şehit Şamil Gökmen <samil-98@hotmail.com>",
     "Erik Koopmans <erik@erik-koopmans.com>"
   ],
   "license": "MIT",
