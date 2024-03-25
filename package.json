@@ -1,6 +1,6 @@
 {
   "name": "html2pdf.js",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "description": "Client-side HTML-to-PDF rendering using pure JS",
   "main": "dist/html2pdf.js",
   "files": [
@@ -31,6 +31,7 @@
   "dependencies": {
     "es6-promise": "^4.2.5",
     "html2canvas": "^1.0.0",
+    "html2canvas-pro": "^1.4.3",
     "jspdf": "^2.3.1"
   },
   "devDependencies": {
