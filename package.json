@@ -1,7 +1,7 @@
 {
   "name": "@ssamilg/html2pdf.js",
-  "version": "0.11.0",
-  "description": "Client-side HTML-to-PDF rendering using pure JS",
+  "version": "1.0.0",
+  "description": "A fork of html2pdf.js with dependency updates",
   "main": "dist/html2pdf.js",
   "files": [
     "/src",
@@ -9,7 +9,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eKoopmans/html2pdf.js.git"
+    "url": "git+https://github.com/ssamilg/html2pdf.js.git"
   },
   "keywords": [
     "javascript",
@@ -19,15 +19,12 @@
     "canvas"
   ],
   "author": {
-    "name": "Erik Koopmans",
-    "email": "erik@erik-koopmans.com",
-    "url": "https://www.erik-koopmans.com"
+    "name": "Şehit Şamil Gökmen",
+    "email": "samil-98@hotmail.com",
+    "url": "https://www.ssamilg.dev"
   },
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/eKoopmans/html2pdf.js/issues"
-  },
-  "homepage": "https://ekoopmans.github.io/html2pdf.js/",
+
   "dependencies": {
     "es6-promise": "^4.2.5",
     "html2canvas": "^1.0.0",
