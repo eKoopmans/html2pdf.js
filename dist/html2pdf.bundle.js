@@ -1,5 +1,5 @@
 /*!
- * @ssamilg/html2pdf.js v0.11.0
+ * @ssamilg/html2pdf.js v1.0.0
  * Copyright (c) 2024 Erik Koopmans
  * Released under the MIT License.
  */
@@ -38048,7 +38048,6 @@ __webpack_require__.r(__webpack_exports__);
  *    sent as settings to their corresponding functions.
  */
 var html2pdf = function html2pdf(src, opt) {
-  console.log("---SSG TESTING---");
   // Create a new worker with the given options.
   var worker = new html2pdf.Worker(opt);
   if (src) {
