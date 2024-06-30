@@ -21,6 +21,9 @@ jobs:
           persist-credentials: false
       - name: Setup Node
         uses: actions/setup-node@v4
+      - name: Build
+        run: npm run build
+        shell: bash
       - name: Semantic Release
         uses: BrightspaceUI/actions/semantic-release@main
         with:
