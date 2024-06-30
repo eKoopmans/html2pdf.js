@@ -61,7 +61,7 @@ Worker.prototype.from = function from(src, type) {
   function getType(src) {
     switch (objType(src)) {
       case 'string':  return 'string';
-      case 'element': return src.nodeName.toLowerCase === 'canvas' ? 'canvas' : 'element';
+      case 'element': return src.nodeName.toLowerCase && src.nodeName.toLowerCase() === 'canvas' ? 'canvas' : 'element';
       default:        return 'unknown';
     }
   }
@@ -168,7 +168,8 @@ Worker.prototype.toImg = function toImg() {
 Worker.prototype.toPdf = function toPdf() {
   // Set up function prerequisites.
   var prereqs = [
-    function checkCanvas() { return this.prop.canvas || this.toCanvas(); }
+    function checkCanvas() { return this.prop.canvas || this.toCanvas(); },
+    function checkPageSize() { return this.prop.pageSize || this.setPageSize(); }
   ];
 
   // Fulfill prereqs then create the image.
