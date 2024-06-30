@@ -31,6 +31,10 @@ describe('snapshot', () => {
       runner: window => defaultCondition(window, { margin: 1, jsPDF: { unit: 'in' } }),
       name: file => `${file}_margin.pdf`,
     },
+    selectCanvas: {
+      runner: window => defaultCondition(window, {}, window.document.getElementById('canvas')),
+      name: file => `${file}_canvas.pdf`,
+    },
     selectMainId: {
       runner: window => defaultCondition(window, {}, window.document.getElementById('main')),
       name: file => `${file}.pdf`,
@@ -56,7 +60,7 @@ describe('snapshot', () => {
   const filesToTest = {
     'blank': [ 'default' ],
     'lorem-ipsum': [ 'default', 'legacy', 'margin' ],
-    'all-tags': [ 'default' ],
+    'all-tags': [ 'default', 'selectCanvas' ],
     'css-selectors': [ 'selectMainId' ],
     'pagebreaks': [ 'pagebreakLegacy', 'pagebreakCss', 'pagebreakAvoidAll', 'pagebreakSpecify' ],
   };
