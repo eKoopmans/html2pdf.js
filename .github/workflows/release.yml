@@ -1,0 +1,35 @@
+name: Release
+on:
+  push:
+    branches:
+      - main
+jobs:
+  release:
+    timeout-minutes: 2
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GH Token
+        uses: actions/create-github-app-token@v1
+        id: gh-token
+        with:
+          app-id: ${{ vars.GH_TOKEN_APP_ID }}
+          private-key: ${{ secrets.GH_TOKEN_APP_PRIVATE_KEY }}
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Semantic Release
+        uses: BrightspaceUI/actions/semantic-release@main
+        with:
+          GITHUB_TOKEN: ${{ steps.gh-token.outputs.token }}
+          NPM: true
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
