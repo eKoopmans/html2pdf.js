@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-      - chore/add-cd
 jobs:
   release:
     timeout-minutes: 2
@@ -31,8 +30,6 @@ jobs:
       - name: Semantic Release
         uses: BrightspaceUI/actions/semantic-release@main
         with:
-          DEFAULT_BRANCH: chore/add-cd
           GITHUB_TOKEN: ${{ steps.gh-token.outputs.token }}
           NPM: true
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          DRY_RUN: true
