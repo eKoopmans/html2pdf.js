@@ -283,7 +283,7 @@ html2pdf.js is currently sorely lacking in unit tests. Any contributions or sugg
 
 ### Pull requests
 
-If you want to create a new feature or bugfix, please feel free to fork and submit a pull request! Create a fork, branch off of `master`, and make changes to the `/src/` files (rather than directly to `/dist/`). You can test your changes by rebuilding with `npm run build`.
+If you want to create a new feature or bugfix, please feel free to fork and submit a pull request! Create a fork, branch off of `main`, and make changes to the `/src/` files (rather than directly to `/dist/`). You can test your changes by rebuilding with `npm run build`.
 
 ## Credits
 
