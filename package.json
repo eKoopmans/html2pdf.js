@@ -36,7 +36,6 @@
     "babel-loader": "^8.2.2",
     "chai": "^4.2.0",
     "chai-spies": "^1.0.0",
-    "commander": "^7.2.0",
     "core-js": "^3.16.0",
     "karma": "^6.3.4",
     "karma-chai": "^0.1.0",
@@ -65,8 +64,6 @@
     "dev:analyze": "webpack --env=dev --env=analyzer",
     "test": "start-server-and-test test:serve http://localhost:3000 test:run",
     "test:serve": "pdftest serve 3000 ./test/reference/snapshot",
-    "test:run": "npx karma start karma.conf.js",
-    "release": "node ./build-scripts.js release",
-    "publish-gh": "node ./build-scripts.js publish-gh"
+    "test:run": "npx karma start karma.conf.js"
   }
 }
