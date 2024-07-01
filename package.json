@@ -7,10 +7,7 @@
     "/src",
     "/dist"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/eKoopmans/html2pdf.js.git"
-  },
+  "repository": "git@github.com:eKoopmans/html2pdf.js.git",
   "keywords": [
     "javascript",
     "pdf-generation",
