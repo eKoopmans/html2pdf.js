@@ -1,0 +1,51 @@
+name: Semantic Release
+description: Deploy using semantic-release
+inputs:
+  DEFAULT_BRANCH:
+    description: Name of the default release branch
+    default: main
+  DRY_RUN:
+    description: Runs semantic-release with the "--dry-run" flag to simulate a release but not actually do one
+    default: false
+  GITHUB_TOKEN:
+    description: Token to use to update version in 'package.json' and create GitHub release
+    required: true
+  NPM:
+    description: Whether or not to release as an NPM package
+    default: false
+  NPM_TOKEN:
+    description: Token to publish to NPM (not required for CodeArtifact)
+outputs:
+  VERSION:
+    description: Version of the new release, or empty if release is unchanged
+    value: ${{ steps.semantic-release.outputs.version }}
+runs:
+  using: composite
+  steps:
+    - name: Installing semantic-release
+      run: |
+        echo "Installing semantic-release..."
+        npm install semantic-release@19 @semantic-release/git@10 --no-save
+      shell: bash
+    - name: Run semantic-release
+      id: semantic-release
+      env:
+        DEFAULT_BRANCH: ${{ inputs.DEFAULT_BRANCH }}
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+        NPM: ${{ inputs.NPM }}
+        NPM_TOKEN: ${{ inputs.NPM_TOKEN }}
+      run: |
+        echo "version=" >> $GITHUB_OUTPUT
+        if [ ${{ inputs.DRY_RUN }} == true ]; then
+          echo "Running semantic-release (dry run)..."
+          npx semantic-release --dry-run -e ./.github/actions/semantic-release/release.config.js
+        else
+          OLD_VERSION=$(node -p -e "require('./package.json').version")
+          echo "Running semantic-release..."
+          npx semantic-release -e ./.github/actions/semantic-release/release.config.js
+          NEW_VERSION=$(node -p -e "require('./package.json').version")
+          if [ "$OLD_VERSION" != "$NEW_VERSION" ]; then
+            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          fi
+        fi
+      shell: bash

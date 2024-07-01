@@ -25,10 +25,8 @@ jobs:
           cache: npm
       - name: Install Dependencies
         run: npm ci
-      - name: Build
-        run: npm run build
       - name: Semantic Release
-        uses: BrightspaceUI/actions/semantic-release@main
+        uses: ./.github/actions/semantic-release/
         with:
           GITHUB_TOKEN: ${{ steps.gh-token.outputs.token }}
           NPM: true
