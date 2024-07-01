@@ -1,6 +1,6 @@
 /*!
- * html2pdf.js v0.10.1
- * Copyright (c) 2021 Erik Koopmans
+ * html2pdf.js v0.10.2
+ * Copyright (c) 2024 Erik Koopmans
  * Released under the MIT License.
  */
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -656,7 +656,7 @@ Worker.prototype.from = function from(src, type) {
         return 'string';
 
       case 'element':
-        return src.nodeName.toLowerCase === 'canvas' ? 'canvas' : 'element';
+        return src.nodeName.toLowerCase && src.nodeName.toLowerCase() === 'canvas' ? 'canvas' : 'element';
 
       default:
         return 'unknown';
@@ -800,6 +800,8 @@ Worker.prototype.toPdf = function toPdf() {
   // Set up function prerequisites.
   var prereqs = [function checkCanvas() {
     return this.prop.canvas || this.toCanvas();
+  }, function checkPageSize() {
+    return this.prop.pageSize || this.setPageSize();
   }]; // Fulfill prereqs then create the image.
 
   return this.thenList(prereqs).then(function toPdf_main() {
