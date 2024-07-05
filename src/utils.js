@@ -73,6 +73,7 @@ export const unitConvert = function unitConvert(obj, k) {
 };
 
 // Convert units to px using the conversion value 'k' from jsPDF.
-export const toPx = function toPx(val, k) {
-  return Math.floor(val * k / 72 * 96);
+export const toPx = function toPx(val, k, floor = true) {
+  const px = val * k / 72 * 96
+  return floor ? Math.floor(px) : px;
 }
