@@ -6,24 +6,26 @@ import './plugin/hyperlinks.js';
 /**
  * Generate a PDF from an HTML element or string using html2canvas and jsPDF.
  *
- * @param {Element|string} source The source element or HTML string.
- * @param {Object=} opt An object of optional settings: 'margin', 'filename',
- *    'image' ('type' and 'quality'), and 'html2canvas' / 'jspdf', which are
- *    sent as settings to their corresponding functions.
+ * @param {Element|string} source - The HTML element or string to convert.
+ * @param {Object=} options - Optional settings including 'margin', 'filename',
+ *    'image' ('type' and 'quality'), and settings for 'html2canvas' and 'jspdf'.
+ * @returns {Promise|Worker} - Returns a Promise if source is specified, otherwise the Worker instance.
  */
-var html2pdf = function html2pdf(src, opt) {
-  // Create a new worker with the given options.
-  var worker = new html2pdf.Worker(opt);
+const generatePDF = function (source, options = {}) {
+  // Initialize a new worker with the provided options.
+  const workerInstance = new generatePDF.Worker(options);
 
-  if (src) {
-    // If src is specified, perform the traditional 'simple' operation.
-    return worker.from(src).save();
+  if (source) {
+    // When a source is provided, initiate the 'simple' operation and save the PDF.
+    return workerInstance.from(source).save();
   } else {
-    // Otherwise, return the worker for new Promise-based operation.
-    return worker;
+    // If no source is provided, return the worker instance for Promise-based operations.
+    return workerInstance;
   }
-}
-html2pdf.Worker = Worker;
+};
 
-// Expose the html2pdf function.
-export default html2pdf;
+// Assign Worker to the generatePDF function.
+generatePDF.Worker = Worker;
+
+// Export the generatePDF function as the default export.
+export default generatePDF;
