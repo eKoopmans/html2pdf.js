@@ -40,7 +40,7 @@ Worker.prototype.toContainer = function toContainer() {
   return orig.toContainer.call(this).then(function toContainer_pagebreak() {
     // Setup root element and inner page height.
     var root = this.prop.container;
-    var pxPageHeight = this.prop.pageSize.inner.px.height;
+    var pxPageHeight = this.opt['html2canvas'] && this.opt['html2canvas']['width'] ? this.opt['html2canvas']['width'] * this.prop.pageSize.inner.ratio : this.prop.pageSize.inner.px.height;
 
     // Check all requested modes.
     var modeSrc = [].concat(this.opt.pagebreak.mode);
