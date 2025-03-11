@@ -27,9 +27,9 @@
     "url": "https://github.com/Quoin/html2pdf.js/issues"
   },
   "dependencies": {
-    "dom-to-image-more": "2.8.0",
+    "dom-to-image-more": "^3.5.0",
     "es6-promise": "^4.2.8",
-    "jspdf": "^2.5.1"
+    "jspdf": "^3.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.17.8",
