@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Свадебное приглашение</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="form-container">
+    <h2>Создать приглашение</h2>
+    <input type="text" id="names" placeholder="Имена пары">
+    <input type="date" id="date">
+    <input type="text" id="location" placeholder="Место">
+    <button onclick="generateInvitation()">Создать</button>
+  </div>
+
+  <div id="invitation" class="invitation hidden">
+    <h1>Приглашение на свадьбу</h1>
+    <p id="namesDisplay"></p>
+    <p id="dateDisplay"></p>
+    <p id="locationDisplay"></p>
+  </div>
+
+  <button id="downloadBtn" class="hidden" onclick="downloadPDF()">Скачать PDF</button>
+
+  <script src="script.js"></script>
+</body>
+</html>
