@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+    <style>
+      html, body {
+        height: 100%;
+      }
+      #main:not(.ready) {
+        display: none;
+      }
+      #iframe {
+        display: block;
+        position: relative;
+        width: 100%;
+        height: 50vh;
+        border: 1px solid #ced4da;
+      }
+      #canvas-target {
+        border: 1px solid #ced4da;
+      }
+      .large {
+        height: 50vh;
+      }
+      .min-300px {
+        min-width: 300px;
+      }
+      .min-120px {
+        min-width: 120px;
+      }
+      .dropdown-toggle {
+        flex-grow: 0 !important;
+      }
+      .dropdown-item {
+        cursor: pointer;
+      }
+    </style>
+  </head>
+
+  <body>
+    <main id="main" class="container-fluid" :class="{ ready: isReady }">
+      <h1>html2pdf.js Version Tester</h1>
+
+      <div class="row">
+        <div class="col-12 col-lg-6">
+          <p>Use this utility to test behaviour in different versions of html2pdf.js, html2canvas, and jsPDF:</p>
+    
+          <ol>
+            <li>Select desired version of html2pdf.js, and whether to load it with bundled dependencies.</li>
+            <li>If using the unbundled version, select versions of html2canvas and jsPDF (e.g. by providing CDN URLs).</li>
+            <li>Paste the HTML to be tested and render it in the iframe using the "Load in iframe" button</li>
+            <li>Test the result </li>
+          </ol>
+        </div>
+
+        <div class="col-12 col-lg-6">
+          <div class="mb-3">
+            <custom-input id="h2p-version" label="html2pdf.js Version" rootclass="mb-0">
+              <h2p-select id="h2p-version"></h2p-select>
+              <div class="input-group-text">
+                <input class="form-check-input mt-0" type="checkbox" id="h2p-bundle" v-model="isBundle" @change="$root.h2pUpdateVersion">
+                <label class="form-check-label" for="h2p-bundle">&nbsp;Bundle</label>
+              </div>
+            </custom-input>
+
+            <custom-input id="h2p-source" label="html2pdf.js Source" placeholder="CDN URL" v-model="html2pdfSrc" :readonly="!isCustom"></custom-input>
+          </div>
+
+          <custom-input id="h2c-source" label="html2canvas Source" placeholder="CDN URL" v-model="html2canvasSrc"></custom-input>
+          <custom-input id="jspdf-source" label="jsPDF Source" placeholder="CDN URL" v-model="jspdfSrc" v-if="!isBundle"></custom-input>
+        </div>
+
+        <div class="col-12 col-lg-6 mb-3">
+          <custom-input id="iframe-html" label="HTML" placeholder="<!DOCTYPE html>" v-model="iframeHtml" inputtype="textarea" inputclass="font-monospace large"></custom-input>
+
+          <button type="button" class="btn btn-primary w-100" @click="loadHtml">
+            <div class="row align-items-center">
+              <!-- <div class="col-auto">1.</div> -->
+              <div class="col">Load HTML and<br />scripts into iframe</div>
+              <div class="col-auto d-none d-lg-block">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
+                </svg>
+              </div>
+            </div>
+          </button>
+        </div>
+
+        <div class="col-12 col-lg-6">
+          <iframe id="iframe" class="large mb-3"></iframe>
+
+          <!-- <div class="row align-items-center mt-1 gx-2">
+            <div class="col-sm-3"></div>
+            <div class="col">
+              <div class="input-group">
+                <label class="input-group-text" for="selector">Element to capture (querySelector)</label>
+                <input type="text" class="form-control font-monospace" id="selector" v-model="selector"></textarea>
+              </div>
+            </div>
+          </div> -->
+
+          <custom-input id="selector" label="Target element (querySelector)" placeholder="CDN URL" v-model="selector" inputclass="font-monospace"></custom-input>
+
+          <div class="row align-items-center gx-2 gy-2 mb-2">
+            <div class="col">
+              <button-with-dropdown @click="makePdf({ isDefault: true })">
+                <template v-slot:label>Generate<br />PDF</template>
+                <li><a class="dropdown-item" @click="h2pShowModal">With custom settings...</a></li>
+              </button-with-dropdown>
+            </div>
+
+            <div class="col">
+              <button-with-dropdown @click="makeCanvas({ isDefault: true })">
+                <template v-slot:label>Render with<br />html2canvas</template>
+                <li><a class="dropdown-item" @click="h2cShowModal">With custom settings...</a></li>
+              </button-with-dropdown>
+            </div>
+
+            <div class="col-auto">
+              <button type="button" class="btn btn-secondary w-100" @click="makeCanvas">Run custom<br />JS...</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modals -->
+      <custom-modal id="h2pModal" title="html2pdf Custom Settings">
+        <p>Testing</p>
+        <template v-slot:buttons><button type="button" class="btn btn-primary" @click="makePdf">Run</button></template>
+      </custom-modal>
+
+      <custom-modal id="h2cModal" title="html2canvas Custom Settings">
+        <p>Testing</p>
+        <template v-slot:buttons><button type="button" class="btn btn-primary" @click="makeCanvas">Run</button></template>
+      </custom-modal>
+
+      <custom-modal id="canvasModal" title="html2canvas Result" modalclass="modal-xl">
+        <div id="canvas-target"></div>
+        <template v-slot:buttons><button type="button" class="btn btn-primary" @click="saveCanvas">Save to PNG</button></template>
+      </custom-modal>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
+    <script src="./index.js"></script>
+  </body>
+</html>
