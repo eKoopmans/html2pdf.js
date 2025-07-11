@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Known issues
+    url: https://github.com/ekoopmans/html2pdf.js#known-issues
+    about: Before reporting a bug, please see if it is already flagged as a known issue.
+  - name: Ask a question
+    url: https://stackoverflow.com/search?q=html2pdf.js
+    about: If you have any questions about usage, etc. please ask on StackOverflow.

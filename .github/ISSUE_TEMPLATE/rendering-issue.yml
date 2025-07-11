@@ -1,0 +1,114 @@
+name: Rendering Issue
+description: Report an issue with how the PDFs are rendered
+title: "[Rendering]: "
+labels: ["rendering"]
+assignees:
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this rendering issue!
+        Rendering issues are any issue where the HTML content is not displayed correctly in the end PDF - e.g. incorrect styles, missing elements, unreadable text, etc.
+        Note that html2pdf.js uses [html2canvas](https://github.com/niklasvh/html2canvas) to do the actual rendering of HTML into an image, which means many rendering issues are outside our scope.
+        Before proceeding, please use the [html2pdf.js version tester](https://ekoopmans.github.io/html2pdf.js/demo/version-tester/) to test your code in a variety of versions of html2pdf.js and html2canvas.
+  - type: checkboxes
+    id: existing-issues
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists for the bug you encountered.
+      options:
+        - label: I have reviewed the [html2pdf.js known issues](https://github.com/ekoopmans/html2pdf.js#known-issues)
+          required: true
+        - label: I have searched the [existing html2pdf.js issues](https://github.com/eKoopmans/html2pdf.js/issues)
+          required: true
+        - label: I have searched the [existing html2canvas issues](https://github.com/niklasvh/html2canvas/issues)
+          required: true
+  - type: input
+    id: h2c-working-version
+    attributes:
+      label: Last working html2canvas version
+      description: If your code does not render correctly in any version of html2canvas, we cannot fix the issue here. Please report on the [html2canvas bug tracker](https://github.com/niklasvh/html2canvas/issues) instead.
+      placeholder: e.g. v1.3.2
+    validations:
+      required: true
+  - type: dropdown
+    id: h2p-details
+    attributes:
+      label: Can you get it to work in html2pdf.js?
+      description: "Please choose the scenario that best describes your issue:"
+      options:
+        - The latest bundled version of html2pdf.js works correctly
+        - The latest un-bundled version of html2pdf.js works, with a specific version of html2canvas
+        - An older version of html2pdf.js works (bundled or un-bundled)
+        - No version of html2pdf.js works
+    validations:
+      required: true
+  - type: input
+    id: h2p-working-version
+    attributes:
+      label: Last working html2pdf.js version (if any)
+      placeholder: e.g. v0.10.1, or None
+    validations:
+      required: false
+  - type: textarea
+    id: html
+    attributes:
+      label: HTML that reproduces the issue
+      description: |
+        Please copy the HTML you used in the [html2pdf.js version tester](https://ekoopmans.github.io/html2pdf.js/demo/version-tester/) to reproduce your issue.
+        Remember to keep the HTML to a [Minimal, Reproducible Example](https://stackoverflow.com/help/minimal-reproducible-example).
+      placeholder: |
+        <!DOCTYPE html>
+        <html>
+          <body>
+            testing
+          </body>
+        </html>
+      render: html
+    validations:
+      required: true
+  - type: textarea
+    id: extra-config
+    attributes:
+      label: Additional config/steps to reproduce the issue
+      description: Let us know if there are any custom selectors, options, or other configuration that are required to reproduce the issue.
+      render: markdown
+    validations:
+      required: false
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+      description: What should it look like? Please add an image and/or PDF by dragging-and-dropping into this box.
+      placeholder: Drag-and-drop an image and/or PDF
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+      description: What does it actually look like? Please add an image and/or PDF by dragging-and-dropping into this box.
+      placeholder: Drag-and-drop an image and/or PDF
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Please share your browser and device/platform that you are testing on.
+      placeholder: e.g. Chrome, Windows 10
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional notes
+      description: Is there anything else you'd like to share?
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: |
+        Thanks again! In the meantime, if you have found a working version of html2canvas you may be able to use it as a temporary solution to your problem:
+        * HTML-based builds: Load your desired html2canvas (and jsPDF) scripts in your HTML, then load the un-bundled html2pdf.js.
+        * npm-based builds: Install your desired version of html2canvas as a dependency, in addition to html2pdf.js. If it is newer than the version required by html2pdf.js, it will be automatically used.
