@@ -18,7 +18,7 @@
         background-color: green;
       }
       .test-after-empty-selectors::after {
-        content: "Test after and empty selectors";
+        content: "Test after and empty selectors (Indigo, blue text background)";
         background-color: blue;
       }
       p:empty {
@@ -46,17 +46,17 @@
     <div id="unincluded-ancestor">
       <div id="main">
         <!-- The parent divs here are for the "test-untargeted-ancestor" condition. -->
-        <p>Test element selector</p>
-        <p class="test-class-selector">Test class selector</p>
-        <p id="test-id-selector">Test ID selector</p>
-        <p data-attribute="test-attribute-selector">Test attribute selector</p>
+        <p>Test element selector (Red)</p>
+        <p class="test-class-selector">Test class selector (Orange)</p>
+        <p id="test-id-selector">Test ID selector (Yellow)</p>
+        <p data-attribute="test-attribute-selector">Test attribute selector (Green)</p>
         <p class="test-after-empty-selectors"></p>
         <p class="test-empty-selector"></p>
-        <p class="test-ancestor-selector">Test ancestor selector</p>
-        <p class="test-parent-selector">Test parent selector</p>
-        <p class="test-direct-sibling-selector">Test direct sibling selector</p>
-        <p class="test-sibling-selector">Test general sibling selector</p>
-        <p class="test-unincluded-ancestor">Test unincluded ancestor (KNOWN FAILURE - WILL APPEAR RED)</p>
+        <p class="test-ancestor-selector">Test ancestor selector (Violet)</p>
+        <p class="test-parent-selector">Test parent selector (#eee)</p>
+        <p class="test-direct-sibling-selector">Test direct sibling selector (#ddd)</p>
+        <p class="test-sibling-selector">Test general sibling selector (#ccc)</p>
+        <p class="test-unincluded-ancestor">Test unincluded ancestor (#bbb)</p>
       </div>
     </div>
   </body>
