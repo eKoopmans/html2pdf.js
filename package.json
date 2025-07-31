@@ -32,10 +32,11 @@
   "devDependencies": {
     "@babel/core": "^7.14.8",
     "@babel/preset-env": "^7.14.8",
+    "@brightspace-ui/testing": "^1.31.2",
     "@web/dev-server": "^0.4.6",
     "babel-loader": "^8.2.2",
-    "chai": "^4.2.0",
-    "chai-spies": "^1.0.0",
+    "chai": "^5.2.1",
+    "chai-spies": "^1.1.0",
     "core-js": "^3.16.0",
     "karma": "^6.3.4",
     "karma-chai": "^0.1.0",
@@ -53,8 +54,9 @@
     "pdfjs-dist": "^5.3.93",
     "pdftest": "^0.3.0",
     "rimraf": "^2.6.2",
+    "sinon": "^21.0.0",
     "start-server-and-test": "^1.12.0",
-    "webpack": "^5.45.1",
+    "webpack": "^5.101.0",
     "webpack-bundle-analyzer": "^4.4.2",
     "webpack-cli": "^4.7.2"
   },
@@ -66,6 +68,7 @@
     "dev:analyze": "webpack --env=dev --env=analyzer",
     "start": "web-dev-server --open test/manual/launcher.html --node-resolve --watch",
     "test": "start-server-and-test test:serve http://localhost:3000 test:run",
+    "test:unit": "d2l-test-runner --chrome",
     "test:serve": "pdftest serve 3000 ./test/reference/snapshot",
     "test:run": "npx karma start karma.conf.js"
   }

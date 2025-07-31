@@ -1,6 +1,8 @@
+import { expect } from '@brightspace-ui/testing';
+
 describe('promise', function () {
   it('promises should exist', function () {
-    expect(window.Promise).to.exist;
+    expect(Promise).to.exist;
   });
   it('promises should resolve', function () {
     return Promise.resolve();
