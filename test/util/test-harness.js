@@ -18,12 +18,10 @@ class TestHarness extends LoadingCompleteMixin(LitElement) {
 
     static styles = css`
         :host {
-            display: block;
-            width: 100%;
+            display: inline-block;
         }
         iframe {
             border: none;
-            width: 100%;
         }
         iframe[hidden] {
             display: block;
@@ -112,8 +110,9 @@ class TestHarness extends LoadingCompleteMixin(LitElement) {
     }
 
     _resizeIframe(iframe) {
-        iframe.width = iframe.contentWindow.document.documentElement.offsetWidth;
-        iframe.height = iframe.contentWindow.document.documentElement.offsetHeight;
+        const body = iframe.contentWindow.document.documentElement.querySelector('body');
+        iframe.width = body.offsetWidth;
+        iframe.height = body.offsetHeight;
     }
 }
 

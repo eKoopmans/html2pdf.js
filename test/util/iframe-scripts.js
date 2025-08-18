@@ -17,6 +17,8 @@ async function renderPdf(arrayBuffer, scale = 1) {
     }));
 
     document.documentElement.innerHTML = '';
+    document.documentElement.style.lineHeight = '0px';
+    document.body.style.display = 'inline-block';
     document.body.style.margin = '0px';
     pages.forEach(page => document.body.appendChild(page));
 }
