@@ -3,6 +3,9 @@ import { expect, fixture, html } from '@brightspace-ui/testing';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import sinon from 'sinon';
 
+const pageSize = { height: 843, width: 597 };
+const viewport = { height: pageSize.height * 10 + 100, width: pageSize.width + 100 };
+
 const defaultSettings = { html2canvas: { logging: false } };
 const pageBreakSettings = pagebreak => ({
   ...defaultSettings,
@@ -65,7 +68,7 @@ describe('html2pdf', () => {
           .settings=${condition.settings || defaultSettings}
           show="pdf"
         ></test-harness>
-      `, { viewport: { height: 20000, width: 1000 } });
+      `, { viewport });
 
       await expect(testHarness).to.be.golden();
     }));
