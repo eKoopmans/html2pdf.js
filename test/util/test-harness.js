@@ -1,13 +1,17 @@
 import { css, html, LitElement, nothing } from 'lit';
 import { createRef, ref } from 'lit/directives/ref.js';
+import { LoadingCompleteMixin } from '@brightspace-ui/core/mixins/loading-complete/loading-complete-mixin.js';
 
 const IFRAME_SCRIPTS_URL = new URL('./iframe-scripts.js', import.meta.url).href;
+const defaultCommand = (window, element, settings) => window.html2pdf().set(settings).from(element).outputPdf('arraybuffer');
 
-class TestHarness extends LitElement {
+class TestHarness extends LoadingCompleteMixin(LitElement) {
     static properties = {
+        command: { type: Function, attribute: false },
         controls: { type: Boolean },
         href: { type: String },
         selector: { type: String },
+        settings: { type: Object, attribute: false },
         show: { type: String, reflect: true },
         _arrayBuffer: { state: true },
     };
@@ -32,9 +36,11 @@ class TestHarness extends LitElement {
     constructor() {
         super();
 
+        this.command = null;
         this.controls = false;
         this.href = null;
         this.selector = 'body';
+        this.settings = {};
         this.show = 'source';
 
         this._pdfIframe = null;
@@ -97,10 +103,12 @@ class TestHarness extends LitElement {
     async _handleScriptLoad() {
         const element = this._pdfIframeWindow.document.querySelector(this.selector);
 
-        const arrayBuffer = await this._pdfIframeWindow.html2pdf().from(element).outputPdf('arraybuffer');
+        const command = this.command || defaultCommand;
+        const arrayBuffer = await command(this._pdfIframeWindow, element, this.settings);
         await this._pdfIframeWindow.renderPdf(arrayBuffer);
 
         this._resizeIframe(this._pdfIframe);
+        this.resolveLoadingComplete();
     }
 
     _resizeIframe(iframe) {
@@ -109,4 +117,4 @@ class TestHarness extends LitElement {
     }
 }
 
-customElements.define('html2pdf-test-harness', TestHarness);
+customElements.define('test-harness', TestHarness);
