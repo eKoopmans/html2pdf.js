@@ -27,12 +27,14 @@ const fileConditions = {
 
 describe('html2pdf', () => {
   Object.keys(fileConditions).forEach(file => describe(file, () => {
+    const href = `/test/reference/${file}.html`;
+
     fileConditions[file].forEach(conditionName => it(conditionName, async () => {
       const condition = conditions[conditionName];
       const testHarness = await fixture(html`
         <test-harness
           command=${ifDefined(condition.command)}
-          file=${file}
+          href=${href}
           selector=${ifDefined(condition.selector)}
           settings=${ifDefined(condition.settings)}
           show="pdf"
