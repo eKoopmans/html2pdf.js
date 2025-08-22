@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta charset="UTF-8">
+		<link rel="stylesheet" href="/node_modules/@brightspace-ui/core/components/demo/styles.css" type="text/css">
+		<script type="module">
+			import '@brightspace-ui/core/components/demo/demo-page.js';
+            import '../test/util/test-harness.js';
+		</script>
+	</head>
+
+	<body unresolved>
+		<d2l-demo-page page-title="html2pdf.js - CSS selectors">
+			<h2>CSS selectors: default</h2>
+			<d2l-demo-snippet>
+				<template>
+                    <test-harness
+                        controls
+                        file="css-selectors"
+                    ></test-harness>
+				</template>
+			</d2l-demo-snippet>
+
+			<h2>CSS selectors: #main selector</h2>
+			<d2l-demo-snippet>
+				<template>
+                    <test-harness
+                        controls
+                        file="css-selectors"
+						selector="#main"
+                    ></test-harness>
+				</template>
+			</d2l-demo-snippet>
+		</d2l-demo-page>
+	</body>
+</html>
