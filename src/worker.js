@@ -1,4 +1,4 @@
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { objType, createElement, cloneNode, toPx } from './utils.js';
 
@@ -57,7 +57,7 @@ Worker.prototype.from = function from(src, type) {
   function getType(src) {
     switch (objType(src)) {
       case 'string':  return 'string';
-      case 'element': return src.nodeName.toLowerCase === 'canvas' ? 'canvas' : 'element';
+      case 'element': return src.nodeName.toLowerCase && src.nodeName.toLowerCase() === 'canvas' ? 'canvas' : 'element';
       default:        return 'unknown';
     }
   }
@@ -140,7 +140,8 @@ Worker.prototype.toImg = function toImg() {
 Worker.prototype.toPdf = function toPdf() {
   // Set up function prerequisites.
   var prereqs = [
-    function checkCanvas() { return this.prop.canvas || this.toCanvas(); }
+    function checkCanvas() { return this.prop.canvas || this.toCanvas(); },
+    function checkPageSize() { return this.prop.pageSize || this.setPageSize(); }
   ];
 
   // Fulfill prereqs then create the image.
@@ -150,7 +151,6 @@ Worker.prototype.toPdf = function toPdf() {
     var opt = this.opt;
 
     // Calculate the number of pages.
-    var ctx = canvas.getContext('2d');
     var pxFullHeight = canvas.height;
     var pxPageHeight = Math.floor(canvas.width * this.prop.pageSize.inner.ratio);
     var nPages = Math.ceil(pxFullHeight / pxPageHeight);
@@ -270,22 +270,22 @@ Worker.prototype.set = function set(opt) {
 
   // Build an array of setter functions to queue.
   var fns = Object.keys(opt || {}).map(function (key) {
-      if (key in Worker.template.prop) {
-        // Set pre-defined properties.
-        return function set_prop() { this.prop[key] = opt[key]; }
-      } else {
-        switch (key) {
-          case 'margin':
-            return this.setMargin.bind(this, opt.margin);
-          case 'jsPDF':
-            return function set_jsPDF() { this.opt.jsPDF = opt.jsPDF; return this.setPageSize(); }
-          case 'pageSize':
-            return this.setPageSize.bind(this, opt.pageSize);
-          default:
-            // Set any other properties in opt.
-            return function set_opt() { this.opt[key] = opt[key] };
+    switch (key) {
+      case 'margin':
+        return this.setMargin.bind(this, opt.margin);
+      case 'jsPDF':
+        return function set_jsPDF() { this.opt.jsPDF = opt.jsPDF; return this.setPageSize(); }
+      case 'pageSize':
+        return this.setPageSize.bind(this, opt.pageSize);
+      default:
+        if (key in Worker.template.prop) {
+          // Set pre-defined properties in prop.
+          return function set_prop() { this.prop[key] = opt[key]; }
+        } else {
+          // Set any other properties in opt.
+          return function set_opt() { this.opt[key] = opt[key] };
         }
-      }
+    }
   }, this);
 
   // Set properties within the promise chain.

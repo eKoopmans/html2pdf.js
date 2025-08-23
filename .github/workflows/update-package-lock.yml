@@ -1,0 +1,33 @@
+name: Update package-lock.json
+on:
+  schedule:
+    - cron: "30 12 * * 1-5" # Mon-Fri 8:30AM EDT. 7:30AM EST.
+  workflow_dispatch: # manual trigger
+jobs:
+  update:
+    name: Update
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GH Token
+        uses: actions/create-github-app-token@v1
+        id: gh-token
+        with:
+          app-id: ${{ vars.GH_TOKEN_APP_ID }}
+          private-key: ${{ secrets.GH_TOKEN_APP_PRIVATE_KEY }}
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.gh-token.outputs.token }}
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Update package-lock.json
+        uses: BrightspaceUI/actions/update-package-lock@main
+        with:
+          AUTO_MERGE_METHOD: squash
+          AUTO_MERGE_TOKEN: ${{ steps.gh-token.outputs.token }}
+          APPROVAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.gh-token.outputs.token }}

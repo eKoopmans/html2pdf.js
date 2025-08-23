@@ -1,14 +1,13 @@
 {
   "name": "html2pdf.js",
-  "version": "0.9.1",
+  "version": "0.11.0",
   "description": "Client-side HTML-to-PDF rendering using pure JS",
-  "main": "dist/require/html2pdf.cjs.js",
-  "module": "dist/include/html2pdf.es.js",
-  "browser": "dist/html2pdf.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/eKoopmans/html2pdf.git"
-  },
+  "main": "dist/html2pdf.js",
+  "files": [
+    "/src",
+    "/dist"
+  ],
+  "repository": "git@github.com:eKoopmans/html2pdf.js.git",
   "keywords": [
     "javascript",
     "pdf-generation",
@@ -23,36 +22,40 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/eKoopmans/html2pdf/issues"
+    "url": "https://github.com/eKoopmans/html2pdf.js/issues"
   },
-  "homepage": "https://github.com/eKoopmans/html2pdf",
+  "homepage": "https://ekoopmans.github.io/html2pdf.js/",
   "dependencies": {
-    "es6-promise": "^4.2.5",
-    "html2canvas": "^1.0.0-alpha.12",
-    "jspdf": "^1.4.1"
+    "html2canvas": "^1.0.0",
+    "jspdf": "^3.0.0"
   },
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-plugin-external-helpers": "^6.22.0",
-    "babel-plugin-transform-object-assign": "^6.22.0",
-    "babel-preset-env": "^1.7.0",
-    "gulp": "^4.0.0",
-    "minimist": "^1.2.0",
+    "@babel/core": "^7.14.8",
+    "@babel/preset-env": "^7.14.8",
+    "@brightspace-ui/core": "^3.156.4",
+    "@brightspace-ui/testing": "^1.31.2",
+    "@web/dev-server": "^0.4.6",
+    "babel-loader": "^8.2.2",
+    "core-js": "^3.16.0",
+    "lit": "^3.3.1",
+    "mocha": "^6.1.4",
+    "pdfjs-dist": "^5.3.93",
     "rimraf": "^2.6.2",
-    "rollup": "^0.51.8",
-    "rollup-plugin-babel": "^3.0.2",
-    "rollup-plugin-commonjs": "^8.2.6",
-    "rollup-plugin-node-resolve": "^3.0.0",
-    "rollup-plugin-replace": "^2.0.0",
-    "rollup-plugin-uglify": "^2.0.1"
+    "sinon": "^21.0.0",
+    "webpack": "^5.101.0",
+    "webpack-bundle-analyzer": "^4.4.2",
+    "webpack-cli": "^4.7.2"
   },
   "scripts": {
-    "build": "rollup -c",
-    "clean": "rimraf dist",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "stage-release": "gulp stage-release --newversion",
-    "release": "gulp release --tagmessage",
-    "publish": "npm publish",
-    "prebuild": "npm install && npm run clean"
+    "build": "npm run clean && webpack --env=prod",
+    "build:analyze": "npm run clean && webpack --env=prod --env=analyzer",
+    "clean": "rimraf dist/*",
+    "dev": "webpack --env=dev",
+    "dev:analyze": "webpack --env=dev --env=analyzer",
+    "start": "web-dev-server --open demo/ --node-resolve --watch",
+    "test": "npm run test:unit && npm run test:vdiff",
+    "test:unit": "d2l-test-runner --chrome",
+    "test:vdiff": "d2l-test-runner vdiff",
+    "test:vdiff:golden": "d2l-test-runner vdiff golden"
   }
 }

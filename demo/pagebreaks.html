@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta charset="UTF-8">
+		<link rel="stylesheet" href="/node_modules/@brightspace-ui/core/components/demo/styles.css" type="text/css">
+		<script type="module">
+			import '@brightspace-ui/core/components/demo/demo-page.js';
+            import '../test/util/test-harness.js';
+		</script>
+	</head>
+
+	<body unresolved>
+		<d2l-demo-page page-title="html2pdf.js - Pagebreaks">
+			<h2>Pagebreaks: legacy</h2>
+			<d2l-demo-snippet>
+				<template>
+                    <test-harness
+                        controls
+                        file="pagebreaks"
+						settings="pagebreakLegacy"
+                    ></test-harness>
+				</template>
+			</d2l-demo-snippet>
+
+			<h2>Pagebreaks: CSS</h2>
+			<d2l-demo-snippet>
+				<template>
+                    <test-harness
+                        controls
+                        file="pagebreaks"
+						settings="pagebreakCss"
+                    ></test-harness>
+				</template>
+			</d2l-demo-snippet>
+
+			<h2>Pagebreaks: avoid-all</h2>
+			<d2l-demo-snippet>
+				<template>
+                    <test-harness
+                        controls
+                        file="pagebreaks"
+						settings="pagebreakAvoidAll"
+                    ></test-harness>
+				</template>
+			</d2l-demo-snippet>
+
+			<h2>Pagebreaks: specify</h2>
+			<d2l-demo-snippet>
+				<template>
+                    <test-harness
+                        controls
+                        file="pagebreaks"
+						settings="pagebreakSpecify"
+                    ></test-harness>
+				</template>
+			</d2l-demo-snippet>
+		</d2l-demo-page>
+	</body>
+</html>

@@ -1,0 +1,40 @@
+name: CI
+on: pull_request
+jobs:
+  unit:
+    name: Unit tests
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Unit tests
+        run: npm run test:unit
+
+  vdiff:
+    name: Visual diff tests
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: vdiff Tests
+        uses: BrightspaceUI/actions/vdiff@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
