@@ -55,7 +55,7 @@
     "start": "web-dev-server --open demo/ --node-resolve --watch",
     "test": "npm run test:unit && npm run test:vdiff",
     "test:unit": "d2l-test-runner --chrome",
-    "test:vdiff": "d2l-test-runner --chrome --group vdiff",
-    "test:vdiff:golden": "d2l-test-runner --chrome --group vdiff --golden"
+    "test:vdiff": "d2l-test-runner vdiff",
+    "test:vdiff:golden": "d2l-test-runner vdiff golden"
   }
 }
