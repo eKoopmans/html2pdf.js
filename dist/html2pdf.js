@@ -1,5 +1,5 @@
 /*!
- * html2pdf.js v0.10.3
+ * html2pdf.js v0.11.0
  * Copyright (c) 2025 Erik Koopmans
  * Released under the MIT License.
  */
@@ -15,1106 +15,6 @@
 })(self, function(__WEBPACK_EXTERNAL_MODULE_jspdf__, __WEBPACK_EXTERNAL_MODULE_html2canvas__) {
 return /******/ (function() { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
-
-/***/ "./src/plugin/hyperlinks.js":
-/*!**********************************!*\
-  !*** ./src/plugin/hyperlinks.js ***!
-  \**********************************/
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/web.dom-collections.for-each.js */ "./node_modules/core-js/modules/web.dom-collections.for-each.js");
-/* harmony import */ var core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_js_modules_es_string_link_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.string.link.js */ "./node_modules/core-js/modules/es.string.link.js");
-/* harmony import */ var core_js_modules_es_string_link_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_link_js__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _worker_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../worker.js */ "./src/worker.js");
-/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utils.js */ "./src/utils.js");
-
-
-
- // Add hyperlink functionality to the PDF creation.
-// Main link array, and refs to original functions.
-
-var linkInfo = [];
-var orig = {
-  toContainer: _worker_js__WEBPACK_IMPORTED_MODULE_2__.default.prototype.toContainer,
-  toPdf: _worker_js__WEBPACK_IMPORTED_MODULE_2__.default.prototype.toPdf
-};
-
-_worker_js__WEBPACK_IMPORTED_MODULE_2__.default.prototype.toContainer = function toContainer() {
-  return orig.toContainer.call(this).then(function toContainer_hyperlink() {
-    // Retrieve hyperlink info if the option is enabled.
-    if (this.opt.enableLinks) {
-      // Find all anchor tags and get the container's bounds for reference.
-      var container = this.prop.container;
-      var links = container.querySelectorAll('a');
-      var containerRect = (0,_utils_js__WEBPACK_IMPORTED_MODULE_3__.unitConvert)(container.getBoundingClientRect(), this.prop.pageSize.k);
-      linkInfo = []; // Loop through each anchor tag.
-
-      Array.prototype.forEach.call(links, function (link) {
-        // Treat each client rect as a separate link (for text-wrapping).
-        var clientRects = link.getClientRects();
-
-        for (var i = 0; i < clientRects.length; i++) {
-          var clientRect = (0,_utils_js__WEBPACK_IMPORTED_MODULE_3__.unitConvert)(clientRects[i], this.prop.pageSize.k);
-          clientRect.left -= containerRect.left;
-          clientRect.top -= containerRect.top;
-          var page = Math.floor(clientRect.top / this.prop.pageSize.inner.height) + 1;
-          var top = this.opt.margin[0] + clientRect.top % this.prop.pageSize.inner.height;
-          var left = this.opt.margin[1] + clientRect.left;
-          linkInfo.push({
-            page: page,
-            top: top,
-            left: left,
-            clientRect: clientRect,
-            link: link
-          });
-        }
-      }, this);
-    }
-  });
-};
-
-_worker_js__WEBPACK_IMPORTED_MODULE_2__.default.prototype.toPdf = function toPdf() {
-  return orig.toPdf.call(this).then(function toPdf_hyperlink() {
-    // Add hyperlinks if the option is enabled.
-    if (this.opt.enableLinks) {
-      // Attach each anchor tag based on info from toContainer().
-      linkInfo.forEach(function (l) {
-        this.prop.pdf.setPage(l.page);
-        this.prop.pdf.link(l.left, l.top, l.clientRect.width, l.clientRect.height, {
-          url: l.link.href
-        });
-      }, this); // Reset the active page of the PDF to the final page.
-
-      var nPages = this.prop.pdf.internal.getNumberOfPages();
-      this.prop.pdf.setPage(nPages);
-    }
-  });
-};
-
-/***/ }),
-
-/***/ "./src/plugin/jspdf-plugin.js":
-/*!************************************!*\
-  !*** ./src/plugin/jspdf-plugin.js ***!
-  \************************************/
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var core_js_modules_es_symbol_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.symbol.js */ "./node_modules/core-js/modules/es.symbol.js");
-/* harmony import */ var core_js_modules_es_symbol_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_js__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_js_modules_es_symbol_description_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.symbol.description.js */ "./node_modules/core-js/modules/es.symbol.description.js");
-/* harmony import */ var core_js_modules_es_symbol_description_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_description_js__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.object.to-string.js */ "./node_modules/core-js/modules/es.object.to-string.js");
-/* harmony import */ var core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var core_js_modules_es_symbol_iterator_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/es.symbol.iterator.js */ "./node_modules/core-js/modules/es.symbol.iterator.js");
-/* harmony import */ var core_js_modules_es_symbol_iterator_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_iterator_js__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var core_js_modules_es_array_iterator_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.array.iterator.js */ "./node_modules/core-js/modules/es.array.iterator.js");
-/* harmony import */ var core_js_modules_es_array_iterator_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_iterator_js__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core-js/modules/es.string.iterator.js */ "./node_modules/core-js/modules/es.string.iterator.js");
-/* harmony import */ var core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core-js/modules/web.dom-collections.iterator.js */ "./node_modules/core-js/modules/web.dom-collections.iterator.js");
-/* harmony import */ var core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var jspdf__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! jspdf */ "jspdf");
-/* harmony import */ var jspdf__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(jspdf__WEBPACK_IMPORTED_MODULE_7__);
-
-
-
-
-
-
-
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-// Import dependencies.
- // Get dimensions of a PDF page, as determined by jsPDF.
-
-jspdf__WEBPACK_IMPORTED_MODULE_7__.jsPDF.getPageSize = function (orientation, unit, format) {
-  // Decode options object
-  if (_typeof(orientation) === 'object') {
-    var options = orientation;
-    orientation = options.orientation;
-    unit = options.unit || unit;
-    format = options.format || format;
-  } // Default options
-
-
-  unit = unit || 'mm';
-  format = format || 'a4';
-  orientation = ('' + (orientation || 'P')).toLowerCase();
-  var format_as_string = ('' + format).toLowerCase(); // Size in pt of various paper formats
-
-  var pageFormats = {
-    'a0': [2383.94, 3370.39],
-    'a1': [1683.78, 2383.94],
-    'a2': [1190.55, 1683.78],
-    'a3': [841.89, 1190.55],
-    'a4': [595.28, 841.89],
-    'a5': [419.53, 595.28],
-    'a6': [297.64, 419.53],
-    'a7': [209.76, 297.64],
-    'a8': [147.40, 209.76],
-    'a9': [104.88, 147.40],
-    'a10': [73.70, 104.88],
-    'b0': [2834.65, 4008.19],
-    'b1': [2004.09, 2834.65],
-    'b2': [1417.32, 2004.09],
-    'b3': [1000.63, 1417.32],
-    'b4': [708.66, 1000.63],
-    'b5': [498.90, 708.66],
-    'b6': [354.33, 498.90],
-    'b7': [249.45, 354.33],
-    'b8': [175.75, 249.45],
-    'b9': [124.72, 175.75],
-    'b10': [87.87, 124.72],
-    'c0': [2599.37, 3676.54],
-    'c1': [1836.85, 2599.37],
-    'c2': [1298.27, 1836.85],
-    'c3': [918.43, 1298.27],
-    'c4': [649.13, 918.43],
-    'c5': [459.21, 649.13],
-    'c6': [323.15, 459.21],
-    'c7': [229.61, 323.15],
-    'c8': [161.57, 229.61],
-    'c9': [113.39, 161.57],
-    'c10': [79.37, 113.39],
-    'dl': [311.81, 623.62],
-    'letter': [612, 792],
-    'government-letter': [576, 756],
-    'legal': [612, 1008],
-    'junior-legal': [576, 360],
-    'ledger': [1224, 792],
-    'tabloid': [792, 1224],
-    'credit-card': [153, 243]
-  }; // Unit conversion
-
-  switch (unit) {
-    case 'pt':
-      var k = 1;
-      break;
-
-    case 'mm':
-      var k = 72 / 25.4;
-      break;
-
-    case 'cm':
-      var k = 72 / 2.54;
-      break;
-
-    case 'in':
-      var k = 72;
-      break;
-
-    case 'px':
-      var k = 72 / 96;
-      break;
-
-    case 'pc':
-      var k = 12;
-      break;
-
-    case 'em':
-      var k = 12;
-      break;
-
-    case 'ex':
-      var k = 6;
-      break;
-
-    default:
-      throw 'Invalid unit: ' + unit;
-  } // Dimensions are stored as user units and converted to points on output
-
-
-  if (pageFormats.hasOwnProperty(format_as_string)) {
-    var pageHeight = pageFormats[format_as_string][1] / k;
-    var pageWidth = pageFormats[format_as_string][0] / k;
-  } else {
-    try {
-      var pageHeight = format[1];
-      var pageWidth = format[0];
-    } catch (err) {
-      throw new Error('Invalid format: ' + format);
-    }
-  } // Handle page orientation
-
-
-  if (orientation === 'p' || orientation === 'portrait') {
-    orientation = 'p';
-
-    if (pageWidth > pageHeight) {
-      var tmp = pageWidth;
-      pageWidth = pageHeight;
-      pageHeight = tmp;
-    }
-  } else if (orientation === 'l' || orientation === 'landscape') {
-    orientation = 'l';
-
-    if (pageHeight > pageWidth) {
-      var tmp = pageWidth;
-      pageWidth = pageHeight;
-      pageHeight = tmp;
-    }
-  } else {
-    throw 'Invalid orientation: ' + orientation;
-  } // Return information (k is the unit conversion ratio from pts)
-
-
-  var info = {
-    'width': pageWidth,
-    'height': pageHeight,
-    'unit': unit,
-    'k': k
-  };
-  return info;
-};
-
-/* harmony default export */ __webpack_exports__["default"] = (jspdf__WEBPACK_IMPORTED_MODULE_7__.jsPDF);
-
-/***/ }),
-
-/***/ "./src/plugin/pagebreaks.js":
-/*!**********************************!*\
-  !*** ./src/plugin/pagebreaks.js ***!
-  \**********************************/
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var core_js_modules_es_array_concat_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.array.concat.js */ "./node_modules/core-js/modules/es.array.concat.js");
-/* harmony import */ var core_js_modules_es_array_concat_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_concat_js__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_js_modules_es_array_slice_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.array.slice.js */ "./node_modules/core-js/modules/es.array.slice.js");
-/* harmony import */ var core_js_modules_es_array_slice_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_slice_js__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var core_js_modules_es_array_join_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.array.join.js */ "./node_modules/core-js/modules/es.array.join.js");
-/* harmony import */ var core_js_modules_es_array_join_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_join_js__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/web.dom-collections.for-each.js */ "./node_modules/core-js/modules/web.dom-collections.for-each.js");
-/* harmony import */ var core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var core_js_modules_es_object_keys_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.object.keys.js */ "./node_modules/core-js/modules/es.object.keys.js");
-/* harmony import */ var core_js_modules_es_object_keys_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_keys_js__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var _worker_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../worker.js */ "./src/worker.js");
-/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../utils.js */ "./src/utils.js");
-
-
-
-
-
-
-
-/* Pagebreak plugin:
-
-    Adds page-break functionality to the html2pdf library. Page-breaks can be
-    enabled by CSS styles, set on individual elements using selectors, or
-    avoided from breaking inside all elements.
-
-    Options on the `opt.pagebreak` object:
-
-    mode:   String or array of strings: 'avoid-all', 'css', and/or 'legacy'
-            Default: ['css', 'legacy']
-
-    before: String or array of CSS selectors for which to add page-breaks
-            before each element. Can be a specific element with an ID
-            ('#myID'), all elements of a type (e.g. 'img'), all of a class
-            ('.myClass'), or even '*' to match every element.
-
-    after:  Like 'before', but adds a page-break immediately after the element.
-
-    avoid:  Like 'before', but avoids page-breaks on these elements. You can
-            enable this feature on every element using the 'avoid-all' mode.
-*/
-// Refs to original functions.
-
-var orig = {
-  toContainer: _worker_js__WEBPACK_IMPORTED_MODULE_5__.default.prototype.toContainer
-}; // Add pagebreak default options to the Worker template.
-
-_worker_js__WEBPACK_IMPORTED_MODULE_5__.default.template.opt.pagebreak = {
-  mode: ['css', 'legacy'],
-  before: [],
-  after: [],
-  avoid: []
-};
-
-_worker_js__WEBPACK_IMPORTED_MODULE_5__.default.prototype.toContainer = function toContainer() {
-  return orig.toContainer.call(this).then(function toContainer_pagebreak() {
-    // Setup root element and inner page height.
-    var root = this.prop.container;
-    var pxPageHeight = this.prop.pageSize.inner.px.height; // Check all requested modes.
-
-    var modeSrc = [].concat(this.opt.pagebreak.mode);
-    var mode = {
-      avoidAll: modeSrc.indexOf('avoid-all') !== -1,
-      css: modeSrc.indexOf('css') !== -1,
-      legacy: modeSrc.indexOf('legacy') !== -1
-    }; // Get arrays of all explicitly requested elements.
-
-    var select = {};
-    var self = this;
-    ['before', 'after', 'avoid'].forEach(function (key) {
-      var all = mode.avoidAll && key === 'avoid';
-      select[key] = all ? [] : [].concat(self.opt.pagebreak[key] || []);
-
-      if (select[key].length > 0) {
-        select[key] = Array.prototype.slice.call(root.querySelectorAll(select[key].join(', ')));
-      }
-    }); // Get all legacy page-break elements.
-
-    var legacyEls = root.querySelectorAll('.html2pdf__page-break');
-    legacyEls = Array.prototype.slice.call(legacyEls); // Loop through all elements.
-
-    var els = root.querySelectorAll('*');
-    Array.prototype.forEach.call(els, function pagebreak_loop(el) {
-      // Setup pagebreak rules based on legacy and avoidAll modes.
-      var rules = {
-        before: false,
-        after: mode.legacy && legacyEls.indexOf(el) !== -1,
-        avoid: mode.avoidAll
-      }; // Add rules for css mode.
-
-      if (mode.css) {
-        // TODO: Check if this is valid with iFrames.
-        var style = window.getComputedStyle(el); // TODO: Handle 'left' and 'right' correctly.
-        // TODO: Add support for 'avoid' on breakBefore/After.
-
-        var breakOpt = ['always', 'page', 'left', 'right'];
-        var avoidOpt = ['avoid', 'avoid-page'];
-        rules = {
-          before: rules.before || breakOpt.indexOf(style.breakBefore || style.pageBreakBefore) !== -1,
-          after: rules.after || breakOpt.indexOf(style.breakAfter || style.pageBreakAfter) !== -1,
-          avoid: rules.avoid || avoidOpt.indexOf(style.breakInside || style.pageBreakInside) !== -1
-        };
-      } // Add rules for explicit requests.
-
-
-      Object.keys(rules).forEach(function (key) {
-        rules[key] = rules[key] || select[key].indexOf(el) !== -1;
-      }); // Get element position on the screen.
-      // TODO: Subtract the top of the container from clientRect.top/bottom?
-
-      var clientRect = el.getBoundingClientRect(); // Avoid: Check if a break happens mid-element.
-
-      if (rules.avoid && !rules.before) {
-        var startPage = Math.floor(clientRect.top / pxPageHeight);
-        var endPage = Math.floor(clientRect.bottom / pxPageHeight);
-        var nPages = Math.abs(clientRect.bottom - clientRect.top) / pxPageHeight; // Turn on rules.before if the el is broken and is at most one page long.
-
-        if (endPage !== startPage && nPages <= 1) {
-          rules.before = true;
-        }
-      } // Before: Create a padding div to push the element to the next page.
-
-
-      if (rules.before) {
-        var pad = (0,_utils_js__WEBPACK_IMPORTED_MODULE_6__.createElement)('div', {
-          style: {
-            display: 'block',
-            height: pxPageHeight - clientRect.top % pxPageHeight + 'px'
-          }
-        });
-        el.parentNode.insertBefore(pad, el);
-      } // After: Create a padding div to fill the remaining page.
-
-
-      if (rules.after) {
-        var pad = (0,_utils_js__WEBPACK_IMPORTED_MODULE_6__.createElement)('div', {
-          style: {
-            display: 'block',
-            height: pxPageHeight - clientRect.bottom % pxPageHeight + 'px'
-          }
-        });
-        el.parentNode.insertBefore(pad, el.nextSibling);
-      }
-    });
-  });
-};
-
-/***/ }),
-
-/***/ "./src/utils.js":
-/*!**********************!*\
-  !*** ./src/utils.js ***!
-  \**********************/
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "objType": function() { return /* binding */ objType; },
-/* harmony export */   "createElement": function() { return /* binding */ createElement; },
-/* harmony export */   "cloneNode": function() { return /* binding */ cloneNode; },
-/* harmony export */   "unitConvert": function() { return /* binding */ unitConvert; },
-/* harmony export */   "toPx": function() { return /* binding */ toPx; }
-/* harmony export */ });
-/* harmony import */ var core_js_modules_es_number_constructor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.number.constructor.js */ "./node_modules/core-js/modules/es.number.constructor.js");
-/* harmony import */ var core_js_modules_es_number_constructor_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_number_constructor_js__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_js_modules_es_symbol_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.symbol.js */ "./node_modules/core-js/modules/es.symbol.js");
-/* harmony import */ var core_js_modules_es_symbol_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_js__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var core_js_modules_es_symbol_description_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.symbol.description.js */ "./node_modules/core-js/modules/es.symbol.description.js");
-/* harmony import */ var core_js_modules_es_symbol_description_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_description_js__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/es.object.to-string.js */ "./node_modules/core-js/modules/es.object.to-string.js");
-/* harmony import */ var core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var core_js_modules_es_symbol_iterator_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.symbol.iterator.js */ "./node_modules/core-js/modules/es.symbol.iterator.js");
-/* harmony import */ var core_js_modules_es_symbol_iterator_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_iterator_js__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var core_js_modules_es_array_iterator_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core-js/modules/es.array.iterator.js */ "./node_modules/core-js/modules/es.array.iterator.js");
-/* harmony import */ var core_js_modules_es_array_iterator_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_iterator_js__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core-js/modules/es.string.iterator.js */ "./node_modules/core-js/modules/es.string.iterator.js");
-/* harmony import */ var core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core-js/modules/web.dom-collections.iterator.js */ "./node_modules/core-js/modules/web.dom-collections.iterator.js");
-/* harmony import */ var core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_7__);
-
-
-
-
-
-
-
-
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-// Determine the type of a variable/object.
-var objType = function objType(obj) {
-  var type = _typeof(obj);
-
-  if (type === 'undefined') return 'undefined';else if (type === 'string' || obj instanceof String) return 'string';else if (type === 'number' || obj instanceof Number) return 'number';else if (type === 'function' || obj instanceof Function) return 'function';else if (!!obj && obj.constructor === Array) return 'array';else if (obj && obj.nodeType === 1) return 'element';else if (type === 'object') return 'object';else return 'unknown';
-}; // Create an HTML element with optional className, innerHTML, and style.
-
-var createElement = function createElement(tagName, opt) {
-  var el = document.createElement(tagName);
-  if (opt.className) el.className = opt.className;
-
-  if (opt.innerHTML) {
-    el.innerHTML = opt.innerHTML;
-    var scripts = el.getElementsByTagName('script');
-
-    for (var i = scripts.length; i-- > 0; null) {
-      scripts[i].parentNode.removeChild(scripts[i]);
-    }
-  }
-
-  for (var key in opt.style) {
-    el.style[key] = opt.style[key];
-  }
-
-  return el;
-}; // Deep-clone a node and preserve contents/properties.
-
-var cloneNode = function cloneNode(node, javascriptEnabled) {
-  // Recursively clone the node.
-  var clone = node.nodeType === 3 ? document.createTextNode(node.nodeValue) : node.cloneNode(false);
-
-  for (var child = node.firstChild; child; child = child.nextSibling) {
-    if (javascriptEnabled === true || child.nodeType !== 1 || child.nodeName !== 'SCRIPT') {
-      clone.appendChild(cloneNode(child, javascriptEnabled));
-    }
-  }
-
-  if (node.nodeType === 1) {
-    // Preserve contents/properties of special nodes.
-    if (node.nodeName === 'CANVAS') {
-      clone.width = node.width;
-      clone.height = node.height;
-      clone.getContext('2d').drawImage(node, 0, 0);
-    } else if (node.nodeName === 'TEXTAREA' || node.nodeName === 'SELECT') {
-      clone.value = node.value;
-    } // Preserve the node's scroll position when it loads.
-
-
-    clone.addEventListener('load', function () {
-      clone.scrollTop = node.scrollTop;
-      clone.scrollLeft = node.scrollLeft;
-    }, true);
-  } // Return the cloned node.
-
-
-  return clone;
-}; // Convert units from px using the conversion value 'k' from jsPDF.
-
-var unitConvert = function unitConvert(obj, k) {
-  if (objType(obj) === 'number') {
-    return obj * 72 / 96 / k;
-  } else {
-    var newObj = {};
-
-    for (var key in obj) {
-      newObj[key] = obj[key] * 72 / 96 / k;
-    }
-
-    return newObj;
-  }
-}; // Convert units to px using the conversion value 'k' from jsPDF.
-
-var toPx = function toPx(val, k) {
-  return Math.floor(val * k / 72 * 96);
-};
-
-/***/ }),
-
-/***/ "./src/worker.js":
-/*!***********************!*\
-  !*** ./src/worker.js ***!
-  \***********************/
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var core_js_modules_es_object_assign_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.object.assign.js */ "./node_modules/core-js/modules/es.object.assign.js");
-/* harmony import */ var core_js_modules_es_object_assign_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_assign_js__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_js_modules_es_array_map_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.array.map.js */ "./node_modules/core-js/modules/es.array.map.js");
-/* harmony import */ var core_js_modules_es_array_map_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_map_js__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var core_js_modules_es_object_keys_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.object.keys.js */ "./node_modules/core-js/modules/es.object.keys.js");
-/* harmony import */ var core_js_modules_es_object_keys_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_keys_js__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var core_js_modules_es_array_concat_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/es.array.concat.js */ "./node_modules/core-js/modules/es.array.concat.js");
-/* harmony import */ var core_js_modules_es_array_concat_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_concat_js__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.object.to-string.js */ "./node_modules/core-js/modules/es.object.to-string.js");
-/* harmony import */ var core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var core_js_modules_es_regexp_to_string_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core-js/modules/es.regexp.to-string.js */ "./node_modules/core-js/modules/es.regexp.to-string.js");
-/* harmony import */ var core_js_modules_es_regexp_to_string_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_regexp_to_string_js__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var core_js_modules_es_function_name_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core-js/modules/es.function.name.js */ "./node_modules/core-js/modules/es.function.name.js");
-/* harmony import */ var core_js_modules_es_function_name_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_function_name_js__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core-js/modules/web.dom-collections.for-each.js */ "./node_modules/core-js/modules/web.dom-collections.for-each.js");
-/* harmony import */ var core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_7__);
-/* harmony import */ var jspdf__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! jspdf */ "jspdf");
-/* harmony import */ var jspdf__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(jspdf__WEBPACK_IMPORTED_MODULE_8__);
-/* harmony import */ var html2canvas__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! html2canvas */ "html2canvas");
-/* harmony import */ var html2canvas__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(html2canvas__WEBPACK_IMPORTED_MODULE_9__);
-/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./utils.js */ "./src/utils.js");
-/* harmony import */ var es6_promise__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! es6-promise */ "./node_modules/es6-promise/dist/es6-promise.js");
-/* harmony import */ var es6_promise__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(es6_promise__WEBPACK_IMPORTED_MODULE_11__);
-
-
-
-
-
-
-
-
-
-
-
-
-var Promise = (es6_promise__WEBPACK_IMPORTED_MODULE_11___default().Promise);
-/* ----- CONSTRUCTOR ----- */
-
-var Worker = function Worker(opt) {
-  // Create the root parent for the proto chain, and the starting Worker.
-  var root = Object.assign(Worker.convert(Promise.resolve()), JSON.parse(JSON.stringify(Worker.template)));
-  var self = Worker.convert(Promise.resolve(), root); // Set progress, optional settings, and return.
-
-  self = self.setProgress(1, Worker, 1, [Worker]);
-  self = self.set(opt);
-  return self;
-}; // Boilerplate for subclassing Promise.
-
-
-Worker.prototype = Object.create(Promise.prototype);
-Worker.prototype.constructor = Worker; // Converts/casts promises into Workers.
-
-Worker.convert = function convert(promise, inherit) {
-  // Uses prototypal inheritance to receive changes made to ancestors' properties.
-  promise.__proto__ = inherit || Worker.prototype;
-  return promise;
-};
-
-Worker.template = {
-  prop: {
-    src: null,
-    container: null,
-    overlay: null,
-    canvas: null,
-    img: null,
-    pdf: null,
-    pageSize: null
-  },
-  progress: {
-    val: 0,
-    state: null,
-    n: 0,
-    stack: []
-  },
-  opt: {
-    filename: 'file.pdf',
-    margin: [0, 0, 0, 0],
-    image: {
-      type: 'jpeg',
-      quality: 0.95
-    },
-    enableLinks: true,
-    html2canvas: {},
-    jsPDF: {}
-  }
-};
-/* ----- FROM / TO ----- */
-
-Worker.prototype.from = function from(src, type) {
-  function getType(src) {
-    switch ((0,_utils_js__WEBPACK_IMPORTED_MODULE_10__.objType)(src)) {
-      case 'string':
-        return 'string';
-
-      case 'element':
-        return src.nodeName.toLowerCase && src.nodeName.toLowerCase() === 'canvas' ? 'canvas' : 'element';
-
-      default:
-        return 'unknown';
-    }
-  }
-
-  return this.then(function from_main() {
-    type = type || getType(src);
-
-    switch (type) {
-      case 'string':
-        return this.set({
-          src: (0,_utils_js__WEBPACK_IMPORTED_MODULE_10__.createElement)('div', {
-            innerHTML: src
-          })
-        });
-
-      case 'element':
-        return this.set({
-          src: src
-        });
-
-      case 'canvas':
-        return this.set({
-          canvas: src
-        });
-
-      case 'img':
-        return this.set({
-          img: src
-        });
-
-      default:
-        return this.error('Unknown source type.');
-    }
-  });
-};
-
-Worker.prototype.to = function to(target) {
-  // Route the 'to' request to the appropriate method.
-  switch (target) {
-    case 'container':
-      return this.toContainer();
-
-    case 'canvas':
-      return this.toCanvas();
-
-    case 'img':
-      return this.toImg();
-
-    case 'pdf':
-      return this.toPdf();
-
-    default:
-      return this.error('Invalid target.');
-  }
-};
-
-Worker.prototype.toContainer = function toContainer() {
-  // Set up function prerequisites.
-  var prereqs = [function checkSrc() {
-    return this.prop.src || this.error('Cannot duplicate - no source HTML.');
-  }, function checkPageSize() {
-    return this.prop.pageSize || this.setPageSize();
-  }];
-  return this.thenList(prereqs).then(function toContainer_main() {
-    // Define the CSS styles for the container and its overlay parent.
-    var overlayCSS = {
-      position: 'fixed',
-      overflow: 'hidden',
-      zIndex: 1000,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      top: 0,
-      backgroundColor: 'rgba(0,0,0,0.8)'
-    };
-    var containerCSS = {
-      position: 'absolute',
-      width: this.prop.pageSize.inner.width + this.prop.pageSize.unit,
-      left: 0,
-      right: 0,
-      top: 0,
-      height: 'auto',
-      margin: 'auto',
-      backgroundColor: 'white'
-    }; // Set the overlay to hidden (could be changed in the future to provide a print preview).
-
-    overlayCSS.opacity = 0; // Create and attach the elements.
-
-    var source = (0,_utils_js__WEBPACK_IMPORTED_MODULE_10__.cloneNode)(this.prop.src, this.opt.html2canvas.javascriptEnabled);
-    this.prop.overlay = (0,_utils_js__WEBPACK_IMPORTED_MODULE_10__.createElement)('div', {
-      className: 'html2pdf__overlay',
-      style: overlayCSS
-    });
-    this.prop.container = (0,_utils_js__WEBPACK_IMPORTED_MODULE_10__.createElement)('div', {
-      className: 'html2pdf__container',
-      style: containerCSS
-    });
-    this.prop.container.appendChild(source);
-    this.prop.overlay.appendChild(this.prop.container);
-    document.body.appendChild(this.prop.overlay);
-  });
-};
-
-Worker.prototype.toCanvas = function toCanvas() {
-  // Set up function prerequisites.
-  var prereqs = [function checkContainer() {
-    return document.body.contains(this.prop.container) || this.toContainer();
-  }]; // Fulfill prereqs then create the canvas.
-
-  return this.thenList(prereqs).then(function toCanvas_main() {
-    // Handle old-fashioned 'onrendered' argument.
-    var options = Object.assign({}, this.opt.html2canvas);
-    delete options.onrendered;
-    return html2canvas__WEBPACK_IMPORTED_MODULE_9__(this.prop.container, options);
-  }).then(function toCanvas_post(canvas) {
-    // Handle old-fashioned 'onrendered' argument.
-    var onRendered = this.opt.html2canvas.onrendered || function () {};
-
-    onRendered(canvas);
-    this.prop.canvas = canvas;
-    document.body.removeChild(this.prop.overlay);
-  });
-};
-
-Worker.prototype.toImg = function toImg() {
-  // Set up function prerequisites.
-  var prereqs = [function checkCanvas() {
-    return this.prop.canvas || this.toCanvas();
-  }]; // Fulfill prereqs then create the image.
-
-  return this.thenList(prereqs).then(function toImg_main() {
-    var imgData = this.prop.canvas.toDataURL('image/' + this.opt.image.type, this.opt.image.quality);
-    this.prop.img = document.createElement('img');
-    this.prop.img.src = imgData;
-  });
-};
-
-Worker.prototype.toPdf = function toPdf() {
-  // Set up function prerequisites.
-  var prereqs = [function checkCanvas() {
-    return this.prop.canvas || this.toCanvas();
-  }, function checkPageSize() {
-    return this.prop.pageSize || this.setPageSize();
-  }]; // Fulfill prereqs then create the image.
-
-  return this.thenList(prereqs).then(function toPdf_main() {
-    // Create local copies of frequently used properties.
-    var canvas = this.prop.canvas;
-    var opt = this.opt; // Calculate the number of pages.
-
-    var pxFullHeight = canvas.height;
-    var pxPageHeight = Math.floor(canvas.width * this.prop.pageSize.inner.ratio);
-    var nPages = Math.ceil(pxFullHeight / pxPageHeight); // Define pageHeight separately so it can be trimmed on the final page.
-
-    var pageHeight = this.prop.pageSize.inner.height; // Create a one-page canvas to split up the full image.
-
-    var pageCanvas = document.createElement('canvas');
-    var pageCtx = pageCanvas.getContext('2d');
-    pageCanvas.width = canvas.width;
-    pageCanvas.height = pxPageHeight; // Initialize the PDF.
-
-    this.prop.pdf = this.prop.pdf || new jspdf__WEBPACK_IMPORTED_MODULE_8__.jsPDF(opt.jsPDF);
-
-    for (var page = 0; page < nPages; page++) {
-      // Trim the final page to reduce file size.
-      if (page === nPages - 1 && pxFullHeight % pxPageHeight !== 0) {
-        pageCanvas.height = pxFullHeight % pxPageHeight;
-        pageHeight = pageCanvas.height * this.prop.pageSize.inner.width / pageCanvas.width;
-      } // Display the page.
-
-
-      var w = pageCanvas.width;
-      var h = pageCanvas.height;
-      pageCtx.fillStyle = 'white';
-      pageCtx.fillRect(0, 0, w, h);
-      pageCtx.drawImage(canvas, 0, page * pxPageHeight, w, h, 0, 0, w, h); // Add the page to the PDF.
-
-      if (page) this.prop.pdf.addPage();
-      var imgData = pageCanvas.toDataURL('image/' + opt.image.type, opt.image.quality);
-      this.prop.pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0], this.prop.pageSize.inner.width, pageHeight);
-    }
-  });
-};
-/* ----- OUTPUT / SAVE ----- */
-
-
-Worker.prototype.output = function output(type, options, src) {
-  // Redirect requests to the correct function (outputPdf / outputImg).
-  src = src || 'pdf';
-
-  if (src.toLowerCase() === 'img' || src.toLowerCase() === 'image') {
-    return this.outputImg(type, options);
-  } else {
-    return this.outputPdf(type, options);
-  }
-};
-
-Worker.prototype.outputPdf = function outputPdf(type, options) {
-  // Set up function prerequisites.
-  var prereqs = [function checkPdf() {
-    return this.prop.pdf || this.toPdf();
-  }]; // Fulfill prereqs then perform the appropriate output.
-
-  return this.thenList(prereqs).then(function outputPdf_main() {
-    /* Currently implemented output types:
-     *    https://rawgit.com/MrRio/jsPDF/master/docs/jspdf.js.html#line992
-     *  save(options), arraybuffer, blob, bloburi/bloburl,
-     *  datauristring/dataurlstring, dataurlnewwindow, datauri/dataurl
-     */
-    return this.prop.pdf.output(type, options);
-  });
-};
-
-Worker.prototype.outputImg = function outputImg(type, options) {
-  // Set up function prerequisites.
-  var prereqs = [function checkImg() {
-    return this.prop.img || this.toImg();
-  }]; // Fulfill prereqs then perform the appropriate output.
-
-  return this.thenList(prereqs).then(function outputImg_main() {
-    switch (type) {
-      case undefined:
-      case 'img':
-        return this.prop.img;
-
-      case 'datauristring':
-      case 'dataurlstring':
-        return this.prop.img.src;
-
-      case 'datauri':
-      case 'dataurl':
-        return document.location.href = this.prop.img.src;
-
-      default:
-        throw 'Image output type "' + type + '" is not supported.';
-    }
-  });
-};
-
-Worker.prototype.save = function save(filename) {
-  // Set up function prerequisites.
-  var prereqs = [function checkPdf() {
-    return this.prop.pdf || this.toPdf();
-  }]; // Fulfill prereqs, update the filename (if provided), and save the PDF.
-
-  return this.thenList(prereqs).set(filename ? {
-    filename: filename
-  } : null).then(function save_main() {
-    this.prop.pdf.save(this.opt.filename);
-  });
-};
-/* ----- SET / GET ----- */
-
-
-Worker.prototype.set = function set(opt) {
-  // TODO: Implement ordered pairs?
-  // Silently ignore invalid or empty input.
-  if ((0,_utils_js__WEBPACK_IMPORTED_MODULE_10__.objType)(opt) !== 'object') {
-    return this;
-  } // Build an array of setter functions to queue.
-
-
-  var fns = Object.keys(opt || {}).map(function (key) {
-    switch (key) {
-      case 'margin':
-        return this.setMargin.bind(this, opt.margin);
-
-      case 'jsPDF':
-        return function set_jsPDF() {
-          this.opt.jsPDF = opt.jsPDF;
-          return this.setPageSize();
-        };
-
-      case 'pageSize':
-        return this.setPageSize.bind(this, opt.pageSize);
-
-      default:
-        if (key in Worker.template.prop) {
-          // Set pre-defined properties in prop.
-          return function set_prop() {
-            this.prop[key] = opt[key];
-          };
-        } else {
-          // Set any other properties in opt.
-          return function set_opt() {
-            this.opt[key] = opt[key];
-          };
-        }
-
-    }
-  }, this); // Set properties within the promise chain.
-
-  return this.then(function set_main() {
-    return this.thenList(fns);
-  });
-};
-
-Worker.prototype.get = function get(key, cbk) {
-  return this.then(function get_main() {
-    // Fetch the requested property, either as a predefined prop or in opt.
-    var val = key in Worker.template.prop ? this.prop[key] : this.opt[key];
-    return cbk ? cbk(val) : val;
-  });
-};
-
-Worker.prototype.setMargin = function setMargin(margin) {
-  return this.then(function setMargin_main() {
-    // Parse the margin property: [top, left, bottom, right].
-    switch ((0,_utils_js__WEBPACK_IMPORTED_MODULE_10__.objType)(margin)) {
-      case 'number':
-        margin = [margin, margin, margin, margin];
-
-      case 'array':
-        if (margin.length === 2) {
-          margin = [margin[0], margin[1], margin[0], margin[1]];
-        }
-
-        if (margin.length === 4) {
-          break;
-        }
-
-      default:
-        return this.error('Invalid margin array.');
-    } // Set the margin property, then update pageSize.
-
-
-    this.opt.margin = margin;
-  }).then(this.setPageSize);
-};
-
-Worker.prototype.setPageSize = function setPageSize(pageSize) {
-  return this.then(function setPageSize_main() {
-    // Retrieve page-size based on jsPDF settings, if not explicitly provided.
-    pageSize = pageSize || jspdf__WEBPACK_IMPORTED_MODULE_8__.jsPDF.getPageSize(this.opt.jsPDF); // Add 'inner' field if not present.
-
-    if (!pageSize.hasOwnProperty('inner')) {
-      pageSize.inner = {
-        width: pageSize.width - this.opt.margin[1] - this.opt.margin[3],
-        height: pageSize.height - this.opt.margin[0] - this.opt.margin[2]
-      };
-      pageSize.inner.px = {
-        width: (0,_utils_js__WEBPACK_IMPORTED_MODULE_10__.toPx)(pageSize.inner.width, pageSize.k),
-        height: (0,_utils_js__WEBPACK_IMPORTED_MODULE_10__.toPx)(pageSize.inner.height, pageSize.k)
-      };
-      pageSize.inner.ratio = pageSize.inner.height / pageSize.inner.width;
-    } // Attach pageSize to this.
-
-
-    this.prop.pageSize = pageSize;
-  });
-};
-
-Worker.prototype.setProgress = function setProgress(val, state, n, stack) {
-  // Immediately update all progress values.
-  if (val != null) this.progress.val = val;
-  if (state != null) this.progress.state = state;
-  if (n != null) this.progress.n = n;
-  if (stack != null) this.progress.stack = stack;
-  this.progress.ratio = this.progress.val / this.progress.state; // Return this for command chaining.
-
-  return this;
-};
-
-Worker.prototype.updateProgress = function updateProgress(val, state, n, stack) {
-  // Immediately update all progress values, using setProgress.
-  return this.setProgress(val ? this.progress.val + val : null, state ? state : null, n ? this.progress.n + n : null, stack ? this.progress.stack.concat(stack) : null);
-};
-/* ----- PROMISE MAPPING ----- */
-
-
-Worker.prototype.then = function then(onFulfilled, onRejected) {
-  // Wrap `this` for encapsulation.
-  var self = this;
-  return this.thenCore(onFulfilled, onRejected, function then_main(onFulfilled, onRejected) {
-    // Update progress while queuing, calling, and resolving `then`.
-    self.updateProgress(null, null, 1, [onFulfilled]);
-    return Promise.prototype.then.call(this, function then_pre(val) {
-      self.updateProgress(null, onFulfilled);
-      return val;
-    }).then(onFulfilled, onRejected).then(function then_post(val) {
-      self.updateProgress(1);
-      return val;
-    });
-  });
-};
-
-Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected, thenBase) {
-  // Handle optional thenBase parameter.
-  thenBase = thenBase || Promise.prototype.then; // Wrap `this` for encapsulation and bind it to the promise handlers.
-
-  var self = this;
-
-  if (onFulfilled) {
-    onFulfilled = onFulfilled.bind(self);
-  }
-
-  if (onRejected) {
-    onRejected = onRejected.bind(self);
-  } // Cast self into a Promise to avoid polyfills recursively defining `then`.
-
-
-  var isNative = Promise.toString().indexOf('[native code]') !== -1 && Promise.name === 'Promise';
-  var selfPromise = isNative ? self : Worker.convert(Object.assign({}, self), Promise.prototype); // Return the promise, after casting it into a Worker and preserving props.
-
-  var returnVal = thenBase.call(selfPromise, onFulfilled, onRejected);
-  return Worker.convert(returnVal, self.__proto__);
-};
-
-Worker.prototype.thenExternal = function thenExternal(onFulfilled, onRejected) {
-  // Call `then` and return a standard promise (exits the Worker chain).
-  return Promise.prototype.then.call(this, onFulfilled, onRejected);
-};
-
-Worker.prototype.thenList = function thenList(fns) {
-  // Queue a series of promise 'factories' into the promise chain.
-  var self = this;
-  fns.forEach(function thenList_forEach(fn) {
-    self = self.thenCore(fn);
-  });
-  return self;
-};
-
-Worker.prototype['catch'] = function (onRejected) {
-  // Bind `this` to the promise handler, call `catch`, and return a Worker.
-  if (onRejected) {
-    onRejected = onRejected.bind(this);
-  }
-
-  var returnVal = Promise.prototype['catch'].call(this, onRejected);
-  return Worker.convert(returnVal, this);
-};
-
-Worker.prototype.catchExternal = function catchExternal(onRejected) {
-  // Call `catch` and return a standard promise (exits the Worker chain).
-  return Promise.prototype['catch'].call(this, onRejected);
-};
-
-Worker.prototype.error = function error(msg) {
-  // Throw the error in the Promise chain.
-  return this.then(function error_main() {
-    throw new Error(msg);
-  });
-};
-/* ----- ALIASES ----- */
-
-
-Worker.prototype.using = Worker.prototype.set;
-Worker.prototype.saveAs = Worker.prototype.save;
-Worker.prototype.export = Worker.prototype.output;
-Worker.prototype.run = Worker.prototype.then;
-/* ----- FINISHING ----- */
-// Expose the Worker class.
-
-/* harmony default export */ __webpack_exports__["default"] = (Worker);
-
-/***/ }),
 
 /***/ "./node_modules/core-js/internals/a-function.js":
 /*!******************************************************!*\
@@ -1178,6 +78,21 @@ module.exports = function (key) {
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/an-instance.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/core-js/internals/an-instance.js ***!
+  \*******************************************************/
+/***/ (function(module) {
+
+module.exports = function (it, Constructor, name) {
+  if (!(it instanceof Constructor)) {
+    throw TypeError('Incorrect ' + (name ? name + ' ' : '') + 'invocation');
+  } return it;
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/an-object.js":
 /*!*****************************************************!*\
   !*** ./node_modules/core-js/internals/an-object.js ***!
@@ -1203,7 +118,7 @@ module.exports = function (it) {
 
 "use strict";
 
-var $forEach = __webpack_require__(/*! ../internals/array-iteration */ "./node_modules/core-js/internals/array-iteration.js").forEach;
+var $forEach = (__webpack_require__(/*! ../internals/array-iteration */ "./node_modules/core-js/internals/array-iteration.js").forEach);
 var arrayMethodIsStrict = __webpack_require__(/*! ../internals/array-method-is-strict */ "./node_modules/core-js/internals/array-method-is-strict.js");
 
 var STRICT_METHOD = arrayMethodIsStrict('forEach');
@@ -1439,6 +354,54 @@ module.exports = function (originalArray, length) {
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/check-correctness-of-iteration.js":
+/*!**************************************************************************!*\
+  !*** ./node_modules/core-js/internals/check-correctness-of-iteration.js ***!
+  \**************************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
+
+var ITERATOR = wellKnownSymbol('iterator');
+var SAFE_CLOSING = false;
+
+try {
+  var called = 0;
+  var iteratorWithReturn = {
+    next: function () {
+      return { done: !!called++ };
+    },
+    'return': function () {
+      SAFE_CLOSING = true;
+    }
+  };
+  iteratorWithReturn[ITERATOR] = function () {
+    return this;
+  };
+  // eslint-disable-next-line es/no-array-from, no-throw-literal -- required for testing
+  Array.from(iteratorWithReturn, function () { throw 2; });
+} catch (error) { /* empty */ }
+
+module.exports = function (exec, SKIP_CLOSING) {
+  if (!SKIP_CLOSING && !SAFE_CLOSING) return false;
+  var ITERATION_SUPPORT = false;
+  try {
+    var object = {};
+    object[ITERATOR] = function () {
+      return {
+        next: function () {
+          return { done: ITERATION_SUPPORT = true };
+        }
+      };
+    };
+    exec(object);
+  } catch (error) { /* empty */ }
+  return ITERATION_SUPPORT;
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/classof-raw.js":
 /*!*******************************************************!*\
   !*** ./node_modules/core-js/internals/classof-raw.js ***!
@@ -1563,7 +526,7 @@ module.exports = function (string, tag, attribute, value) {
 
 "use strict";
 
-var IteratorPrototype = __webpack_require__(/*! ../internals/iterators-core */ "./node_modules/core-js/internals/iterators-core.js").IteratorPrototype;
+var IteratorPrototype = (__webpack_require__(/*! ../internals/iterators-core */ "./node_modules/core-js/internals/iterators-core.js").IteratorPrototype);
 var create = __webpack_require__(/*! ../internals/object-create */ "./node_modules/core-js/internals/object-create.js");
 var createPropertyDescriptor = __webpack_require__(/*! ../internals/create-property-descriptor */ "./node_modules/core-js/internals/create-property-descriptor.js");
 var setToStringTag = __webpack_require__(/*! ../internals/set-to-string-tag */ "./node_modules/core-js/internals/set-to-string-tag.js");
@@ -1751,7 +714,7 @@ module.exports = function (Iterable, NAME, IteratorConstructor, next, DEFAULT, I
 var path = __webpack_require__(/*! ../internals/path */ "./node_modules/core-js/internals/path.js");
 var has = __webpack_require__(/*! ../internals/has */ "./node_modules/core-js/internals/has.js");
 var wrappedWellKnownSymbolModule = __webpack_require__(/*! ../internals/well-known-symbol-wrapped */ "./node_modules/core-js/internals/well-known-symbol-wrapped.js");
-var defineProperty = __webpack_require__(/*! ../internals/object-define-property */ "./node_modules/core-js/internals/object-define-property.js").f;
+var defineProperty = (__webpack_require__(/*! ../internals/object-define-property */ "./node_modules/core-js/internals/object-define-property.js").f);
 
 module.exports = function (NAME) {
   var Symbol = path.Symbol || (path.Symbol = {});
@@ -1845,6 +808,57 @@ module.exports = {
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/engine-is-browser.js":
+/*!*************************************************************!*\
+  !*** ./node_modules/core-js/internals/engine-is-browser.js ***!
+  \*************************************************************/
+/***/ (function(module) {
+
+module.exports = typeof window == 'object';
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/engine-is-ios.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/core-js/internals/engine-is-ios.js ***!
+  \*********************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var userAgent = __webpack_require__(/*! ../internals/engine-user-agent */ "./node_modules/core-js/internals/engine-user-agent.js");
+
+module.exports = /(?:iphone|ipod|ipad).*applewebkit/i.test(userAgent);
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/engine-is-node.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/core-js/internals/engine-is-node.js ***!
+  \**********************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var classof = __webpack_require__(/*! ../internals/classof-raw */ "./node_modules/core-js/internals/classof-raw.js");
+var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
+
+module.exports = classof(global.process) == 'process';
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/engine-is-webos-webkit.js":
+/*!******************************************************************!*\
+  !*** ./node_modules/core-js/internals/engine-is-webos-webkit.js ***!
+  \******************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var userAgent = __webpack_require__(/*! ../internals/engine-user-agent */ "./node_modules/core-js/internals/engine-user-agent.js");
+
+module.exports = /web0s(?!.*chrome)/i.test(userAgent);
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/engine-user-agent.js":
 /*!*************************************************************!*\
   !*** ./node_modules/core-js/internals/engine-user-agent.js ***!
@@ -1916,7 +930,7 @@ module.exports = [
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
-var getOwnPropertyDescriptor = __webpack_require__(/*! ../internals/object-get-own-property-descriptor */ "./node_modules/core-js/internals/object-get-own-property-descriptor.js").f;
+var getOwnPropertyDescriptor = (__webpack_require__(/*! ../internals/object-get-own-property-descriptor */ "./node_modules/core-js/internals/object-get-own-property-descriptor.js").f);
 var createNonEnumerableProperty = __webpack_require__(/*! ../internals/create-non-enumerable-property */ "./node_modules/core-js/internals/create-non-enumerable-property.js");
 var redefine = __webpack_require__(/*! ../internals/redefine */ "./node_modules/core-js/internals/redefine.js");
 var setGlobal = __webpack_require__(/*! ../internals/set-global */ "./node_modules/core-js/internals/set-global.js");
@@ -2043,6 +1057,27 @@ module.exports = function (namespace, method) {
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/get-iterator-method.js":
+/*!***************************************************************!*\
+  !*** ./node_modules/core-js/internals/get-iterator-method.js ***!
+  \***************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var classof = __webpack_require__(/*! ../internals/classof */ "./node_modules/core-js/internals/classof.js");
+var Iterators = __webpack_require__(/*! ../internals/iterators */ "./node_modules/core-js/internals/iterators.js");
+var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
+
+var ITERATOR = wellKnownSymbol('iterator');
+
+module.exports = function (it) {
+  if (it != undefined) return it[ITERATOR]
+    || it['@@iterator']
+    || Iterators[classof(it)];
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/global.js":
 /*!**************************************************!*\
   !*** ./node_modules/core-js/internals/global.js ***!
@@ -2091,6 +1126,24 @@ module.exports = Object.hasOwn || function hasOwn(it, key) {
 /***/ (function(module) {
 
 module.exports = {};
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/host-report-errors.js":
+/*!**************************************************************!*\
+  !*** ./node_modules/core-js/internals/host-report-errors.js ***!
+  \**************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
+
+module.exports = function (a, b) {
+  var console = global.console;
+  if (console && console.error) {
+    arguments.length === 1 ? console.error(a) : console.error(a, b);
+  }
+};
 
 
 /***/ }),
@@ -2278,6 +1331,26 @@ module.exports = {
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/is-array-iterator-method.js":
+/*!********************************************************************!*\
+  !*** ./node_modules/core-js/internals/is-array-iterator-method.js ***!
+  \********************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
+var Iterators = __webpack_require__(/*! ../internals/iterators */ "./node_modules/core-js/internals/iterators.js");
+
+var ITERATOR = wellKnownSymbol('iterator');
+var ArrayPrototype = Array.prototype;
+
+// check on default Array iterator
+module.exports = function (it) {
+  return it !== undefined && (Iterators.Array === it || ArrayPrototype[ITERATOR] === it);
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/is-array.js":
 /*!****************************************************!*\
   !*** ./node_modules/core-js/internals/is-array.js ***!
@@ -2370,6 +1443,92 @@ module.exports = USE_SYMBOL_AS_UID ? function (it) {
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/iterate.js":
+/*!***************************************************!*\
+  !*** ./node_modules/core-js/internals/iterate.js ***!
+  \***************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var anObject = __webpack_require__(/*! ../internals/an-object */ "./node_modules/core-js/internals/an-object.js");
+var isArrayIteratorMethod = __webpack_require__(/*! ../internals/is-array-iterator-method */ "./node_modules/core-js/internals/is-array-iterator-method.js");
+var toLength = __webpack_require__(/*! ../internals/to-length */ "./node_modules/core-js/internals/to-length.js");
+var bind = __webpack_require__(/*! ../internals/function-bind-context */ "./node_modules/core-js/internals/function-bind-context.js");
+var getIteratorMethod = __webpack_require__(/*! ../internals/get-iterator-method */ "./node_modules/core-js/internals/get-iterator-method.js");
+var iteratorClose = __webpack_require__(/*! ../internals/iterator-close */ "./node_modules/core-js/internals/iterator-close.js");
+
+var Result = function (stopped, result) {
+  this.stopped = stopped;
+  this.result = result;
+};
+
+module.exports = function (iterable, unboundFunction, options) {
+  var that = options && options.that;
+  var AS_ENTRIES = !!(options && options.AS_ENTRIES);
+  var IS_ITERATOR = !!(options && options.IS_ITERATOR);
+  var INTERRUPTED = !!(options && options.INTERRUPTED);
+  var fn = bind(unboundFunction, that, 1 + AS_ENTRIES + INTERRUPTED);
+  var iterator, iterFn, index, length, result, next, step;
+
+  var stop = function (condition) {
+    if (iterator) iteratorClose(iterator);
+    return new Result(true, condition);
+  };
+
+  var callFn = function (value) {
+    if (AS_ENTRIES) {
+      anObject(value);
+      return INTERRUPTED ? fn(value[0], value[1], stop) : fn(value[0], value[1]);
+    } return INTERRUPTED ? fn(value, stop) : fn(value);
+  };
+
+  if (IS_ITERATOR) {
+    iterator = iterable;
+  } else {
+    iterFn = getIteratorMethod(iterable);
+    if (typeof iterFn != 'function') throw TypeError('Target is not iterable');
+    // optimisation for array iterators
+    if (isArrayIteratorMethod(iterFn)) {
+      for (index = 0, length = toLength(iterable.length); length > index; index++) {
+        result = callFn(iterable[index]);
+        if (result && result instanceof Result) return result;
+      } return new Result(false);
+    }
+    iterator = iterFn.call(iterable);
+  }
+
+  next = iterator.next;
+  while (!(step = next.call(iterator)).done) {
+    try {
+      result = callFn(step.value);
+    } catch (error) {
+      iteratorClose(iterator);
+      throw error;
+    }
+    if (typeof result == 'object' && result && result instanceof Result) return result;
+  } return new Result(false);
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/iterator-close.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/core-js/internals/iterator-close.js ***!
+  \**********************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var anObject = __webpack_require__(/*! ../internals/an-object */ "./node_modules/core-js/internals/an-object.js");
+
+module.exports = function (iterator) {
+  var returnMethod = iterator['return'];
+  if (returnMethod !== undefined) {
+    return anObject(returnMethod.call(iterator)).value;
+  }
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/iterators-core.js":
 /*!**********************************************************!*\
   !*** ./node_modules/core-js/internals/iterators-core.js ***!
@@ -2438,6 +1597,111 @@ module.exports = {};
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/microtask.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/core-js/internals/microtask.js ***!
+  \*****************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
+var getOwnPropertyDescriptor = (__webpack_require__(/*! ../internals/object-get-own-property-descriptor */ "./node_modules/core-js/internals/object-get-own-property-descriptor.js").f);
+var macrotask = (__webpack_require__(/*! ../internals/task */ "./node_modules/core-js/internals/task.js").set);
+var IS_IOS = __webpack_require__(/*! ../internals/engine-is-ios */ "./node_modules/core-js/internals/engine-is-ios.js");
+var IS_WEBOS_WEBKIT = __webpack_require__(/*! ../internals/engine-is-webos-webkit */ "./node_modules/core-js/internals/engine-is-webos-webkit.js");
+var IS_NODE = __webpack_require__(/*! ../internals/engine-is-node */ "./node_modules/core-js/internals/engine-is-node.js");
+
+var MutationObserver = global.MutationObserver || global.WebKitMutationObserver;
+var document = global.document;
+var process = global.process;
+var Promise = global.Promise;
+// Node.js 11 shows ExperimentalWarning on getting `queueMicrotask`
+var queueMicrotaskDescriptor = getOwnPropertyDescriptor(global, 'queueMicrotask');
+var queueMicrotask = queueMicrotaskDescriptor && queueMicrotaskDescriptor.value;
+
+var flush, head, last, notify, toggle, node, promise, then;
+
+// modern engines have queueMicrotask method
+if (!queueMicrotask) {
+  flush = function () {
+    var parent, fn;
+    if (IS_NODE && (parent = process.domain)) parent.exit();
+    while (head) {
+      fn = head.fn;
+      head = head.next;
+      try {
+        fn();
+      } catch (error) {
+        if (head) notify();
+        else last = undefined;
+        throw error;
+      }
+    } last = undefined;
+    if (parent) parent.enter();
+  };
+
+  // browsers with MutationObserver, except iOS - https://github.com/zloirock/core-js/issues/339
+  // also except WebOS Webkit https://github.com/zloirock/core-js/issues/898
+  if (!IS_IOS && !IS_NODE && !IS_WEBOS_WEBKIT && MutationObserver && document) {
+    toggle = true;
+    node = document.createTextNode('');
+    new MutationObserver(flush).observe(node, { characterData: true });
+    notify = function () {
+      node.data = toggle = !toggle;
+    };
+  // environments with maybe non-completely correct, but existent Promise
+  } else if (Promise && Promise.resolve) {
+    // Promise.resolve without an argument throws an error in LG WebOS 2
+    promise = Promise.resolve(undefined);
+    // workaround of WebKit ~ iOS Safari 10.1 bug
+    promise.constructor = Promise;
+    then = promise.then;
+    notify = function () {
+      then.call(promise, flush);
+    };
+  // Node.js without promises
+  } else if (IS_NODE) {
+    notify = function () {
+      process.nextTick(flush);
+    };
+  // for other environments - macrotask based on:
+  // - setImmediate
+  // - MessageChannel
+  // - window.postMessag
+  // - onreadystatechange
+  // - setTimeout
+  } else {
+    notify = function () {
+      // strange IE + webpack dev server bug - use .call(global)
+      macrotask.call(global, flush);
+    };
+  }
+}
+
+module.exports = queueMicrotask || function (fn) {
+  var task = { fn: fn, next: undefined };
+  if (last) last.next = task;
+  if (!head) {
+    head = task;
+    notify();
+  } last = task;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/native-promise-constructor.js":
+/*!**********************************************************************!*\
+  !*** ./node_modules/core-js/internals/native-promise-constructor.js ***!
+  \**********************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
+
+module.exports = global.Promise;
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/native-symbol.js":
 /*!*********************************************************!*\
   !*** ./node_modules/core-js/internals/native-symbol.js ***!
@@ -2473,6 +1737,36 @@ var inspectSource = __webpack_require__(/*! ../internals/inspect-source */ "./no
 var WeakMap = global.WeakMap;
 
 module.exports = typeof WeakMap === 'function' && /native code/.test(inspectSource(WeakMap));
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/new-promise-capability.js":
+/*!******************************************************************!*\
+  !*** ./node_modules/core-js/internals/new-promise-capability.js ***!
+  \******************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var aFunction = __webpack_require__(/*! ../internals/a-function */ "./node_modules/core-js/internals/a-function.js");
+
+var PromiseCapability = function (C) {
+  var resolve, reject;
+  this.promise = new C(function ($$resolve, $$reject) {
+    if (resolve !== undefined || reject !== undefined) throw TypeError('Bad Promise constructor');
+    resolve = $$resolve;
+    reject = $$reject;
+  });
+  this.resolve = aFunction(resolve);
+  this.reject = aFunction(reject);
+};
+
+// `NewPromiseCapability` abstract operation
+// https://tc39.es/ecma262/#sec-newpromisecapability
+module.exports.f = function (C) {
+  return new PromiseCapability(C);
+};
 
 
 /***/ }),
@@ -2732,7 +2026,7 @@ exports.f = DESCRIPTORS ? $getOwnPropertyDescriptor : function getOwnPropertyDes
 
 /* eslint-disable es/no-object-getownpropertynames -- safe */
 var toIndexedObject = __webpack_require__(/*! ../internals/to-indexed-object */ "./node_modules/core-js/internals/to-indexed-object.js");
-var $getOwnPropertyNames = __webpack_require__(/*! ../internals/object-get-own-property-names */ "./node_modules/core-js/internals/object-get-own-property-names.js").f;
+var $getOwnPropertyNames = (__webpack_require__(/*! ../internals/object-get-own-property-names */ "./node_modules/core-js/internals/object-get-own-property-names.js").f);
 
 var toString = {}.toString;
 
@@ -2826,7 +2120,7 @@ module.exports = CORRECT_PROTOTYPE_GETTER ? Object.getPrototypeOf : function (O)
 
 var has = __webpack_require__(/*! ../internals/has */ "./node_modules/core-js/internals/has.js");
 var toIndexedObject = __webpack_require__(/*! ../internals/to-indexed-object */ "./node_modules/core-js/internals/to-indexed-object.js");
-var indexOf = __webpack_require__(/*! ../internals/array-includes */ "./node_modules/core-js/internals/array-includes.js").indexOf;
+var indexOf = (__webpack_require__(/*! ../internals/array-includes */ "./node_modules/core-js/internals/array-includes.js").indexOf);
 var hiddenKeys = __webpack_require__(/*! ../internals/hidden-keys */ "./node_modules/core-js/internals/hidden-keys.js");
 
 module.exports = function (object, names) {
@@ -3000,6 +2294,61 @@ module.exports = global;
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/perform.js":
+/*!***************************************************!*\
+  !*** ./node_modules/core-js/internals/perform.js ***!
+  \***************************************************/
+/***/ (function(module) {
+
+module.exports = function (exec) {
+  try {
+    return { error: false, value: exec() };
+  } catch (error) {
+    return { error: true, value: error };
+  }
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/promise-resolve.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/core-js/internals/promise-resolve.js ***!
+  \***********************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var anObject = __webpack_require__(/*! ../internals/an-object */ "./node_modules/core-js/internals/an-object.js");
+var isObject = __webpack_require__(/*! ../internals/is-object */ "./node_modules/core-js/internals/is-object.js");
+var newPromiseCapability = __webpack_require__(/*! ../internals/new-promise-capability */ "./node_modules/core-js/internals/new-promise-capability.js");
+
+module.exports = function (C, x) {
+  anObject(C);
+  if (isObject(x) && x.constructor === C) return x;
+  var promiseCapability = newPromiseCapability.f(C);
+  var resolve = promiseCapability.resolve;
+  resolve(x);
+  return promiseCapability.promise;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/redefine-all.js":
+/*!********************************************************!*\
+  !*** ./node_modules/core-js/internals/redefine-all.js ***!
+  \********************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var redefine = __webpack_require__(/*! ../internals/redefine */ "./node_modules/core-js/internals/redefine.js");
+
+module.exports = function (target, src, options) {
+  for (var key in src) redefine(target, key, src[key], options);
+  return target;
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/redefine.js":
 /*!****************************************************!*\
   !*** ./node_modules/core-js/internals/redefine.js ***!
@@ -3113,13 +2462,43 @@ module.exports = function (key, value) {
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/set-species.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/core-js/internals/set-species.js ***!
+  \*******************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var getBuiltIn = __webpack_require__(/*! ../internals/get-built-in */ "./node_modules/core-js/internals/get-built-in.js");
+var definePropertyModule = __webpack_require__(/*! ../internals/object-define-property */ "./node_modules/core-js/internals/object-define-property.js");
+var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
+var DESCRIPTORS = __webpack_require__(/*! ../internals/descriptors */ "./node_modules/core-js/internals/descriptors.js");
+
+var SPECIES = wellKnownSymbol('species');
+
+module.exports = function (CONSTRUCTOR_NAME) {
+  var Constructor = getBuiltIn(CONSTRUCTOR_NAME);
+  var defineProperty = definePropertyModule.f;
+
+  if (DESCRIPTORS && Constructor && !Constructor[SPECIES]) {
+    defineProperty(Constructor, SPECIES, {
+      configurable: true,
+      get: function () { return this; }
+    });
+  }
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/set-to-string-tag.js":
 /*!*************************************************************!*\
   !*** ./node_modules/core-js/internals/set-to-string-tag.js ***!
   \*************************************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var defineProperty = __webpack_require__(/*! ../internals/object-define-property */ "./node_modules/core-js/internals/object-define-property.js").f;
+var defineProperty = (__webpack_require__(/*! ../internals/object-define-property */ "./node_modules/core-js/internals/object-define-property.js").f);
 var has = __webpack_require__(/*! ../internals/has */ "./node_modules/core-js/internals/has.js");
 var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
 
@@ -3185,6 +2564,29 @@ var store = __webpack_require__(/*! ../internals/shared-store */ "./node_modules
   mode: IS_PURE ? 'pure' : 'global',
   copyright: '© 2021 Denis Pushkarev (zloirock.ru)'
 });
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/species-constructor.js":
+/*!***************************************************************!*\
+  !*** ./node_modules/core-js/internals/species-constructor.js ***!
+  \***************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var anObject = __webpack_require__(/*! ../internals/an-object */ "./node_modules/core-js/internals/an-object.js");
+var aFunction = __webpack_require__(/*! ../internals/a-function */ "./node_modules/core-js/internals/a-function.js");
+var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
+
+var SPECIES = wellKnownSymbol('species');
+
+// `SpeciesConstructor` abstract operation
+// https://tc39.es/ecma262/#sec-speciesconstructor
+module.exports = function (O, defaultConstructor) {
+  var C = anObject(O).constructor;
+  var S;
+  return C === undefined || (S = anObject(C)[SPECIES]) == undefined ? defaultConstructor : aFunction(S);
+};
 
 
 /***/ }),
@@ -3281,6 +2683,128 @@ module.exports = {
   // `String.prototype.trim` method
   // https://tc39.es/ecma262/#sec-string.prototype.trim
   trim: createMethod(3)
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/task.js":
+/*!************************************************!*\
+  !*** ./node_modules/core-js/internals/task.js ***!
+  \************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
+var fails = __webpack_require__(/*! ../internals/fails */ "./node_modules/core-js/internals/fails.js");
+var bind = __webpack_require__(/*! ../internals/function-bind-context */ "./node_modules/core-js/internals/function-bind-context.js");
+var html = __webpack_require__(/*! ../internals/html */ "./node_modules/core-js/internals/html.js");
+var createElement = __webpack_require__(/*! ../internals/document-create-element */ "./node_modules/core-js/internals/document-create-element.js");
+var IS_IOS = __webpack_require__(/*! ../internals/engine-is-ios */ "./node_modules/core-js/internals/engine-is-ios.js");
+var IS_NODE = __webpack_require__(/*! ../internals/engine-is-node */ "./node_modules/core-js/internals/engine-is-node.js");
+
+var set = global.setImmediate;
+var clear = global.clearImmediate;
+var process = global.process;
+var MessageChannel = global.MessageChannel;
+var Dispatch = global.Dispatch;
+var counter = 0;
+var queue = {};
+var ONREADYSTATECHANGE = 'onreadystatechange';
+var location, defer, channel, port;
+
+try {
+  // Deno throws a ReferenceError on `location` access without `--location` flag
+  location = global.location;
+} catch (error) { /* empty */ }
+
+var run = function (id) {
+  // eslint-disable-next-line no-prototype-builtins -- safe
+  if (queue.hasOwnProperty(id)) {
+    var fn = queue[id];
+    delete queue[id];
+    fn();
+  }
+};
+
+var runner = function (id) {
+  return function () {
+    run(id);
+  };
+};
+
+var listener = function (event) {
+  run(event.data);
+};
+
+var post = function (id) {
+  // old engines have not location.origin
+  global.postMessage(String(id), location.protocol + '//' + location.host);
+};
+
+// Node.js 0.9+ & IE10+ has setImmediate, otherwise:
+if (!set || !clear) {
+  set = function setImmediate(fn) {
+    var args = [];
+    var argumentsLength = arguments.length;
+    var i = 1;
+    while (argumentsLength > i) args.push(arguments[i++]);
+    queue[++counter] = function () {
+      // eslint-disable-next-line no-new-func -- spec requirement
+      (typeof fn == 'function' ? fn : Function(fn)).apply(undefined, args);
+    };
+    defer(counter);
+    return counter;
+  };
+  clear = function clearImmediate(id) {
+    delete queue[id];
+  };
+  // Node.js 0.8-
+  if (IS_NODE) {
+    defer = function (id) {
+      process.nextTick(runner(id));
+    };
+  // Sphere (JS game engine) Dispatch API
+  } else if (Dispatch && Dispatch.now) {
+    defer = function (id) {
+      Dispatch.now(runner(id));
+    };
+  // Browsers with MessageChannel, includes WebWorkers
+  // except iOS - https://github.com/zloirock/core-js/issues/624
+  } else if (MessageChannel && !IS_IOS) {
+    channel = new MessageChannel();
+    port = channel.port2;
+    channel.port1.onmessage = listener;
+    defer = bind(port.postMessage, port, 1);
+  // Browsers with postMessage, skip WebWorkers
+  // IE8 has postMessage, but it's sync & typeof its postMessage is 'object'
+  } else if (
+    global.addEventListener &&
+    typeof postMessage == 'function' &&
+    !global.importScripts &&
+    location && location.protocol !== 'file:' &&
+    !fails(post)
+  ) {
+    defer = post;
+    global.addEventListener('message', listener, false);
+  // IE8-
+  } else if (ONREADYSTATECHANGE in createElement('script')) {
+    defer = function (id) {
+      html.appendChild(createElement('script'))[ONREADYSTATECHANGE] = function () {
+        html.removeChild(this);
+        run(id);
+      };
+    };
+  // Rest old browsers
+  } else {
+    defer = function (id) {
+      setTimeout(runner(id), 0);
+    };
+  }
+}
+
+module.exports = {
+  set: set,
+  clear: clear
 };
 
 
@@ -3726,7 +3250,7 @@ $({ target: 'Array', proto: true, forced: ES3_STRINGS || !STRICT_METHOD }, {
 "use strict";
 
 var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var $map = __webpack_require__(/*! ../internals/array-iteration */ "./node_modules/core-js/internals/array-iteration.js").map;
+var $map = (__webpack_require__(/*! ../internals/array-iteration */ "./node_modules/core-js/internals/array-iteration.js").map);
 var arrayMethodHasSpeciesSupport = __webpack_require__(/*! ../internals/array-method-has-species-support */ "./node_modules/core-js/internals/array-method-has-species-support.js");
 
 var HAS_SPECIES_SUPPORT = arrayMethodHasSpeciesSupport('map');
@@ -3808,7 +3332,7 @@ $({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT }, {
 /***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
 
 var DESCRIPTORS = __webpack_require__(/*! ../internals/descriptors */ "./node_modules/core-js/internals/descriptors.js");
-var defineProperty = __webpack_require__(/*! ../internals/object-define-property */ "./node_modules/core-js/internals/object-define-property.js").f;
+var defineProperty = (__webpack_require__(/*! ../internals/object-define-property */ "./node_modules/core-js/internals/object-define-property.js").f);
 
 var FunctionPrototype = Function.prototype;
 var FunctionPrototypeToString = FunctionPrototype.toString;
@@ -3852,10 +3376,10 @@ var isSymbol = __webpack_require__(/*! ../internals/is-symbol */ "./node_modules
 var toPrimitive = __webpack_require__(/*! ../internals/to-primitive */ "./node_modules/core-js/internals/to-primitive.js");
 var fails = __webpack_require__(/*! ../internals/fails */ "./node_modules/core-js/internals/fails.js");
 var create = __webpack_require__(/*! ../internals/object-create */ "./node_modules/core-js/internals/object-create.js");
-var getOwnPropertyNames = __webpack_require__(/*! ../internals/object-get-own-property-names */ "./node_modules/core-js/internals/object-get-own-property-names.js").f;
-var getOwnPropertyDescriptor = __webpack_require__(/*! ../internals/object-get-own-property-descriptor */ "./node_modules/core-js/internals/object-get-own-property-descriptor.js").f;
-var defineProperty = __webpack_require__(/*! ../internals/object-define-property */ "./node_modules/core-js/internals/object-define-property.js").f;
-var trim = __webpack_require__(/*! ../internals/string-trim */ "./node_modules/core-js/internals/string-trim.js").trim;
+var getOwnPropertyNames = (__webpack_require__(/*! ../internals/object-get-own-property-names */ "./node_modules/core-js/internals/object-get-own-property-names.js").f);
+var getOwnPropertyDescriptor = (__webpack_require__(/*! ../internals/object-get-own-property-descriptor */ "./node_modules/core-js/internals/object-get-own-property-descriptor.js").f);
+var defineProperty = (__webpack_require__(/*! ../internals/object-define-property */ "./node_modules/core-js/internals/object-define-property.js").f);
+var trim = (__webpack_require__(/*! ../internals/string-trim */ "./node_modules/core-js/internals/string-trim.js").trim);
 
 var NUMBER = 'Number';
 var NativeNumber = global[NUMBER];
@@ -3988,6 +3512,410 @@ if (!TO_STRING_TAG_SUPPORT) {
 
 /***/ }),
 
+/***/ "./node_modules/core-js/modules/es.promise.js":
+/*!****************************************************!*\
+  !*** ./node_modules/core-js/modules/es.promise.js ***!
+  \****************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var IS_PURE = __webpack_require__(/*! ../internals/is-pure */ "./node_modules/core-js/internals/is-pure.js");
+var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
+var getBuiltIn = __webpack_require__(/*! ../internals/get-built-in */ "./node_modules/core-js/internals/get-built-in.js");
+var NativePromise = __webpack_require__(/*! ../internals/native-promise-constructor */ "./node_modules/core-js/internals/native-promise-constructor.js");
+var redefine = __webpack_require__(/*! ../internals/redefine */ "./node_modules/core-js/internals/redefine.js");
+var redefineAll = __webpack_require__(/*! ../internals/redefine-all */ "./node_modules/core-js/internals/redefine-all.js");
+var setPrototypeOf = __webpack_require__(/*! ../internals/object-set-prototype-of */ "./node_modules/core-js/internals/object-set-prototype-of.js");
+var setToStringTag = __webpack_require__(/*! ../internals/set-to-string-tag */ "./node_modules/core-js/internals/set-to-string-tag.js");
+var setSpecies = __webpack_require__(/*! ../internals/set-species */ "./node_modules/core-js/internals/set-species.js");
+var isObject = __webpack_require__(/*! ../internals/is-object */ "./node_modules/core-js/internals/is-object.js");
+var aFunction = __webpack_require__(/*! ../internals/a-function */ "./node_modules/core-js/internals/a-function.js");
+var anInstance = __webpack_require__(/*! ../internals/an-instance */ "./node_modules/core-js/internals/an-instance.js");
+var inspectSource = __webpack_require__(/*! ../internals/inspect-source */ "./node_modules/core-js/internals/inspect-source.js");
+var iterate = __webpack_require__(/*! ../internals/iterate */ "./node_modules/core-js/internals/iterate.js");
+var checkCorrectnessOfIteration = __webpack_require__(/*! ../internals/check-correctness-of-iteration */ "./node_modules/core-js/internals/check-correctness-of-iteration.js");
+var speciesConstructor = __webpack_require__(/*! ../internals/species-constructor */ "./node_modules/core-js/internals/species-constructor.js");
+var task = (__webpack_require__(/*! ../internals/task */ "./node_modules/core-js/internals/task.js").set);
+var microtask = __webpack_require__(/*! ../internals/microtask */ "./node_modules/core-js/internals/microtask.js");
+var promiseResolve = __webpack_require__(/*! ../internals/promise-resolve */ "./node_modules/core-js/internals/promise-resolve.js");
+var hostReportErrors = __webpack_require__(/*! ../internals/host-report-errors */ "./node_modules/core-js/internals/host-report-errors.js");
+var newPromiseCapabilityModule = __webpack_require__(/*! ../internals/new-promise-capability */ "./node_modules/core-js/internals/new-promise-capability.js");
+var perform = __webpack_require__(/*! ../internals/perform */ "./node_modules/core-js/internals/perform.js");
+var InternalStateModule = __webpack_require__(/*! ../internals/internal-state */ "./node_modules/core-js/internals/internal-state.js");
+var isForced = __webpack_require__(/*! ../internals/is-forced */ "./node_modules/core-js/internals/is-forced.js");
+var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
+var IS_BROWSER = __webpack_require__(/*! ../internals/engine-is-browser */ "./node_modules/core-js/internals/engine-is-browser.js");
+var IS_NODE = __webpack_require__(/*! ../internals/engine-is-node */ "./node_modules/core-js/internals/engine-is-node.js");
+var V8_VERSION = __webpack_require__(/*! ../internals/engine-v8-version */ "./node_modules/core-js/internals/engine-v8-version.js");
+
+var SPECIES = wellKnownSymbol('species');
+var PROMISE = 'Promise';
+var getInternalState = InternalStateModule.get;
+var setInternalState = InternalStateModule.set;
+var getInternalPromiseState = InternalStateModule.getterFor(PROMISE);
+var NativePromisePrototype = NativePromise && NativePromise.prototype;
+var PromiseConstructor = NativePromise;
+var PromiseConstructorPrototype = NativePromisePrototype;
+var TypeError = global.TypeError;
+var document = global.document;
+var process = global.process;
+var newPromiseCapability = newPromiseCapabilityModule.f;
+var newGenericPromiseCapability = newPromiseCapability;
+var DISPATCH_EVENT = !!(document && document.createEvent && global.dispatchEvent);
+var NATIVE_REJECTION_EVENT = typeof PromiseRejectionEvent == 'function';
+var UNHANDLED_REJECTION = 'unhandledrejection';
+var REJECTION_HANDLED = 'rejectionhandled';
+var PENDING = 0;
+var FULFILLED = 1;
+var REJECTED = 2;
+var HANDLED = 1;
+var UNHANDLED = 2;
+var SUBCLASSING = false;
+var Internal, OwnPromiseCapability, PromiseWrapper, nativeThen;
+
+var FORCED = isForced(PROMISE, function () {
+  var PROMISE_CONSTRUCTOR_SOURCE = inspectSource(PromiseConstructor);
+  var GLOBAL_CORE_JS_PROMISE = PROMISE_CONSTRUCTOR_SOURCE !== String(PromiseConstructor);
+  // V8 6.6 (Node 10 and Chrome 66) have a bug with resolving custom thenables
+  // https://bugs.chromium.org/p/chromium/issues/detail?id=830565
+  // We can't detect it synchronously, so just check versions
+  if (!GLOBAL_CORE_JS_PROMISE && V8_VERSION === 66) return true;
+  // We need Promise#finally in the pure version for preventing prototype pollution
+  if (IS_PURE && !PromiseConstructorPrototype['finally']) return true;
+  // We can't use @@species feature detection in V8 since it causes
+  // deoptimization and performance degradation
+  // https://github.com/zloirock/core-js/issues/679
+  if (V8_VERSION >= 51 && /native code/.test(PROMISE_CONSTRUCTOR_SOURCE)) return false;
+  // Detect correctness of subclassing with @@species support
+  var promise = new PromiseConstructor(function (resolve) { resolve(1); });
+  var FakePromise = function (exec) {
+    exec(function () { /* empty */ }, function () { /* empty */ });
+  };
+  var constructor = promise.constructor = {};
+  constructor[SPECIES] = FakePromise;
+  SUBCLASSING = promise.then(function () { /* empty */ }) instanceof FakePromise;
+  if (!SUBCLASSING) return true;
+  // Unhandled rejections tracking support, NodeJS Promise without it fails @@species test
+  return !GLOBAL_CORE_JS_PROMISE && IS_BROWSER && !NATIVE_REJECTION_EVENT;
+});
+
+var INCORRECT_ITERATION = FORCED || !checkCorrectnessOfIteration(function (iterable) {
+  PromiseConstructor.all(iterable)['catch'](function () { /* empty */ });
+});
+
+// helpers
+var isThenable = function (it) {
+  var then;
+  return isObject(it) && typeof (then = it.then) == 'function' ? then : false;
+};
+
+var notify = function (state, isReject) {
+  if (state.notified) return;
+  state.notified = true;
+  var chain = state.reactions;
+  microtask(function () {
+    var value = state.value;
+    var ok = state.state == FULFILLED;
+    var index = 0;
+    // variable length - can't use forEach
+    while (chain.length > index) {
+      var reaction = chain[index++];
+      var handler = ok ? reaction.ok : reaction.fail;
+      var resolve = reaction.resolve;
+      var reject = reaction.reject;
+      var domain = reaction.domain;
+      var result, then, exited;
+      try {
+        if (handler) {
+          if (!ok) {
+            if (state.rejection === UNHANDLED) onHandleUnhandled(state);
+            state.rejection = HANDLED;
+          }
+          if (handler === true) result = value;
+          else {
+            if (domain) domain.enter();
+            result = handler(value); // can throw
+            if (domain) {
+              domain.exit();
+              exited = true;
+            }
+          }
+          if (result === reaction.promise) {
+            reject(TypeError('Promise-chain cycle'));
+          } else if (then = isThenable(result)) {
+            then.call(result, resolve, reject);
+          } else resolve(result);
+        } else reject(value);
+      } catch (error) {
+        if (domain && !exited) domain.exit();
+        reject(error);
+      }
+    }
+    state.reactions = [];
+    state.notified = false;
+    if (isReject && !state.rejection) onUnhandled(state);
+  });
+};
+
+var dispatchEvent = function (name, promise, reason) {
+  var event, handler;
+  if (DISPATCH_EVENT) {
+    event = document.createEvent('Event');
+    event.promise = promise;
+    event.reason = reason;
+    event.initEvent(name, false, true);
+    global.dispatchEvent(event);
+  } else event = { promise: promise, reason: reason };
+  if (!NATIVE_REJECTION_EVENT && (handler = global['on' + name])) handler(event);
+  else if (name === UNHANDLED_REJECTION) hostReportErrors('Unhandled promise rejection', reason);
+};
+
+var onUnhandled = function (state) {
+  task.call(global, function () {
+    var promise = state.facade;
+    var value = state.value;
+    var IS_UNHANDLED = isUnhandled(state);
+    var result;
+    if (IS_UNHANDLED) {
+      result = perform(function () {
+        if (IS_NODE) {
+          process.emit('unhandledRejection', value, promise);
+        } else dispatchEvent(UNHANDLED_REJECTION, promise, value);
+      });
+      // Browsers should not trigger `rejectionHandled` event if it was handled here, NodeJS - should
+      state.rejection = IS_NODE || isUnhandled(state) ? UNHANDLED : HANDLED;
+      if (result.error) throw result.value;
+    }
+  });
+};
+
+var isUnhandled = function (state) {
+  return state.rejection !== HANDLED && !state.parent;
+};
+
+var onHandleUnhandled = function (state) {
+  task.call(global, function () {
+    var promise = state.facade;
+    if (IS_NODE) {
+      process.emit('rejectionHandled', promise);
+    } else dispatchEvent(REJECTION_HANDLED, promise, state.value);
+  });
+};
+
+var bind = function (fn, state, unwrap) {
+  return function (value) {
+    fn(state, value, unwrap);
+  };
+};
+
+var internalReject = function (state, value, unwrap) {
+  if (state.done) return;
+  state.done = true;
+  if (unwrap) state = unwrap;
+  state.value = value;
+  state.state = REJECTED;
+  notify(state, true);
+};
+
+var internalResolve = function (state, value, unwrap) {
+  if (state.done) return;
+  state.done = true;
+  if (unwrap) state = unwrap;
+  try {
+    if (state.facade === value) throw TypeError("Promise can't be resolved itself");
+    var then = isThenable(value);
+    if (then) {
+      microtask(function () {
+        var wrapper = { done: false };
+        try {
+          then.call(value,
+            bind(internalResolve, wrapper, state),
+            bind(internalReject, wrapper, state)
+          );
+        } catch (error) {
+          internalReject(wrapper, error, state);
+        }
+      });
+    } else {
+      state.value = value;
+      state.state = FULFILLED;
+      notify(state, false);
+    }
+  } catch (error) {
+    internalReject({ done: false }, error, state);
+  }
+};
+
+// constructor polyfill
+if (FORCED) {
+  // 25.4.3.1 Promise(executor)
+  PromiseConstructor = function Promise(executor) {
+    anInstance(this, PromiseConstructor, PROMISE);
+    aFunction(executor);
+    Internal.call(this);
+    var state = getInternalState(this);
+    try {
+      executor(bind(internalResolve, state), bind(internalReject, state));
+    } catch (error) {
+      internalReject(state, error);
+    }
+  };
+  PromiseConstructorPrototype = PromiseConstructor.prototype;
+  // eslint-disable-next-line no-unused-vars -- required for `.length`
+  Internal = function Promise(executor) {
+    setInternalState(this, {
+      type: PROMISE,
+      done: false,
+      notified: false,
+      parent: false,
+      reactions: [],
+      rejection: false,
+      state: PENDING,
+      value: undefined
+    });
+  };
+  Internal.prototype = redefineAll(PromiseConstructorPrototype, {
+    // `Promise.prototype.then` method
+    // https://tc39.es/ecma262/#sec-promise.prototype.then
+    then: function then(onFulfilled, onRejected) {
+      var state = getInternalPromiseState(this);
+      var reaction = newPromiseCapability(speciesConstructor(this, PromiseConstructor));
+      reaction.ok = typeof onFulfilled == 'function' ? onFulfilled : true;
+      reaction.fail = typeof onRejected == 'function' && onRejected;
+      reaction.domain = IS_NODE ? process.domain : undefined;
+      state.parent = true;
+      state.reactions.push(reaction);
+      if (state.state != PENDING) notify(state, false);
+      return reaction.promise;
+    },
+    // `Promise.prototype.catch` method
+    // https://tc39.es/ecma262/#sec-promise.prototype.catch
+    'catch': function (onRejected) {
+      return this.then(undefined, onRejected);
+    }
+  });
+  OwnPromiseCapability = function () {
+    var promise = new Internal();
+    var state = getInternalState(promise);
+    this.promise = promise;
+    this.resolve = bind(internalResolve, state);
+    this.reject = bind(internalReject, state);
+  };
+  newPromiseCapabilityModule.f = newPromiseCapability = function (C) {
+    return C === PromiseConstructor || C === PromiseWrapper
+      ? new OwnPromiseCapability(C)
+      : newGenericPromiseCapability(C);
+  };
+
+  if (!IS_PURE && typeof NativePromise == 'function' && NativePromisePrototype !== Object.prototype) {
+    nativeThen = NativePromisePrototype.then;
+
+    if (!SUBCLASSING) {
+      // make `Promise#then` return a polyfilled `Promise` for native promise-based APIs
+      redefine(NativePromisePrototype, 'then', function then(onFulfilled, onRejected) {
+        var that = this;
+        return new PromiseConstructor(function (resolve, reject) {
+          nativeThen.call(that, resolve, reject);
+        }).then(onFulfilled, onRejected);
+      // https://github.com/zloirock/core-js/issues/640
+      }, { unsafe: true });
+
+      // makes sure that native promise-based APIs `Promise#catch` properly works with patched `Promise#then`
+      redefine(NativePromisePrototype, 'catch', PromiseConstructorPrototype['catch'], { unsafe: true });
+    }
+
+    // make `.constructor === Promise` work for native promise-based APIs
+    try {
+      delete NativePromisePrototype.constructor;
+    } catch (error) { /* empty */ }
+
+    // make `instanceof Promise` work for native promise-based APIs
+    if (setPrototypeOf) {
+      setPrototypeOf(NativePromisePrototype, PromiseConstructorPrototype);
+    }
+  }
+}
+
+$({ global: true, wrap: true, forced: FORCED }, {
+  Promise: PromiseConstructor
+});
+
+setToStringTag(PromiseConstructor, PROMISE, false, true);
+setSpecies(PROMISE);
+
+PromiseWrapper = getBuiltIn(PROMISE);
+
+// statics
+$({ target: PROMISE, stat: true, forced: FORCED }, {
+  // `Promise.reject` method
+  // https://tc39.es/ecma262/#sec-promise.reject
+  reject: function reject(r) {
+    var capability = newPromiseCapability(this);
+    capability.reject.call(undefined, r);
+    return capability.promise;
+  }
+});
+
+$({ target: PROMISE, stat: true, forced: IS_PURE || FORCED }, {
+  // `Promise.resolve` method
+  // https://tc39.es/ecma262/#sec-promise.resolve
+  resolve: function resolve(x) {
+    return promiseResolve(IS_PURE && this === PromiseWrapper ? PromiseConstructor : this, x);
+  }
+});
+
+$({ target: PROMISE, stat: true, forced: INCORRECT_ITERATION }, {
+  // `Promise.all` method
+  // https://tc39.es/ecma262/#sec-promise.all
+  all: function all(iterable) {
+    var C = this;
+    var capability = newPromiseCapability(C);
+    var resolve = capability.resolve;
+    var reject = capability.reject;
+    var result = perform(function () {
+      var $promiseResolve = aFunction(C.resolve);
+      var values = [];
+      var counter = 0;
+      var remaining = 1;
+      iterate(iterable, function (promise) {
+        var index = counter++;
+        var alreadyCalled = false;
+        values.push(undefined);
+        remaining++;
+        $promiseResolve.call(C, promise).then(function (value) {
+          if (alreadyCalled) return;
+          alreadyCalled = true;
+          values[index] = value;
+          --remaining || resolve(values);
+        }, reject);
+      });
+      --remaining || resolve(values);
+    });
+    if (result.error) reject(result.value);
+    return capability.promise;
+  },
+  // `Promise.race` method
+  // https://tc39.es/ecma262/#sec-promise.race
+  race: function race(iterable) {
+    var C = this;
+    var capability = newPromiseCapability(C);
+    var reject = capability.reject;
+    var result = perform(function () {
+      var $promiseResolve = aFunction(C.resolve);
+      iterate(iterable, function (promise) {
+        $promiseResolve.call(C, promise).then(capability.resolve, reject);
+      });
+    });
+    if (result.error) reject(result.value);
+    return capability.promise;
+  }
+});
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/modules/es.regexp.to-string.js":
 /*!*************************************************************!*\
   !*** ./node_modules/core-js/modules/es.regexp.to-string.js ***!
@@ -4033,7 +3961,7 @@ if (NOT_GENERIC || INCORRECT_NAME) {
 
 "use strict";
 
-var charAt = __webpack_require__(/*! ../internals/string-multibyte */ "./node_modules/core-js/internals/string-multibyte.js").charAt;
+var charAt = (__webpack_require__(/*! ../internals/string-multibyte */ "./node_modules/core-js/internals/string-multibyte.js").charAt);
 var toString = __webpack_require__(/*! ../internals/to-string */ "./node_modules/core-js/internals/to-string.js");
 var InternalStateModule = __webpack_require__(/*! ../internals/internal-state */ "./node_modules/core-js/internals/internal-state.js");
 var defineIterator = __webpack_require__(/*! ../internals/define-iterator */ "./node_modules/core-js/internals/define-iterator.js");
@@ -4104,7 +4032,7 @@ var DESCRIPTORS = __webpack_require__(/*! ../internals/descriptors */ "./node_mo
 var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
 var has = __webpack_require__(/*! ../internals/has */ "./node_modules/core-js/internals/has.js");
 var isObject = __webpack_require__(/*! ../internals/is-object */ "./node_modules/core-js/internals/is-object.js");
-var defineProperty = __webpack_require__(/*! ../internals/object-define-property */ "./node_modules/core-js/internals/object-define-property.js").f;
+var defineProperty = (__webpack_require__(/*! ../internals/object-define-property */ "./node_modules/core-js/internals/object-define-property.js").f);
 var copyConstructorProperties = __webpack_require__(/*! ../internals/copy-constructor-properties */ "./node_modules/core-js/internals/copy-constructor-properties.js");
 
 var NativeSymbol = global.Symbol;
@@ -4209,7 +4137,7 @@ var wrappedWellKnownSymbolModule = __webpack_require__(/*! ../internals/well-kno
 var defineWellKnownSymbol = __webpack_require__(/*! ../internals/define-well-known-symbol */ "./node_modules/core-js/internals/define-well-known-symbol.js");
 var setToStringTag = __webpack_require__(/*! ../internals/set-to-string-tag */ "./node_modules/core-js/internals/set-to-string-tag.js");
 var InternalStateModule = __webpack_require__(/*! ../internals/internal-state */ "./node_modules/core-js/internals/internal-state.js");
-var $forEach = __webpack_require__(/*! ../internals/array-iteration */ "./node_modules/core-js/internals/array-iteration.js").forEach;
+var $forEach = (__webpack_require__(/*! ../internals/array-iteration */ "./node_modules/core-js/internals/array-iteration.js").forEach);
 
 var HIDDEN = sharedKey('hidden');
 var SYMBOL = 'Symbol';
@@ -4550,1186 +4478,1102 @@ for (var COLLECTION_NAME in DOMIterables) {
 
 /***/ }),
 
-/***/ "./node_modules/es6-promise/dist/es6-promise.js":
-/*!******************************************************!*\
-  !*** ./node_modules/es6-promise/dist/es6-promise.js ***!
-  \******************************************************/
-/***/ (function(module) {
+/***/ "./src/plugin/hyperlinks.js":
+/*!**********************************!*\
+  !*** ./src/plugin/hyperlinks.js ***!
+  \**********************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
-/*!
- * @overview es6-promise - a tiny implementation of Promises/A+.
- * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
- * @license   Licensed under MIT license
- *            See https://raw.githubusercontent.com/stefanpenner/es6-promise/master/LICENSE
- * @version   v4.2.8+1e68dce6
- */
-
-(function (global, factory) {
-	 true ? module.exports = factory() :
-	0;
-}(this, (function () { 'use strict';
-
-function objectOrFunction(x) {
-  var type = typeof x;
-  return x !== null && (type === 'object' || type === 'function');
-}
-
-function isFunction(x) {
-  return typeof x === 'function';
-}
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/web.dom-collections.for-each.js */ "./node_modules/core-js/modules/web.dom-collections.for-each.js");
+/* harmony import */ var core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_es_string_link_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.string.link.js */ "./node_modules/core-js/modules/es.string.link.js");
+/* harmony import */ var core_js_modules_es_string_link_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_link_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _worker_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../worker.js */ "./src/worker.js");
+/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utils.js */ "./src/utils.js");
 
 
 
-var _isArray = void 0;
-if (Array.isArray) {
-  _isArray = Array.isArray;
-} else {
-  _isArray = function (x) {
-    return Object.prototype.toString.call(x) === '[object Array]';
-  };
-}
+ // Add hyperlink functionality to the PDF creation.
+// Main link array, and refs to original functions.
 
-var isArray = _isArray;
+var linkInfo = [];
+var orig = {
+  toContainer: _worker_js__WEBPACK_IMPORTED_MODULE_2__["default"].prototype.toContainer,
+  toPdf: _worker_js__WEBPACK_IMPORTED_MODULE_2__["default"].prototype.toPdf
+};
 
-var len = 0;
-var vertxNext = void 0;
-var customSchedulerFn = void 0;
+_worker_js__WEBPACK_IMPORTED_MODULE_2__["default"].prototype.toContainer = function toContainer() {
+  return orig.toContainer.call(this).then(function toContainer_hyperlink() {
+    // Retrieve hyperlink info if the option is enabled.
+    if (this.opt.enableLinks) {
+      // Find all anchor tags and get the container's bounds for reference.
+      var container = this.prop.container;
+      var links = container.querySelectorAll('a');
+      var containerRect = (0,_utils_js__WEBPACK_IMPORTED_MODULE_3__.unitConvert)(container.getBoundingClientRect(), this.prop.pageSize.k);
+      linkInfo = []; // Loop through each anchor tag.
 
-var asap = function asap(callback, arg) {
-  queue[len] = callback;
-  queue[len + 1] = arg;
-  len += 2;
-  if (len === 2) {
-    // If len is 2, that means that we need to schedule an async flush.
-    // If additional callbacks are queued before the queue is flushed, they
-    // will be processed by this flush that we are scheduling.
-    if (customSchedulerFn) {
-      customSchedulerFn(flush);
-    } else {
-      scheduleFlush();
+      Array.prototype.forEach.call(links, function (link) {
+        // Treat each client rect as a separate link (for text-wrapping).
+        var clientRects = link.getClientRects();
+
+        for (var i = 0; i < clientRects.length; i++) {
+          var clientRect = (0,_utils_js__WEBPACK_IMPORTED_MODULE_3__.unitConvert)(clientRects[i], this.prop.pageSize.k);
+          clientRect.left -= containerRect.left;
+          clientRect.top -= containerRect.top;
+          var page = Math.floor(clientRect.top / this.prop.pageSize.inner.height) + 1;
+          var top = this.opt.margin[0] + clientRect.top % this.prop.pageSize.inner.height;
+          var left = this.opt.margin[1] + clientRect.left;
+          linkInfo.push({
+            page: page,
+            top: top,
+            left: left,
+            clientRect: clientRect,
+            link: link
+          });
+        }
+      }, this);
     }
+  });
+};
+
+_worker_js__WEBPACK_IMPORTED_MODULE_2__["default"].prototype.toPdf = function toPdf() {
+  return orig.toPdf.call(this).then(function toPdf_hyperlink() {
+    // Add hyperlinks if the option is enabled.
+    if (this.opt.enableLinks) {
+      // Attach each anchor tag based on info from toContainer().
+      linkInfo.forEach(function (l) {
+        this.prop.pdf.setPage(l.page);
+        this.prop.pdf.link(l.left, l.top, l.clientRect.width, l.clientRect.height, {
+          url: l.link.href
+        });
+      }, this); // Reset the active page of the PDF to the final page.
+
+      var nPages = this.prop.pdf.internal.getNumberOfPages();
+      this.prop.pdf.setPage(nPages);
+    }
+  });
+};
+
+/***/ }),
+
+/***/ "./src/plugin/jspdf-plugin.js":
+/*!************************************!*\
+  !*** ./src/plugin/jspdf-plugin.js ***!
+  \************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var core_js_modules_es_symbol_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.symbol.js */ "./node_modules/core-js/modules/es.symbol.js");
+/* harmony import */ var core_js_modules_es_symbol_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_es_symbol_description_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.symbol.description.js */ "./node_modules/core-js/modules/es.symbol.description.js");
+/* harmony import */ var core_js_modules_es_symbol_description_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_description_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.object.to-string.js */ "./node_modules/core-js/modules/es.object.to-string.js");
+/* harmony import */ var core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var core_js_modules_es_symbol_iterator_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/es.symbol.iterator.js */ "./node_modules/core-js/modules/es.symbol.iterator.js");
+/* harmony import */ var core_js_modules_es_symbol_iterator_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_iterator_js__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var core_js_modules_es_array_iterator_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.array.iterator.js */ "./node_modules/core-js/modules/es.array.iterator.js");
+/* harmony import */ var core_js_modules_es_array_iterator_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_iterator_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core-js/modules/es.string.iterator.js */ "./node_modules/core-js/modules/es.string.iterator.js");
+/* harmony import */ var core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core-js/modules/web.dom-collections.iterator.js */ "./node_modules/core-js/modules/web.dom-collections.iterator.js");
+/* harmony import */ var core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var jspdf__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! jspdf */ "jspdf");
+/* harmony import */ var jspdf__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(jspdf__WEBPACK_IMPORTED_MODULE_7__);
+
+
+
+
+
+
+
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+// Import dependencies.
+ // Get dimensions of a PDF page, as determined by jsPDF.
+
+jspdf__WEBPACK_IMPORTED_MODULE_7__.jsPDF.getPageSize = function (orientation, unit, format) {
+  // Decode options object
+  if (_typeof(orientation) === 'object') {
+    var options = orientation;
+    orientation = options.orientation;
+    unit = options.unit || unit;
+    format = options.format || format;
+  } // Default options
+
+
+  unit = unit || 'mm';
+  format = format || 'a4';
+  orientation = ('' + (orientation || 'P')).toLowerCase();
+  var format_as_string = ('' + format).toLowerCase(); // Size in pt of various paper formats
+
+  var pageFormats = {
+    'a0': [2383.94, 3370.39],
+    'a1': [1683.78, 2383.94],
+    'a2': [1190.55, 1683.78],
+    'a3': [841.89, 1190.55],
+    'a4': [595.28, 841.89],
+    'a5': [419.53, 595.28],
+    'a6': [297.64, 419.53],
+    'a7': [209.76, 297.64],
+    'a8': [147.40, 209.76],
+    'a9': [104.88, 147.40],
+    'a10': [73.70, 104.88],
+    'b0': [2834.65, 4008.19],
+    'b1': [2004.09, 2834.65],
+    'b2': [1417.32, 2004.09],
+    'b3': [1000.63, 1417.32],
+    'b4': [708.66, 1000.63],
+    'b5': [498.90, 708.66],
+    'b6': [354.33, 498.90],
+    'b7': [249.45, 354.33],
+    'b8': [175.75, 249.45],
+    'b9': [124.72, 175.75],
+    'b10': [87.87, 124.72],
+    'c0': [2599.37, 3676.54],
+    'c1': [1836.85, 2599.37],
+    'c2': [1298.27, 1836.85],
+    'c3': [918.43, 1298.27],
+    'c4': [649.13, 918.43],
+    'c5': [459.21, 649.13],
+    'c6': [323.15, 459.21],
+    'c7': [229.61, 323.15],
+    'c8': [161.57, 229.61],
+    'c9': [113.39, 161.57],
+    'c10': [79.37, 113.39],
+    'dl': [311.81, 623.62],
+    'letter': [612, 792],
+    'government-letter': [576, 756],
+    'legal': [612, 1008],
+    'junior-legal': [576, 360],
+    'ledger': [1224, 792],
+    'tabloid': [792, 1224],
+    'credit-card': [153, 243]
+  }; // Unit conversion
+
+  switch (unit) {
+    case 'pt':
+      var k = 1;
+      break;
+
+    case 'mm':
+      var k = 72 / 25.4;
+      break;
+
+    case 'cm':
+      var k = 72 / 2.54;
+      break;
+
+    case 'in':
+      var k = 72;
+      break;
+
+    case 'px':
+      var k = 72 / 96;
+      break;
+
+    case 'pc':
+      var k = 12;
+      break;
+
+    case 'em':
+      var k = 12;
+      break;
+
+    case 'ex':
+      var k = 6;
+      break;
+
+    default:
+      throw 'Invalid unit: ' + unit;
+  } // Dimensions are stored as user units and converted to points on output
+
+
+  if (pageFormats.hasOwnProperty(format_as_string)) {
+    var pageHeight = pageFormats[format_as_string][1] / k;
+    var pageWidth = pageFormats[format_as_string][0] / k;
+  } else {
+    try {
+      var pageHeight = format[1];
+      var pageWidth = format[0];
+    } catch (err) {
+      throw new Error('Invalid format: ' + format);
+    }
+  } // Handle page orientation
+
+
+  if (orientation === 'p' || orientation === 'portrait') {
+    orientation = 'p';
+
+    if (pageWidth > pageHeight) {
+      var tmp = pageWidth;
+      pageWidth = pageHeight;
+      pageHeight = tmp;
+    }
+  } else if (orientation === 'l' || orientation === 'landscape') {
+    orientation = 'l';
+
+    if (pageHeight > pageWidth) {
+      var tmp = pageWidth;
+      pageWidth = pageHeight;
+      pageHeight = tmp;
+    }
+  } else {
+    throw 'Invalid orientation: ' + orientation;
+  } // Return information (k is the unit conversion ratio from pts)
+
+
+  var info = {
+    'width': pageWidth,
+    'height': pageHeight,
+    'unit': unit,
+    'k': k
+  };
+  return info;
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (jspdf__WEBPACK_IMPORTED_MODULE_7__.jsPDF);
+
+/***/ }),
+
+/***/ "./src/plugin/pagebreaks.js":
+/*!**********************************!*\
+  !*** ./src/plugin/pagebreaks.js ***!
+  \**********************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var core_js_modules_es_array_concat_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.array.concat.js */ "./node_modules/core-js/modules/es.array.concat.js");
+/* harmony import */ var core_js_modules_es_array_concat_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_concat_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_es_array_slice_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.array.slice.js */ "./node_modules/core-js/modules/es.array.slice.js");
+/* harmony import */ var core_js_modules_es_array_slice_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_slice_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var core_js_modules_es_array_join_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.array.join.js */ "./node_modules/core-js/modules/es.array.join.js");
+/* harmony import */ var core_js_modules_es_array_join_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_join_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/web.dom-collections.for-each.js */ "./node_modules/core-js/modules/web.dom-collections.for-each.js");
+/* harmony import */ var core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var core_js_modules_es_object_keys_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.object.keys.js */ "./node_modules/core-js/modules/es.object.keys.js");
+/* harmony import */ var core_js_modules_es_object_keys_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_keys_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _worker_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../worker.js */ "./src/worker.js");
+/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../utils.js */ "./src/utils.js");
+
+
+
+
+
+
+
+/* Pagebreak plugin:
+
+    Adds page-break functionality to the html2pdf library. Page-breaks can be
+    enabled by CSS styles, set on individual elements using selectors, or
+    avoided from breaking inside all elements.
+
+    Options on the `opt.pagebreak` object:
+
+    mode:   String or array of strings: 'avoid-all', 'css', and/or 'legacy'
+            Default: ['css', 'legacy']
+
+    before: String or array of CSS selectors for which to add page-breaks
+            before each element. Can be a specific element with an ID
+            ('#myID'), all elements of a type (e.g. 'img'), all of a class
+            ('.myClass'), or even '*' to match every element.
+
+    after:  Like 'before', but adds a page-break immediately after the element.
+
+    avoid:  Like 'before', but avoids page-breaks on these elements. You can
+            enable this feature on every element using the 'avoid-all' mode.
+*/
+// Refs to original functions.
+
+var orig = {
+  toContainer: _worker_js__WEBPACK_IMPORTED_MODULE_5__["default"].prototype.toContainer
+}; // Add pagebreak default options to the Worker template.
+
+_worker_js__WEBPACK_IMPORTED_MODULE_5__["default"].template.opt.pagebreak = {
+  mode: ['css', 'legacy'],
+  before: [],
+  after: [],
+  avoid: []
+};
+
+_worker_js__WEBPACK_IMPORTED_MODULE_5__["default"].prototype.toContainer = function toContainer() {
+  return orig.toContainer.call(this).then(function toContainer_pagebreak() {
+    // Setup root element and inner page height.
+    var root = this.prop.container;
+    var pxPageHeight = this.prop.pageSize.inner.px.height; // Check all requested modes.
+
+    var modeSrc = [].concat(this.opt.pagebreak.mode);
+    var mode = {
+      avoidAll: modeSrc.indexOf('avoid-all') !== -1,
+      css: modeSrc.indexOf('css') !== -1,
+      legacy: modeSrc.indexOf('legacy') !== -1
+    }; // Get arrays of all explicitly requested elements.
+
+    var select = {};
+    var self = this;
+    ['before', 'after', 'avoid'].forEach(function (key) {
+      var all = mode.avoidAll && key === 'avoid';
+      select[key] = all ? [] : [].concat(self.opt.pagebreak[key] || []);
+
+      if (select[key].length > 0) {
+        select[key] = Array.prototype.slice.call(root.querySelectorAll(select[key].join(', ')));
+      }
+    }); // Get all legacy page-break elements.
+
+    var legacyEls = root.querySelectorAll('.html2pdf__page-break');
+    legacyEls = Array.prototype.slice.call(legacyEls); // Loop through all elements.
+
+    var els = root.querySelectorAll('*');
+    Array.prototype.forEach.call(els, function pagebreak_loop(el) {
+      // Setup pagebreak rules based on legacy and avoidAll modes.
+      var rules = {
+        before: false,
+        after: mode.legacy && legacyEls.indexOf(el) !== -1,
+        avoid: mode.avoidAll
+      }; // Add rules for css mode.
+
+      if (mode.css) {
+        // TODO: Check if this is valid with iFrames.
+        var style = window.getComputedStyle(el); // TODO: Handle 'left' and 'right' correctly.
+        // TODO: Add support for 'avoid' on breakBefore/After.
+
+        var breakOpt = ['always', 'page', 'left', 'right'];
+        var avoidOpt = ['avoid', 'avoid-page'];
+        rules = {
+          before: rules.before || breakOpt.indexOf(style.breakBefore || style.pageBreakBefore) !== -1,
+          after: rules.after || breakOpt.indexOf(style.breakAfter || style.pageBreakAfter) !== -1,
+          avoid: rules.avoid || avoidOpt.indexOf(style.breakInside || style.pageBreakInside) !== -1
+        };
+      } // Add rules for explicit requests.
+
+
+      Object.keys(rules).forEach(function (key) {
+        rules[key] = rules[key] || select[key].indexOf(el) !== -1;
+      }); // Get element position on the screen.
+      // TODO: Subtract the top of the container from clientRect.top/bottom?
+
+      var clientRect = el.getBoundingClientRect(); // Avoid: Check if a break happens mid-element.
+
+      if (rules.avoid && !rules.before) {
+        var startPage = Math.floor(clientRect.top / pxPageHeight);
+        var endPage = Math.floor(clientRect.bottom / pxPageHeight);
+        var nPages = Math.abs(clientRect.bottom - clientRect.top) / pxPageHeight; // Turn on rules.before if the el is broken and is at most one page long.
+
+        if (endPage !== startPage && nPages <= 1) {
+          rules.before = true;
+        }
+      } // Before: Create a padding div to push the element to the next page.
+
+
+      if (rules.before) {
+        var pad = (0,_utils_js__WEBPACK_IMPORTED_MODULE_6__.createElement)('div', {
+          style: {
+            display: 'block',
+            height: pxPageHeight - clientRect.top % pxPageHeight + 'px'
+          }
+        });
+        el.parentNode.insertBefore(pad, el);
+      } // After: Create a padding div to fill the remaining page.
+
+
+      if (rules.after) {
+        var pad = (0,_utils_js__WEBPACK_IMPORTED_MODULE_6__.createElement)('div', {
+          style: {
+            display: 'block',
+            height: pxPageHeight - clientRect.bottom % pxPageHeight + 'px'
+          }
+        });
+        el.parentNode.insertBefore(pad, el.nextSibling);
+      }
+    });
+  });
+};
+
+/***/ }),
+
+/***/ "./src/utils.js":
+/*!**********************!*\
+  !*** ./src/utils.js ***!
+  \**********************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   cloneNode: function() { return /* binding */ cloneNode; },
+/* harmony export */   createElement: function() { return /* binding */ createElement; },
+/* harmony export */   objType: function() { return /* binding */ objType; },
+/* harmony export */   toPx: function() { return /* binding */ toPx; },
+/* harmony export */   unitConvert: function() { return /* binding */ unitConvert; }
+/* harmony export */ });
+/* harmony import */ var core_js_modules_es_number_constructor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.number.constructor.js */ "./node_modules/core-js/modules/es.number.constructor.js");
+/* harmony import */ var core_js_modules_es_number_constructor_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_number_constructor_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_es_symbol_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.symbol.js */ "./node_modules/core-js/modules/es.symbol.js");
+/* harmony import */ var core_js_modules_es_symbol_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var core_js_modules_es_symbol_description_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.symbol.description.js */ "./node_modules/core-js/modules/es.symbol.description.js");
+/* harmony import */ var core_js_modules_es_symbol_description_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_description_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/es.object.to-string.js */ "./node_modules/core-js/modules/es.object.to-string.js");
+/* harmony import */ var core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var core_js_modules_es_symbol_iterator_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.symbol.iterator.js */ "./node_modules/core-js/modules/es.symbol.iterator.js");
+/* harmony import */ var core_js_modules_es_symbol_iterator_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_iterator_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var core_js_modules_es_array_iterator_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core-js/modules/es.array.iterator.js */ "./node_modules/core-js/modules/es.array.iterator.js");
+/* harmony import */ var core_js_modules_es_array_iterator_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_iterator_js__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core-js/modules/es.string.iterator.js */ "./node_modules/core-js/modules/es.string.iterator.js");
+/* harmony import */ var core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core-js/modules/web.dom-collections.iterator.js */ "./node_modules/core-js/modules/web.dom-collections.iterator.js");
+/* harmony import */ var core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_7__);
+
+
+
+
+
+
+
+
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+// Determine the type of a variable/object.
+var objType = function objType(obj) {
+  var type = _typeof(obj);
+
+  if (type === 'undefined') return 'undefined';else if (type === 'string' || obj instanceof String) return 'string';else if (type === 'number' || obj instanceof Number) return 'number';else if (type === 'function' || obj instanceof Function) return 'function';else if (!!obj && obj.constructor === Array) return 'array';else if (obj && obj.nodeType === 1) return 'element';else if (type === 'object') return 'object';else return 'unknown';
+}; // Create an HTML element with optional className, innerHTML, and style.
+
+var createElement = function createElement(tagName, opt) {
+  var el = document.createElement(tagName);
+  if (opt.className) el.className = opt.className;
+
+  if (opt.innerHTML) {
+    el.innerHTML = opt.innerHTML;
+    var scripts = el.getElementsByTagName('script');
+
+    for (var i = scripts.length; i-- > 0; null) {
+      scripts[i].parentNode.removeChild(scripts[i]);
+    }
+  }
+
+  for (var key in opt.style) {
+    el.style[key] = opt.style[key];
+  }
+
+  return el;
+}; // Deep-clone a node and preserve contents/properties.
+
+var cloneNode = function cloneNode(node, javascriptEnabled) {
+  // Recursively clone the node.
+  var clone = node.nodeType === 3 ? document.createTextNode(node.nodeValue) : node.cloneNode(false);
+
+  for (var child = node.firstChild; child; child = child.nextSibling) {
+    if (javascriptEnabled === true || child.nodeType !== 1 || child.nodeName !== 'SCRIPT') {
+      clone.appendChild(cloneNode(child, javascriptEnabled));
+    }
+  }
+
+  if (node.nodeType === 1) {
+    // Preserve contents/properties of special nodes.
+    if (node.nodeName === 'CANVAS') {
+      clone.width = node.width;
+      clone.height = node.height;
+      clone.getContext('2d').drawImage(node, 0, 0);
+    } else if (node.nodeName === 'TEXTAREA' || node.nodeName === 'SELECT') {
+      clone.value = node.value;
+    } // Preserve the node's scroll position when it loads.
+
+
+    clone.addEventListener('load', function () {
+      clone.scrollTop = node.scrollTop;
+      clone.scrollLeft = node.scrollLeft;
+    }, true);
+  } // Return the cloned node.
+
+
+  return clone;
+}; // Convert units from px using the conversion value 'k' from jsPDF.
+
+var unitConvert = function unitConvert(obj, k) {
+  if (objType(obj) === 'number') {
+    return obj * 72 / 96 / k;
+  } else {
+    var newObj = {};
+
+    for (var key in obj) {
+      newObj[key] = obj[key] * 72 / 96 / k;
+    }
+
+    return newObj;
+  }
+}; // Convert units to px using the conversion value 'k' from jsPDF.
+
+var toPx = function toPx(val, k) {
+  return Math.floor(val * k / 72 * 96);
+};
+
+/***/ }),
+
+/***/ "./src/worker.js":
+/*!***********************!*\
+  !*** ./src/worker.js ***!
+  \***********************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var core_js_modules_es_object_assign_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.object.assign.js */ "./node_modules/core-js/modules/es.object.assign.js");
+/* harmony import */ var core_js_modules_es_object_assign_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_assign_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.object.to-string.js */ "./node_modules/core-js/modules/es.object.to-string.js");
+/* harmony import */ var core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var core_js_modules_es_promise_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.promise.js */ "./node_modules/core-js/modules/es.promise.js");
+/* harmony import */ var core_js_modules_es_promise_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_promise_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var core_js_modules_es_array_map_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/es.array.map.js */ "./node_modules/core-js/modules/es.array.map.js");
+/* harmony import */ var core_js_modules_es_array_map_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_map_js__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var core_js_modules_es_object_keys_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.object.keys.js */ "./node_modules/core-js/modules/es.object.keys.js");
+/* harmony import */ var core_js_modules_es_object_keys_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_keys_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var core_js_modules_es_array_concat_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core-js/modules/es.array.concat.js */ "./node_modules/core-js/modules/es.array.concat.js");
+/* harmony import */ var core_js_modules_es_array_concat_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_concat_js__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var core_js_modules_es_regexp_to_string_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core-js/modules/es.regexp.to-string.js */ "./node_modules/core-js/modules/es.regexp.to-string.js");
+/* harmony import */ var core_js_modules_es_regexp_to_string_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_regexp_to_string_js__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var core_js_modules_es_function_name_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core-js/modules/es.function.name.js */ "./node_modules/core-js/modules/es.function.name.js");
+/* harmony import */ var core_js_modules_es_function_name_js__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_function_name_js__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core-js/modules/web.dom-collections.for-each.js */ "./node_modules/core-js/modules/web.dom-collections.for-each.js");
+/* harmony import */ var core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var jspdf__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! jspdf */ "jspdf");
+/* harmony import */ var jspdf__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(jspdf__WEBPACK_IMPORTED_MODULE_9__);
+/* harmony import */ var html2canvas__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! html2canvas */ "html2canvas");
+/* harmony import */ var html2canvas__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(html2canvas__WEBPACK_IMPORTED_MODULE_10__);
+/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./utils.js */ "./src/utils.js");
+
+
+
+
+
+
+
+
+
+
+
+
+/* ----- CONSTRUCTOR ----- */
+
+var Worker = function Worker(opt) {
+  // Create the root parent for the proto chain, and the starting Worker.
+  var root = Object.assign(Worker.convert(Promise.resolve()), JSON.parse(JSON.stringify(Worker.template)));
+  var self = Worker.convert(Promise.resolve(), root); // Set progress, optional settings, and return.
+
+  self = self.setProgress(1, Worker, 1, [Worker]);
+  self = self.set(opt);
+  return self;
+}; // Boilerplate for subclassing Promise.
+
+
+Worker.prototype = Object.create(Promise.prototype);
+Worker.prototype.constructor = Worker; // Converts/casts promises into Workers.
+
+Worker.convert = function convert(promise, inherit) {
+  // Uses prototypal inheritance to receive changes made to ancestors' properties.
+  promise.__proto__ = inherit || Worker.prototype;
+  return promise;
+};
+
+Worker.template = {
+  prop: {
+    src: null,
+    container: null,
+    overlay: null,
+    canvas: null,
+    img: null,
+    pdf: null,
+    pageSize: null
+  },
+  progress: {
+    val: 0,
+    state: null,
+    n: 0,
+    stack: []
+  },
+  opt: {
+    filename: 'file.pdf',
+    margin: [0, 0, 0, 0],
+    image: {
+      type: 'jpeg',
+      quality: 0.95
+    },
+    enableLinks: true,
+    html2canvas: {},
+    jsPDF: {}
+  }
+};
+/* ----- FROM / TO ----- */
+
+Worker.prototype.from = function from(src, type) {
+  function getType(src) {
+    switch ((0,_utils_js__WEBPACK_IMPORTED_MODULE_11__.objType)(src)) {
+      case 'string':
+        return 'string';
+
+      case 'element':
+        return src.nodeName.toLowerCase && src.nodeName.toLowerCase() === 'canvas' ? 'canvas' : 'element';
+
+      default:
+        return 'unknown';
+    }
+  }
+
+  return this.then(function from_main() {
+    type = type || getType(src);
+
+    switch (type) {
+      case 'string':
+        return this.set({
+          src: (0,_utils_js__WEBPACK_IMPORTED_MODULE_11__.createElement)('div', {
+            innerHTML: src
+          })
+        });
+
+      case 'element':
+        return this.set({
+          src: src
+        });
+
+      case 'canvas':
+        return this.set({
+          canvas: src
+        });
+
+      case 'img':
+        return this.set({
+          img: src
+        });
+
+      default:
+        return this.error('Unknown source type.');
+    }
+  });
+};
+
+Worker.prototype.to = function to(target) {
+  // Route the 'to' request to the appropriate method.
+  switch (target) {
+    case 'container':
+      return this.toContainer();
+
+    case 'canvas':
+      return this.toCanvas();
+
+    case 'img':
+      return this.toImg();
+
+    case 'pdf':
+      return this.toPdf();
+
+    default:
+      return this.error('Invalid target.');
   }
 };
 
-function setScheduler(scheduleFn) {
-  customSchedulerFn = scheduleFn;
-}
-
-function setAsap(asapFn) {
-  asap = asapFn;
-}
-
-var browserWindow = typeof window !== 'undefined' ? window : undefined;
-var browserGlobal = browserWindow || {};
-var BrowserMutationObserver = browserGlobal.MutationObserver || browserGlobal.WebKitMutationObserver;
-var isNode = typeof self === 'undefined' && typeof process !== 'undefined' && {}.toString.call(process) === '[object process]';
-
-// test for web worker but not in IE10
-var isWorker = typeof Uint8ClampedArray !== 'undefined' && typeof importScripts !== 'undefined' && typeof MessageChannel !== 'undefined';
-
-// node
-function useNextTick() {
-  // node version 0.10.x displays a deprecation warning when nextTick is used recursively
-  // see https://github.com/cujojs/when/issues/410 for details
-  return function () {
-    return process.nextTick(flush);
-  };
-}
-
-// vertx
-function useVertxTimer() {
-  if (typeof vertxNext !== 'undefined') {
-    return function () {
-      vertxNext(flush);
+Worker.prototype.toContainer = function toContainer() {
+  // Set up function prerequisites.
+  var prereqs = [function checkSrc() {
+    return this.prop.src || this.error('Cannot duplicate - no source HTML.');
+  }, function checkPageSize() {
+    return this.prop.pageSize || this.setPageSize();
+  }];
+  return this.thenList(prereqs).then(function toContainer_main() {
+    // Define the CSS styles for the container and its overlay parent.
+    var overlayCSS = {
+      position: 'fixed',
+      overflow: 'hidden',
+      zIndex: 1000,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      top: 0,
+      backgroundColor: 'rgba(0,0,0,0.8)'
     };
-  }
+    var containerCSS = {
+      position: 'absolute',
+      width: this.prop.pageSize.inner.width + this.prop.pageSize.unit,
+      left: 0,
+      right: 0,
+      top: 0,
+      height: 'auto',
+      margin: 'auto',
+      backgroundColor: 'white'
+    }; // Set the overlay to hidden (could be changed in the future to provide a print preview).
 
-  return useSetTimeout();
-}
+    overlayCSS.opacity = 0; // Create and attach the elements.
 
-function useMutationObserver() {
-  var iterations = 0;
-  var observer = new BrowserMutationObserver(flush);
-  var node = document.createTextNode('');
-  observer.observe(node, { characterData: true });
-
-  return function () {
-    node.data = iterations = ++iterations % 2;
-  };
-}
-
-// web worker
-function useMessageChannel() {
-  var channel = new MessageChannel();
-  channel.port1.onmessage = flush;
-  return function () {
-    return channel.port2.postMessage(0);
-  };
-}
-
-function useSetTimeout() {
-  // Store setTimeout reference so es6-promise will be unaffected by
-  // other code modifying setTimeout (like sinon.useFakeTimers())
-  var globalSetTimeout = setTimeout;
-  return function () {
-    return globalSetTimeout(flush, 1);
-  };
-}
-
-var queue = new Array(1000);
-function flush() {
-  for (var i = 0; i < len; i += 2) {
-    var callback = queue[i];
-    var arg = queue[i + 1];
-
-    callback(arg);
-
-    queue[i] = undefined;
-    queue[i + 1] = undefined;
-  }
-
-  len = 0;
-}
-
-function attemptVertx() {
-  try {
-    var vertx = Function('return this')().require('vertx');
-    vertxNext = vertx.runOnLoop || vertx.runOnContext;
-    return useVertxTimer();
-  } catch (e) {
-    return useSetTimeout();
-  }
-}
-
-var scheduleFlush = void 0;
-// Decide what async method to use to triggering processing of queued callbacks:
-if (isNode) {
-  scheduleFlush = useNextTick();
-} else if (BrowserMutationObserver) {
-  scheduleFlush = useMutationObserver();
-} else if (isWorker) {
-  scheduleFlush = useMessageChannel();
-} else if (browserWindow === undefined && "function" === 'function') {
-  scheduleFlush = attemptVertx();
-} else {
-  scheduleFlush = useSetTimeout();
-}
-
-function then(onFulfillment, onRejection) {
-  var parent = this;
-
-  var child = new this.constructor(noop);
-
-  if (child[PROMISE_ID] === undefined) {
-    makePromise(child);
-  }
-
-  var _state = parent._state;
-
-
-  if (_state) {
-    var callback = arguments[_state - 1];
-    asap(function () {
-      return invokeCallback(_state, child, callback, parent._result);
+    var source = (0,_utils_js__WEBPACK_IMPORTED_MODULE_11__.cloneNode)(this.prop.src, this.opt.html2canvas.javascriptEnabled);
+    this.prop.overlay = (0,_utils_js__WEBPACK_IMPORTED_MODULE_11__.createElement)('div', {
+      className: 'html2pdf__overlay',
+      style: overlayCSS
     });
-  } else {
-    subscribe(parent, child, onFulfillment, onRejection);
-  }
-
-  return child;
-}
-
-/**
-  `Promise.resolve` returns a promise that will become resolved with the
-  passed `value`. It is shorthand for the following:
-
-  ```javascript
-  let promise = new Promise(function(resolve, reject){
-    resolve(1);
-  });
-
-  promise.then(function(value){
-    // value === 1
-  });
-  ```
-
-  Instead of writing the above, your code now simply becomes the following:
-
-  ```javascript
-  let promise = Promise.resolve(1);
-
-  promise.then(function(value){
-    // value === 1
-  });
-  ```
-
-  @method resolve
-  @static
-  @param {Any} value value that the returned promise will be resolved with
-  Useful for tooling.
-  @return {Promise} a promise that will become fulfilled with the given
-  `value`
-*/
-function resolve$1(object) {
-  /*jshint validthis:true */
-  var Constructor = this;
-
-  if (object && typeof object === 'object' && object.constructor === Constructor) {
-    return object;
-  }
-
-  var promise = new Constructor(noop);
-  resolve(promise, object);
-  return promise;
-}
-
-var PROMISE_ID = Math.random().toString(36).substring(2);
-
-function noop() {}
-
-var PENDING = void 0;
-var FULFILLED = 1;
-var REJECTED = 2;
-
-function selfFulfillment() {
-  return new TypeError("You cannot resolve a promise with itself");
-}
-
-function cannotReturnOwn() {
-  return new TypeError('A promises callback cannot return that same promise.');
-}
-
-function tryThen(then$$1, value, fulfillmentHandler, rejectionHandler) {
-  try {
-    then$$1.call(value, fulfillmentHandler, rejectionHandler);
-  } catch (e) {
-    return e;
-  }
-}
-
-function handleForeignThenable(promise, thenable, then$$1) {
-  asap(function (promise) {
-    var sealed = false;
-    var error = tryThen(then$$1, thenable, function (value) {
-      if (sealed) {
-        return;
-      }
-      sealed = true;
-      if (thenable !== value) {
-        resolve(promise, value);
-      } else {
-        fulfill(promise, value);
-      }
-    }, function (reason) {
-      if (sealed) {
-        return;
-      }
-      sealed = true;
-
-      reject(promise, reason);
-    }, 'Settle: ' + (promise._label || ' unknown promise'));
-
-    if (!sealed && error) {
-      sealed = true;
-      reject(promise, error);
-    }
-  }, promise);
-}
-
-function handleOwnThenable(promise, thenable) {
-  if (thenable._state === FULFILLED) {
-    fulfill(promise, thenable._result);
-  } else if (thenable._state === REJECTED) {
-    reject(promise, thenable._result);
-  } else {
-    subscribe(thenable, undefined, function (value) {
-      return resolve(promise, value);
-    }, function (reason) {
-      return reject(promise, reason);
+    this.prop.container = (0,_utils_js__WEBPACK_IMPORTED_MODULE_11__.createElement)('div', {
+      className: 'html2pdf__container',
+      style: containerCSS
     });
-  }
-}
+    this.prop.container.appendChild(source);
+    this.prop.overlay.appendChild(this.prop.container);
+    document.body.appendChild(this.prop.overlay);
+  });
+};
 
-function handleMaybeThenable(promise, maybeThenable, then$$1) {
-  if (maybeThenable.constructor === promise.constructor && then$$1 === then && maybeThenable.constructor.resolve === resolve$1) {
-    handleOwnThenable(promise, maybeThenable);
+Worker.prototype.toCanvas = function toCanvas() {
+  // Set up function prerequisites.
+  var prereqs = [function checkContainer() {
+    return document.body.contains(this.prop.container) || this.toContainer();
+  }]; // Fulfill prereqs then create the canvas.
+
+  return this.thenList(prereqs).then(function toCanvas_main() {
+    // Handle old-fashioned 'onrendered' argument.
+    var options = Object.assign({}, this.opt.html2canvas);
+    delete options.onrendered;
+    return html2canvas__WEBPACK_IMPORTED_MODULE_10___default()(this.prop.container, options);
+  }).then(function toCanvas_post(canvas) {
+    // Handle old-fashioned 'onrendered' argument.
+    var onRendered = this.opt.html2canvas.onrendered || function () {};
+
+    onRendered(canvas);
+    this.prop.canvas = canvas;
+    document.body.removeChild(this.prop.overlay);
+  });
+};
+
+Worker.prototype.toImg = function toImg() {
+  // Set up function prerequisites.
+  var prereqs = [function checkCanvas() {
+    return this.prop.canvas || this.toCanvas();
+  }]; // Fulfill prereqs then create the image.
+
+  return this.thenList(prereqs).then(function toImg_main() {
+    var imgData = this.prop.canvas.toDataURL('image/' + this.opt.image.type, this.opt.image.quality);
+    this.prop.img = document.createElement('img');
+    this.prop.img.src = imgData;
+  });
+};
+
+Worker.prototype.toPdf = function toPdf() {
+  // Set up function prerequisites.
+  var prereqs = [function checkCanvas() {
+    return this.prop.canvas || this.toCanvas();
+  }, function checkPageSize() {
+    return this.prop.pageSize || this.setPageSize();
+  }]; // Fulfill prereqs then create the image.
+
+  return this.thenList(prereqs).then(function toPdf_main() {
+    // Create local copies of frequently used properties.
+    var canvas = this.prop.canvas;
+    var opt = this.opt; // Calculate the number of pages.
+
+    var pxFullHeight = canvas.height;
+    var pxPageHeight = Math.floor(canvas.width * this.prop.pageSize.inner.ratio);
+    var nPages = Math.ceil(pxFullHeight / pxPageHeight); // Define pageHeight separately so it can be trimmed on the final page.
+
+    var pageHeight = this.prop.pageSize.inner.height; // Create a one-page canvas to split up the full image.
+
+    var pageCanvas = document.createElement('canvas');
+    var pageCtx = pageCanvas.getContext('2d');
+    pageCanvas.width = canvas.width;
+    pageCanvas.height = pxPageHeight; // Initialize the PDF.
+
+    this.prop.pdf = this.prop.pdf || new jspdf__WEBPACK_IMPORTED_MODULE_9__.jsPDF(opt.jsPDF);
+
+    for (var page = 0; page < nPages; page++) {
+      // Trim the final page to reduce file size.
+      if (page === nPages - 1 && pxFullHeight % pxPageHeight !== 0) {
+        pageCanvas.height = pxFullHeight % pxPageHeight;
+        pageHeight = pageCanvas.height * this.prop.pageSize.inner.width / pageCanvas.width;
+      } // Display the page.
+
+
+      var w = pageCanvas.width;
+      var h = pageCanvas.height;
+      pageCtx.fillStyle = 'white';
+      pageCtx.fillRect(0, 0, w, h);
+      pageCtx.drawImage(canvas, 0, page * pxPageHeight, w, h, 0, 0, w, h); // Add the page to the PDF.
+
+      if (page) this.prop.pdf.addPage();
+      var imgData = pageCanvas.toDataURL('image/' + opt.image.type, opt.image.quality);
+      this.prop.pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0], this.prop.pageSize.inner.width, pageHeight);
+    }
+  });
+};
+/* ----- OUTPUT / SAVE ----- */
+
+
+Worker.prototype.output = function output(type, options, src) {
+  // Redirect requests to the correct function (outputPdf / outputImg).
+  src = src || 'pdf';
+
+  if (src.toLowerCase() === 'img' || src.toLowerCase() === 'image') {
+    return this.outputImg(type, options);
   } else {
-    if (then$$1 === undefined) {
-      fulfill(promise, maybeThenable);
-    } else if (isFunction(then$$1)) {
-      handleForeignThenable(promise, maybeThenable, then$$1);
-    } else {
-      fulfill(promise, maybeThenable);
+    return this.outputPdf(type, options);
+  }
+};
+
+Worker.prototype.outputPdf = function outputPdf(type, options) {
+  // Set up function prerequisites.
+  var prereqs = [function checkPdf() {
+    return this.prop.pdf || this.toPdf();
+  }]; // Fulfill prereqs then perform the appropriate output.
+
+  return this.thenList(prereqs).then(function outputPdf_main() {
+    /* Currently implemented output types:
+     *    https://rawgit.com/MrRio/jsPDF/master/docs/jspdf.js.html#line992
+     *  save(options), arraybuffer, blob, bloburi/bloburl,
+     *  datauristring/dataurlstring, dataurlnewwindow, datauri/dataurl
+     */
+    return this.prop.pdf.output(type, options);
+  });
+};
+
+Worker.prototype.outputImg = function outputImg(type, options) {
+  // Set up function prerequisites.
+  var prereqs = [function checkImg() {
+    return this.prop.img || this.toImg();
+  }]; // Fulfill prereqs then perform the appropriate output.
+
+  return this.thenList(prereqs).then(function outputImg_main() {
+    switch (type) {
+      case undefined:
+      case 'img':
+        return this.prop.img;
+
+      case 'datauristring':
+      case 'dataurlstring':
+        return this.prop.img.src;
+
+      case 'datauri':
+      case 'dataurl':
+        return document.location.href = this.prop.img.src;
+
+      default:
+        throw 'Image output type "' + type + '" is not supported.';
     }
-  }
-}
+  });
+};
 
-function resolve(promise, value) {
-  if (promise === value) {
-    reject(promise, selfFulfillment());
-  } else if (objectOrFunction(value)) {
-    var then$$1 = void 0;
-    try {
-      then$$1 = value.then;
-    } catch (error) {
-      reject(promise, error);
-      return;
-    }
-    handleMaybeThenable(promise, value, then$$1);
-  } else {
-    fulfill(promise, value);
-  }
-}
+Worker.prototype.save = function save(filename) {
+  // Set up function prerequisites.
+  var prereqs = [function checkPdf() {
+    return this.prop.pdf || this.toPdf();
+  }]; // Fulfill prereqs, update the filename (if provided), and save the PDF.
 
-function publishRejection(promise) {
-  if (promise._onerror) {
-    promise._onerror(promise._result);
-  }
-
-  publish(promise);
-}
-
-function fulfill(promise, value) {
-  if (promise._state !== PENDING) {
-    return;
-  }
-
-  promise._result = value;
-  promise._state = FULFILLED;
-
-  if (promise._subscribers.length !== 0) {
-    asap(publish, promise);
-  }
-}
-
-function reject(promise, reason) {
-  if (promise._state !== PENDING) {
-    return;
-  }
-  promise._state = REJECTED;
-  promise._result = reason;
-
-  asap(publishRejection, promise);
-}
-
-function subscribe(parent, child, onFulfillment, onRejection) {
-  var _subscribers = parent._subscribers;
-  var length = _subscribers.length;
+  return this.thenList(prereqs).set(filename ? {
+    filename: filename
+  } : null).then(function save_main() {
+    this.prop.pdf.save(this.opt.filename);
+  });
+};
+/* ----- SET / GET ----- */
 
 
-  parent._onerror = null;
-
-  _subscribers[length] = child;
-  _subscribers[length + FULFILLED] = onFulfillment;
-  _subscribers[length + REJECTED] = onRejection;
-
-  if (length === 0 && parent._state) {
-    asap(publish, parent);
-  }
-}
-
-function publish(promise) {
-  var subscribers = promise._subscribers;
-  var settled = promise._state;
-
-  if (subscribers.length === 0) {
-    return;
-  }
-
-  var child = void 0,
-      callback = void 0,
-      detail = promise._result;
-
-  for (var i = 0; i < subscribers.length; i += 3) {
-    child = subscribers[i];
-    callback = subscribers[i + settled];
-
-    if (child) {
-      invokeCallback(settled, child, callback, detail);
-    } else {
-      callback(detail);
-    }
-  }
-
-  promise._subscribers.length = 0;
-}
-
-function invokeCallback(settled, promise, callback, detail) {
-  var hasCallback = isFunction(callback),
-      value = void 0,
-      error = void 0,
-      succeeded = true;
-
-  if (hasCallback) {
-    try {
-      value = callback(detail);
-    } catch (e) {
-      succeeded = false;
-      error = e;
-    }
-
-    if (promise === value) {
-      reject(promise, cannotReturnOwn());
-      return;
-    }
-  } else {
-    value = detail;
-  }
-
-  if (promise._state !== PENDING) {
-    // noop
-  } else if (hasCallback && succeeded) {
-    resolve(promise, value);
-  } else if (succeeded === false) {
-    reject(promise, error);
-  } else if (settled === FULFILLED) {
-    fulfill(promise, value);
-  } else if (settled === REJECTED) {
-    reject(promise, value);
-  }
-}
-
-function initializePromise(promise, resolver) {
-  try {
-    resolver(function resolvePromise(value) {
-      resolve(promise, value);
-    }, function rejectPromise(reason) {
-      reject(promise, reason);
-    });
-  } catch (e) {
-    reject(promise, e);
-  }
-}
-
-var id = 0;
-function nextId() {
-  return id++;
-}
-
-function makePromise(promise) {
-  promise[PROMISE_ID] = id++;
-  promise._state = undefined;
-  promise._result = undefined;
-  promise._subscribers = [];
-}
-
-function validationError() {
-  return new Error('Array Methods must be provided an Array');
-}
-
-var Enumerator = function () {
-  function Enumerator(Constructor, input) {
-    this._instanceConstructor = Constructor;
-    this.promise = new Constructor(noop);
-
-    if (!this.promise[PROMISE_ID]) {
-      makePromise(this.promise);
-    }
-
-    if (isArray(input)) {
-      this.length = input.length;
-      this._remaining = input.length;
-
-      this._result = new Array(this.length);
-
-      if (this.length === 0) {
-        fulfill(this.promise, this._result);
-      } else {
-        this.length = this.length || 0;
-        this._enumerate(input);
-        if (this._remaining === 0) {
-          fulfill(this.promise, this._result);
-        }
-      }
-    } else {
-      reject(this.promise, validationError());
-    }
-  }
-
-  Enumerator.prototype._enumerate = function _enumerate(input) {
-    for (var i = 0; this._state === PENDING && i < input.length; i++) {
-      this._eachEntry(input[i], i);
-    }
-  };
-
-  Enumerator.prototype._eachEntry = function _eachEntry(entry, i) {
-    var c = this._instanceConstructor;
-    var resolve$$1 = c.resolve;
+Worker.prototype.set = function set(opt) {
+  // TODO: Implement ordered pairs?
+  // Silently ignore invalid or empty input.
+  if ((0,_utils_js__WEBPACK_IMPORTED_MODULE_11__.objType)(opt) !== 'object') {
+    return this;
+  } // Build an array of setter functions to queue.
 
 
-    if (resolve$$1 === resolve$1) {
-      var _then = void 0;
-      var error = void 0;
-      var didError = false;
-      try {
-        _then = entry.then;
-      } catch (e) {
-        didError = true;
-        error = e;
-      }
+  var fns = Object.keys(opt || {}).map(function (key) {
+    switch (key) {
+      case 'margin':
+        return this.setMargin.bind(this, opt.margin);
 
-      if (_then === then && entry._state !== PENDING) {
-        this._settledAt(entry._state, i, entry._result);
-      } else if (typeof _then !== 'function') {
-        this._remaining--;
-        this._result[i] = entry;
-      } else if (c === Promise$1) {
-        var promise = new c(noop);
-        if (didError) {
-          reject(promise, error);
+      case 'jsPDF':
+        return function set_jsPDF() {
+          this.opt.jsPDF = opt.jsPDF;
+          return this.setPageSize();
+        };
+
+      case 'pageSize':
+        return this.setPageSize.bind(this, opt.pageSize);
+
+      default:
+        if (key in Worker.template.prop) {
+          // Set pre-defined properties in prop.
+          return function set_prop() {
+            this.prop[key] = opt[key];
+          };
         } else {
-          handleMaybeThenable(promise, entry, _then);
+          // Set any other properties in opt.
+          return function set_opt() {
+            this.opt[key] = opt[key];
+          };
         }
-        this._willSettleAt(promise, i);
-      } else {
-        this._willSettleAt(new c(function (resolve$$1) {
-          return resolve$$1(entry);
-        }), i);
-      }
-    } else {
-      this._willSettleAt(resolve$$1(entry), i);
+
     }
-  };
+  }, this); // Set properties within the promise chain.
 
-  Enumerator.prototype._settledAt = function _settledAt(state, i, value) {
-    var promise = this.promise;
-
-
-    if (promise._state === PENDING) {
-      this._remaining--;
-
-      if (state === REJECTED) {
-        reject(promise, value);
-      } else {
-        this._result[i] = value;
-      }
-    }
-
-    if (this._remaining === 0) {
-      fulfill(promise, this._result);
-    }
-  };
-
-  Enumerator.prototype._willSettleAt = function _willSettleAt(promise, i) {
-    var enumerator = this;
-
-    subscribe(promise, undefined, function (value) {
-      return enumerator._settledAt(FULFILLED, i, value);
-    }, function (reason) {
-      return enumerator._settledAt(REJECTED, i, reason);
-    });
-  };
-
-  return Enumerator;
-}();
-
-/**
-  `Promise.all` accepts an array of promises, and returns a new promise which
-  is fulfilled with an array of fulfillment values for the passed promises, or
-  rejected with the reason of the first passed promise to be rejected. It casts all
-  elements of the passed iterable to promises as it runs this algorithm.
-
-  Example:
-
-  ```javascript
-  let promise1 = resolve(1);
-  let promise2 = resolve(2);
-  let promise3 = resolve(3);
-  let promises = [ promise1, promise2, promise3 ];
-
-  Promise.all(promises).then(function(array){
-    // The array here would be [ 1, 2, 3 ];
+  return this.then(function set_main() {
+    return this.thenList(fns);
   });
-  ```
+};
 
-  If any of the `promises` given to `all` are rejected, the first promise
-  that is rejected will be given as an argument to the returned promises's
-  rejection handler. For example:
-
-  Example:
-
-  ```javascript
-  let promise1 = resolve(1);
-  let promise2 = reject(new Error("2"));
-  let promise3 = reject(new Error("3"));
-  let promises = [ promise1, promise2, promise3 ];
-
-  Promise.all(promises).then(function(array){
-    // Code here never runs because there are rejected promises!
-  }, function(error) {
-    // error.message === "2"
+Worker.prototype.get = function get(key, cbk) {
+  return this.then(function get_main() {
+    // Fetch the requested property, either as a predefined prop or in opt.
+    var val = key in Worker.template.prop ? this.prop[key] : this.opt[key];
+    return cbk ? cbk(val) : val;
   });
-  ```
+};
 
-  @method all
-  @static
-  @param {Array} entries array of promises
-  @param {String} label optional string for labeling the promise.
-  Useful for tooling.
-  @return {Promise} promise that is fulfilled when all `promises` have been
-  fulfilled, or rejected if any of them become rejected.
-  @static
-*/
-function all(entries) {
-  return new Enumerator(this, entries).promise;
-}
+Worker.prototype.setMargin = function setMargin(margin) {
+  return this.then(function setMargin_main() {
+    // Parse the margin property: [top, left, bottom, right].
+    switch ((0,_utils_js__WEBPACK_IMPORTED_MODULE_11__.objType)(margin)) {
+      case 'number':
+        margin = [margin, margin, margin, margin];
 
-/**
-  `Promise.race` returns a new promise which is settled in the same way as the
-  first passed promise to settle.
-
-  Example:
-
-  ```javascript
-  let promise1 = new Promise(function(resolve, reject){
-    setTimeout(function(){
-      resolve('promise 1');
-    }, 200);
-  });
-
-  let promise2 = new Promise(function(resolve, reject){
-    setTimeout(function(){
-      resolve('promise 2');
-    }, 100);
-  });
-
-  Promise.race([promise1, promise2]).then(function(result){
-    // result === 'promise 2' because it was resolved before promise1
-    // was resolved.
-  });
-  ```
-
-  `Promise.race` is deterministic in that only the state of the first
-  settled promise matters. For example, even if other promises given to the
-  `promises` array argument are resolved, but the first settled promise has
-  become rejected before the other promises became fulfilled, the returned
-  promise will become rejected:
-
-  ```javascript
-  let promise1 = new Promise(function(resolve, reject){
-    setTimeout(function(){
-      resolve('promise 1');
-    }, 200);
-  });
-
-  let promise2 = new Promise(function(resolve, reject){
-    setTimeout(function(){
-      reject(new Error('promise 2'));
-    }, 100);
-  });
-
-  Promise.race([promise1, promise2]).then(function(result){
-    // Code here never runs
-  }, function(reason){
-    // reason.message === 'promise 2' because promise 2 became rejected before
-    // promise 1 became fulfilled
-  });
-  ```
-
-  An example real-world use case is implementing timeouts:
-
-  ```javascript
-  Promise.race([ajax('foo.json'), timeout(5000)])
-  ```
-
-  @method race
-  @static
-  @param {Array} promises array of promises to observe
-  Useful for tooling.
-  @return {Promise} a promise which settles in the same way as the first passed
-  promise to settle.
-*/
-function race(entries) {
-  /*jshint validthis:true */
-  var Constructor = this;
-
-  if (!isArray(entries)) {
-    return new Constructor(function (_, reject) {
-      return reject(new TypeError('You must pass an array to race.'));
-    });
-  } else {
-    return new Constructor(function (resolve, reject) {
-      var length = entries.length;
-      for (var i = 0; i < length; i++) {
-        Constructor.resolve(entries[i]).then(resolve, reject);
-      }
-    });
-  }
-}
-
-/**
-  `Promise.reject` returns a promise rejected with the passed `reason`.
-  It is shorthand for the following:
-
-  ```javascript
-  let promise = new Promise(function(resolve, reject){
-    reject(new Error('WHOOPS'));
-  });
-
-  promise.then(function(value){
-    // Code here doesn't run because the promise is rejected!
-  }, function(reason){
-    // reason.message === 'WHOOPS'
-  });
-  ```
-
-  Instead of writing the above, your code now simply becomes the following:
-
-  ```javascript
-  let promise = Promise.reject(new Error('WHOOPS'));
-
-  promise.then(function(value){
-    // Code here doesn't run because the promise is rejected!
-  }, function(reason){
-    // reason.message === 'WHOOPS'
-  });
-  ```
-
-  @method reject
-  @static
-  @param {Any} reason value that the returned promise will be rejected with.
-  Useful for tooling.
-  @return {Promise} a promise rejected with the given `reason`.
-*/
-function reject$1(reason) {
-  /*jshint validthis:true */
-  var Constructor = this;
-  var promise = new Constructor(noop);
-  reject(promise, reason);
-  return promise;
-}
-
-function needsResolver() {
-  throw new TypeError('You must pass a resolver function as the first argument to the promise constructor');
-}
-
-function needsNew() {
-  throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.");
-}
-
-/**
-  Promise objects represent the eventual result of an asynchronous operation. The
-  primary way of interacting with a promise is through its `then` method, which
-  registers callbacks to receive either a promise's eventual value or the reason
-  why the promise cannot be fulfilled.
-
-  Terminology
-  -----------
-
-  - `promise` is an object or function with a `then` method whose behavior conforms to this specification.
-  - `thenable` is an object or function that defines a `then` method.
-  - `value` is any legal JavaScript value (including undefined, a thenable, or a promise).
-  - `exception` is a value that is thrown using the throw statement.
-  - `reason` is a value that indicates why a promise was rejected.
-  - `settled` the final resting state of a promise, fulfilled or rejected.
-
-  A promise can be in one of three states: pending, fulfilled, or rejected.
-
-  Promises that are fulfilled have a fulfillment value and are in the fulfilled
-  state.  Promises that are rejected have a rejection reason and are in the
-  rejected state.  A fulfillment value is never a thenable.
-
-  Promises can also be said to *resolve* a value.  If this value is also a
-  promise, then the original promise's settled state will match the value's
-  settled state.  So a promise that *resolves* a promise that rejects will
-  itself reject, and a promise that *resolves* a promise that fulfills will
-  itself fulfill.
-
-
-  Basic Usage:
-  ------------
-
-  ```js
-  let promise = new Promise(function(resolve, reject) {
-    // on success
-    resolve(value);
-
-    // on failure
-    reject(reason);
-  });
-
-  promise.then(function(value) {
-    // on fulfillment
-  }, function(reason) {
-    // on rejection
-  });
-  ```
-
-  Advanced Usage:
-  ---------------
-
-  Promises shine when abstracting away asynchronous interactions such as
-  `XMLHttpRequest`s.
-
-  ```js
-  function getJSON(url) {
-    return new Promise(function(resolve, reject){
-      let xhr = new XMLHttpRequest();
-
-      xhr.open('GET', url);
-      xhr.onreadystatechange = handler;
-      xhr.responseType = 'json';
-      xhr.setRequestHeader('Accept', 'application/json');
-      xhr.send();
-
-      function handler() {
-        if (this.readyState === this.DONE) {
-          if (this.status === 200) {
-            resolve(this.response);
-          } else {
-            reject(new Error('getJSON: `' + url + '` failed with status: [' + this.status + ']'));
-          }
+      case 'array':
+        if (margin.length === 2) {
+          margin = [margin[0], margin[1], margin[0], margin[1]];
         }
+
+        if (margin.length === 4) {
+          break;
+        }
+
+      default:
+        return this.error('Invalid margin array.');
+    } // Set the margin property, then update pageSize.
+
+
+    this.opt.margin = margin;
+  }).then(this.setPageSize);
+};
+
+Worker.prototype.setPageSize = function setPageSize(pageSize) {
+  return this.then(function setPageSize_main() {
+    // Retrieve page-size based on jsPDF settings, if not explicitly provided.
+    pageSize = pageSize || jspdf__WEBPACK_IMPORTED_MODULE_9__.jsPDF.getPageSize(this.opt.jsPDF); // Add 'inner' field if not present.
+
+    if (!pageSize.hasOwnProperty('inner')) {
+      pageSize.inner = {
+        width: pageSize.width - this.opt.margin[1] - this.opt.margin[3],
+        height: pageSize.height - this.opt.margin[0] - this.opt.margin[2]
       };
+      pageSize.inner.px = {
+        width: (0,_utils_js__WEBPACK_IMPORTED_MODULE_11__.toPx)(pageSize.inner.width, pageSize.k),
+        height: (0,_utils_js__WEBPACK_IMPORTED_MODULE_11__.toPx)(pageSize.inner.height, pageSize.k)
+      };
+      pageSize.inner.ratio = pageSize.inner.height / pageSize.inner.width;
+    } // Attach pageSize to this.
+
+
+    this.prop.pageSize = pageSize;
+  });
+};
+
+Worker.prototype.setProgress = function setProgress(val, state, n, stack) {
+  // Immediately update all progress values.
+  if (val != null) this.progress.val = val;
+  if (state != null) this.progress.state = state;
+  if (n != null) this.progress.n = n;
+  if (stack != null) this.progress.stack = stack;
+  this.progress.ratio = this.progress.val / this.progress.state; // Return this for command chaining.
+
+  return this;
+};
+
+Worker.prototype.updateProgress = function updateProgress(val, state, n, stack) {
+  // Immediately update all progress values, using setProgress.
+  return this.setProgress(val ? this.progress.val + val : null, state ? state : null, n ? this.progress.n + n : null, stack ? this.progress.stack.concat(stack) : null);
+};
+/* ----- PROMISE MAPPING ----- */
+
+
+Worker.prototype.then = function then(onFulfilled, onRejected) {
+  // Wrap `this` for encapsulation.
+  var self = this;
+  return this.thenCore(onFulfilled, onRejected, function then_main(onFulfilled, onRejected) {
+    // Update progress while queuing, calling, and resolving `then`.
+    self.updateProgress(null, null, 1, [onFulfilled]);
+    return Promise.prototype.then.call(this, function then_pre(val) {
+      self.updateProgress(null, onFulfilled);
+      return val;
+    }).then(onFulfilled, onRejected).then(function then_post(val) {
+      self.updateProgress(1);
+      return val;
     });
+  });
+};
+
+Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected, thenBase) {
+  // Handle optional thenBase parameter.
+  thenBase = thenBase || Promise.prototype.then; // Wrap `this` for encapsulation and bind it to the promise handlers.
+
+  var self = this;
+
+  if (onFulfilled) {
+    onFulfilled = onFulfilled.bind(self);
   }
 
-  getJSON('/posts.json').then(function(json) {
-    // on fulfillment
-  }, function(reason) {
-    // on rejection
+  if (onRejected) {
+    onRejected = onRejected.bind(self);
+  } // Cast self into a Promise to avoid polyfills recursively defining `then`.
+
+
+  var isNative = Promise.toString().indexOf('[native code]') !== -1 && Promise.name === 'Promise';
+  var selfPromise = isNative ? self : Worker.convert(Object.assign({}, self), Promise.prototype); // Return the promise, after casting it into a Worker and preserving props.
+
+  var returnVal = thenBase.call(selfPromise, onFulfilled, onRejected);
+  return Worker.convert(returnVal, self.__proto__);
+};
+
+Worker.prototype.thenExternal = function thenExternal(onFulfilled, onRejected) {
+  // Call `then` and return a standard promise (exits the Worker chain).
+  return Promise.prototype.then.call(this, onFulfilled, onRejected);
+};
+
+Worker.prototype.thenList = function thenList(fns) {
+  // Queue a series of promise 'factories' into the promise chain.
+  var self = this;
+  fns.forEach(function thenList_forEach(fn) {
+    self = self.thenCore(fn);
   });
-  ```
+  return self;
+};
 
-  Unlike callbacks, promises are great composable primitives.
-
-  ```js
-  Promise.all([
-    getJSON('/posts'),
-    getJSON('/comments')
-  ]).then(function(values){
-    values[0] // => postsJSON
-    values[1] // => commentsJSON
-
-    return values;
-  });
-  ```
-
-  @class Promise
-  @param {Function} resolver
-  Useful for tooling.
-  @constructor
-*/
-
-var Promise$1 = function () {
-  function Promise(resolver) {
-    this[PROMISE_ID] = nextId();
-    this._result = this._state = undefined;
-    this._subscribers = [];
-
-    if (noop !== resolver) {
-      typeof resolver !== 'function' && needsResolver();
-      this instanceof Promise ? initializePromise(this, resolver) : needsNew();
-    }
+Worker.prototype['catch'] = function (onRejected) {
+  // Bind `this` to the promise handler, call `catch`, and return a Worker.
+  if (onRejected) {
+    onRejected = onRejected.bind(this);
   }
 
-  /**
-  The primary way of interacting with a promise is through its `then` method,
-  which registers callbacks to receive either a promise's eventual value or the
-  reason why the promise cannot be fulfilled.
-   ```js
-  findUser().then(function(user){
-    // user is available
-  }, function(reason){
-    // user is unavailable, and you are given the reason why
+  var returnVal = Promise.prototype['catch'].call(this, onRejected);
+  return Worker.convert(returnVal, this);
+};
+
+Worker.prototype.catchExternal = function catchExternal(onRejected) {
+  // Call `catch` and return a standard promise (exits the Worker chain).
+  return Promise.prototype['catch'].call(this, onRejected);
+};
+
+Worker.prototype.error = function error(msg) {
+  // Throw the error in the Promise chain.
+  return this.then(function error_main() {
+    throw new Error(msg);
   });
-  ```
-   Chaining
-  --------
-   The return value of `then` is itself a promise.  This second, 'downstream'
-  promise is resolved with the return value of the first promise's fulfillment
-  or rejection handler, or rejected if the handler throws an exception.
-   ```js
-  findUser().then(function (user) {
-    return user.name;
-  }, function (reason) {
-    return 'default name';
-  }).then(function (userName) {
-    // If `findUser` fulfilled, `userName` will be the user's name, otherwise it
-    // will be `'default name'`
-  });
-   findUser().then(function (user) {
-    throw new Error('Found user, but still unhappy');
-  }, function (reason) {
-    throw new Error('`findUser` rejected and we're unhappy');
-  }).then(function (value) {
-    // never reached
-  }, function (reason) {
-    // if `findUser` fulfilled, `reason` will be 'Found user, but still unhappy'.
-    // If `findUser` rejected, `reason` will be '`findUser` rejected and we're unhappy'.
-  });
-  ```
-  If the downstream promise does not specify a rejection handler, rejection reasons will be propagated further downstream.
-   ```js
-  findUser().then(function (user) {
-    throw new PedagogicalException('Upstream error');
-  }).then(function (value) {
-    // never reached
-  }).then(function (value) {
-    // never reached
-  }, function (reason) {
-    // The `PedgagocialException` is propagated all the way down to here
-  });
-  ```
-   Assimilation
-  ------------
-   Sometimes the value you want to propagate to a downstream promise can only be
-  retrieved asynchronously. This can be achieved by returning a promise in the
-  fulfillment or rejection handler. The downstream promise will then be pending
-  until the returned promise is settled. This is called *assimilation*.
-   ```js
-  findUser().then(function (user) {
-    return findCommentsByAuthor(user);
-  }).then(function (comments) {
-    // The user's comments are now available
-  });
-  ```
-   If the assimliated promise rejects, then the downstream promise will also reject.
-   ```js
-  findUser().then(function (user) {
-    return findCommentsByAuthor(user);
-  }).then(function (comments) {
-    // If `findCommentsByAuthor` fulfills, we'll have the value here
-  }, function (reason) {
-    // If `findCommentsByAuthor` rejects, we'll have the reason here
-  });
-  ```
-   Simple Example
-  --------------
-   Synchronous Example
-   ```javascript
-  let result;
-   try {
-    result = findResult();
-    // success
-  } catch(reason) {
-    // failure
-  }
-  ```
-   Errback Example
-   ```js
-  findResult(function(result, err){
-    if (err) {
-      // failure
-    } else {
-      // success
-    }
-  });
-  ```
-   Promise Example;
-   ```javascript
-  findResult().then(function(result){
-    // success
-  }, function(reason){
-    // failure
-  });
-  ```
-   Advanced Example
-  --------------
-   Synchronous Example
-   ```javascript
-  let author, books;
-   try {
-    author = findAuthor();
-    books  = findBooksByAuthor(author);
-    // success
-  } catch(reason) {
-    // failure
-  }
-  ```
-   Errback Example
-   ```js
-   function foundBooks(books) {
-   }
-   function failure(reason) {
-   }
-   findAuthor(function(author, err){
-    if (err) {
-      failure(err);
-      // failure
-    } else {
-      try {
-        findBoooksByAuthor(author, function(books, err) {
-          if (err) {
-            failure(err);
-          } else {
-            try {
-              foundBooks(books);
-            } catch(reason) {
-              failure(reason);
-            }
-          }
-        });
-      } catch(error) {
-        failure(err);
-      }
-      // success
-    }
-  });
-  ```
-   Promise Example;
-   ```javascript
-  findAuthor().
-    then(findBooksByAuthor).
-    then(function(books){
-      // found books
-  }).catch(function(reason){
-    // something went wrong
-  });
-  ```
-   @method then
-  @param {Function} onFulfilled
-  @param {Function} onRejected
-  Useful for tooling.
-  @return {Promise}
-  */
-
-  /**
-  `catch` is simply sugar for `then(undefined, onRejection)` which makes it the same
-  as the catch block of a try/catch statement.
-  ```js
-  function findAuthor(){
-  throw new Error('couldn't find that author');
-  }
-  // synchronous
-  try {
-  findAuthor();
-  } catch(reason) {
-  // something went wrong
-  }
-  // async with promises
-  findAuthor().catch(function(reason){
-  // something went wrong
-  });
-  ```
-  @method catch
-  @param {Function} onRejection
-  Useful for tooling.
-  @return {Promise}
-  */
+};
+/* ----- ALIASES ----- */
 
 
-  Promise.prototype.catch = function _catch(onRejection) {
-    return this.then(null, onRejection);
-  };
+Worker.prototype.using = Worker.prototype.set;
+Worker.prototype.saveAs = Worker.prototype.save;
+Worker.prototype.export = Worker.prototype.output;
+Worker.prototype.run = Worker.prototype.then;
+/* ----- FINISHING ----- */
+// Expose the Worker class.
 
-  /**
-    `finally` will be invoked regardless of the promise's fate just as native
-    try/catch/finally behaves
-  
-    Synchronous example:
-  
-    ```js
-    findAuthor() {
-      if (Math.random() > 0.5) {
-        throw new Error();
-      }
-      return new Author();
-    }
-  
-    try {
-      return findAuthor(); // succeed or fail
-    } catch(error) {
-      return findOtherAuther();
-    } finally {
-      // always runs
-      // doesn't affect the return value
-    }
-    ```
-  
-    Asynchronous example:
-  
-    ```js
-    findAuthor().catch(function(reason){
-      return findOtherAuther();
-    }).finally(function(){
-      // author was either found, or not
-    });
-    ```
-  
-    @method finally
-    @param {Function} callback
-    @return {Promise}
-  */
-
-
-  Promise.prototype.finally = function _finally(callback) {
-    var promise = this;
-    var constructor = promise.constructor;
-
-    if (isFunction(callback)) {
-      return promise.then(function (value) {
-        return constructor.resolve(callback()).then(function () {
-          return value;
-        });
-      }, function (reason) {
-        return constructor.resolve(callback()).then(function () {
-          throw reason;
-        });
-      });
-    }
-
-    return promise.then(callback, callback);
-  };
-
-  return Promise;
-}();
-
-Promise$1.prototype.then = then;
-Promise$1.all = all;
-Promise$1.race = race;
-Promise$1.resolve = resolve$1;
-Promise$1.reject = reject$1;
-Promise$1._setScheduler = setScheduler;
-Promise$1._setAsap = setAsap;
-Promise$1._asap = asap;
-
-/*global self*/
-function polyfill() {
-  var local = void 0;
-
-  if (typeof global !== 'undefined') {
-    local = global;
-  } else if (typeof self !== 'undefined') {
-    local = self;
-  } else {
-    try {
-      local = Function('return this')();
-    } catch (e) {
-      throw new Error('polyfill failed because global object is unavailable in this environment');
-    }
-  }
-
-  var P = local.Promise;
-
-  if (P) {
-    var promiseToString = null;
-    try {
-      promiseToString = Object.prototype.toString.call(P.resolve());
-    } catch (e) {
-      // silently ignored
-    }
-
-    if (promiseToString === '[object Promise]' && !P.cast) {
-      return;
-    }
-  }
-
-  local.Promise = Promise$1;
-}
-
-// Strange compat..
-Promise$1.polyfill = polyfill;
-Promise$1.Promise = Promise$1;
-
-return Promise$1;
-
-})));
-
-
-
-//# sourceMappingURL=es6-promise.map
-
+/* harmony default export */ __webpack_exports__["default"] = (Worker);
 
 /***/ }),
 
@@ -5775,7 +5619,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_jspdf__;
 /******/ 		};
 /******/ 	
 /******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
 /******/ 	
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
@@ -5824,7 +5668,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_jspdf__;
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+// This entry needs to be wrapped in an IIFE because it needs to be in strict mode.
 !function() {
 "use strict";
 /*!**********************!*\
@@ -5861,11 +5705,11 @@ var html2pdf = function html2pdf(src, opt) {
   }
 };
 
-html2pdf.Worker = _worker_js__WEBPACK_IMPORTED_MODULE_0__.default; // Expose the html2pdf function.
+html2pdf.Worker = _worker_js__WEBPACK_IMPORTED_MODULE_0__["default"]; // Expose the html2pdf function.
 
 /* harmony default export */ __webpack_exports__["default"] = (html2pdf);
 }();
-__webpack_exports__ = __webpack_exports__.default;
+__webpack_exports__ = __webpack_exports__["default"];
 /******/ 	return __webpack_exports__;
 /******/ })()
 ;

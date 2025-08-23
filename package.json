@@ -1,6 +1,6 @@
 {
   "name": "html2pdf.js",
-  "version": "0.10.3",
+  "version": "0.11.0",
   "description": "Client-side HTML-to-PDF rendering using pure JS",
   "main": "dist/html2pdf.js",
   "files": [
