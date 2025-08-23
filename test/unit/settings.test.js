@@ -1,3 +1,7 @@
+import { expect } from '@brightspace-ui/testing';
+import html2pdf from '../../src/index.js';
+import sinon from 'sinon';
+
 describe('settings', function () {
   describe('default settings', function () {
     var worker = html2pdf();
@@ -94,10 +98,10 @@ describe('settings', function () {
 
     it('set({ pageSize }) should call setPageSize', function () {
       var worker = html2pdf();
-      chai.spy.on(worker, 'setPageSize', function () { return this.then(function () {}); });
+      const stub = sinon.stub(worker, 'setPageSize').callsFake(function () { return this.then(function () {}); });
       return worker.set({ pageSize: 'test' }).then(function () {
-        expect(worker.setPageSize).to.have.been.called.with('test');
-        chai.spy.restore();
+        expect(worker.setPageSize.calledWith('test')).to.be.true;
+        stub.restore();
       });
     });
     it('setPageSize() with no argument should use jsPDF default settings', function () {

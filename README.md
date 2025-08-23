@@ -2,8 +2,6 @@
 
 html2pdf.js converts any webpage or element into a printable PDF entirely client-side using [html2canvas](https://github.com/niklasvh/html2canvas) and [jsPDF](https://github.com/MrRio/jsPDF).
 
-> :warning: There have been several issues reported in v0.10. They are being investigated but in the meantime you may wish to remain on v0.9.3 ("^0.9.3" in npm, or [use cdnjs for HTML script tags](https://cdnjs.com/libraries/html2pdf.js/0.9.3)).
-
 ## Table of contents
 
 - [Getting started](#getting-started)
@@ -231,18 +229,20 @@ The Worker object returned by `html2pdf()` has a built-in progress-tracking mech
 
 ## Dependencies
 
-html2pdf.js depends on the external packages [html2canvas](https://github.com/niklasvh/html2canvas), [jsPDF](https://github.com/MrRio/jsPDF), and [es6-promise](https://github.com/stefanpenner/es6-promise). These dependencies are automatically loaded when using NPM or the bundled package.
+html2pdf.js depends on the external packages [html2canvas](https://github.com/niklasvh/html2canvas) and [jsPDF](https://github.com/MrRio/jsPDF). These dependencies are automatically loaded when using NPM or the bundled package.
 
 If using the unbundled `dist/html2pdf.min.js` (or its un-minified version), you must also include each dependency. Order is important, otherwise html2canvas will be overridden by jsPDF's own internal implementation:
 
 ```html
-<script src="es6-promise.auto.min.js"></script>
 <script src="jspdf.min.js"></script>
 <script src="html2canvas.min.js"></script>
 <script src="html2pdf.min.js"></script>
 ```
 
 ## Contributing
+
+> [!TIP]
+> Working on html2pdf.js locally? Use `npm start` to host local demos on http://localhost:8000.
 
 ### Issues
 
@@ -269,7 +269,6 @@ When submitting an issue, please provide reproducible code that highlights the i
     - Related project: [Feature: New renderer](https://github.com/eKoopmans/html2pdf.js/projects/4)
 
 5. **Promise clashes:** html2pdf.js relies on specific Promise behaviour, and can fail when used with custom Promise libraries.
-    - In the next release, Promises will be sandboxed in html2pdf.js to remove this issue.
     - Related project: [Bugfix: Sandboxed promises](https://github.com/eKoopmans/html2pdf.js/projects/11)
 
 6. **Maximum size:** HTML5 canvases have a [maximum height/width](https://stackoverflow.com/a/11585939/4080966). Anything larger will fail to render.
@@ -279,7 +278,7 @@ When submitting an issue, please provide reproducible code that highlights the i
 
 ### Tests
 
-html2pdf.js is currently sorely lacking in unit tests. Any contributions or suggestions of automated (or manual) tests are welcome. This is high on the to-do list for this project.
+html2pdf.js performs automatic vdiff (visual difference) comparisons on PDFs generated from a collection of sample HTML files. Contributions of additional test cases are more than welcome - see `test/vdiff/html2pdf.vdiff.js` and `test/reference/*.html` for examples. Some changes may require adding more options to the test harness, `test/util/test-harness.js`.
 
 ### Pull requests
 
