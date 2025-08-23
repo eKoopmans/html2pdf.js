@@ -1,0 +1,29 @@
+name: CI
+on: pull_request
+jobs:
+  vdiff:
+    name: Visual diff tests
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GH Token
+        uses: actions/create-github-app-token@v1
+        id: gh-token
+        with:
+          app-id: ${{ vars.GH_TOKEN_APP_ID }}
+          private-key: ${{ secrets.GH_TOKEN_APP_PRIVATE_KEY }}
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: vdiff Tests
+        uses: BrightspaceUI/actions/vdiff@main
+        with:
+          github-token: ${{ steps.gh-token.outputs.token }}
