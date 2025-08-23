@@ -2,7 +2,7 @@
 	"browsers": [
 		{
 			"name": "Chromium",
-			"version": 139
+			"version": 140
 		}
 	],
 	"system": {
