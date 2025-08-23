@@ -25,12 +25,6 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
-      - name: Create GH Token
-        uses: actions/create-github-app-token@v1
-        id: gh-token
-        with:
-          app-id: ${{ vars.GH_TOKEN_APP_ID }}
-          private-key: ${{ secrets.GH_TOKEN_APP_PRIVATE_KEY }}
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -45,4 +39,4 @@ jobs:
       - name: vdiff Tests
         uses: BrightspaceUI/actions/vdiff@main
         with:
-          github-token: ${{ steps.gh-token.outputs.token }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
