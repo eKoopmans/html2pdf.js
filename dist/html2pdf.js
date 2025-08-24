@@ -1,5 +1,5 @@
 /*!
- * html2pdf.js v0.11.0
+ * html2pdf.js v0.11.1
  * Copyright (c) 2025 Erik Koopmans
  * Released under the MIT License.
  */
@@ -4478,6 +4478,44 @@ for (var COLLECTION_NAME in DOMIterables) {
 
 /***/ }),
 
+/***/ "./node_modules/core-js/modules/web.timers.js":
+/*!****************************************************!*\
+  !*** ./node_modules/core-js/modules/web.timers.js ***!
+  \****************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
+var userAgent = __webpack_require__(/*! ../internals/engine-user-agent */ "./node_modules/core-js/internals/engine-user-agent.js");
+
+var slice = [].slice;
+var MSIE = /MSIE .\./.test(userAgent); // <- dirty ie9- check
+
+var wrap = function (scheduler) {
+  return function (handler, timeout /* , ...arguments */) {
+    var boundArgs = arguments.length > 2;
+    var args = boundArgs ? slice.call(arguments, 2) : undefined;
+    return scheduler(boundArgs ? function () {
+      // eslint-disable-next-line no-new-func -- spec requirement
+      (typeof handler == 'function' ? handler : Function(handler)).apply(this, args);
+    } : handler, timeout);
+  };
+};
+
+// ie9- setTimeout & setInterval additional parameters fix
+// https://html.spec.whatwg.org/multipage/timers-and-user-prompts.html#timers
+$({ global: true, bind: true, forced: MSIE }, {
+  // `setTimeout` method
+  // https://html.spec.whatwg.org/multipage/timers-and-user-prompts.html#dom-settimeout
+  setTimeout: wrap(global.setTimeout),
+  // `setInterval` method
+  // https://html.spec.whatwg.org/multipage/timers-and-user-prompts.html#dom-setinterval
+  setInterval: wrap(global.setInterval)
+});
+
+
+/***/ }),
+
 /***/ "./src/plugin/hyperlinks.js":
 /*!**********************************!*\
   !*** ./src/plugin/hyperlinks.js ***!
@@ -5029,23 +5067,26 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var core_js_modules_es_promise_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.promise.js */ "./node_modules/core-js/modules/es.promise.js");
 /* harmony import */ var core_js_modules_es_promise_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_promise_js__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var core_js_modules_es_array_map_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/es.array.map.js */ "./node_modules/core-js/modules/es.array.map.js");
-/* harmony import */ var core_js_modules_es_array_map_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_map_js__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var core_js_modules_es_object_keys_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.object.keys.js */ "./node_modules/core-js/modules/es.object.keys.js");
-/* harmony import */ var core_js_modules_es_object_keys_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_keys_js__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var core_js_modules_es_array_concat_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core-js/modules/es.array.concat.js */ "./node_modules/core-js/modules/es.array.concat.js");
-/* harmony import */ var core_js_modules_es_array_concat_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_concat_js__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var core_js_modules_es_regexp_to_string_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core-js/modules/es.regexp.to-string.js */ "./node_modules/core-js/modules/es.regexp.to-string.js");
-/* harmony import */ var core_js_modules_es_regexp_to_string_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_regexp_to_string_js__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var core_js_modules_es_function_name_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core-js/modules/es.function.name.js */ "./node_modules/core-js/modules/es.function.name.js");
-/* harmony import */ var core_js_modules_es_function_name_js__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_function_name_js__WEBPACK_IMPORTED_MODULE_7__);
-/* harmony import */ var core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core-js/modules/web.dom-collections.for-each.js */ "./node_modules/core-js/modules/web.dom-collections.for-each.js");
-/* harmony import */ var core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_8__);
-/* harmony import */ var jspdf__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! jspdf */ "jspdf");
-/* harmony import */ var jspdf__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(jspdf__WEBPACK_IMPORTED_MODULE_9__);
-/* harmony import */ var html2canvas__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! html2canvas */ "html2canvas");
-/* harmony import */ var html2canvas__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(html2canvas__WEBPACK_IMPORTED_MODULE_10__);
-/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./utils.js */ "./src/utils.js");
+/* harmony import */ var core_js_modules_web_timers_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/web.timers.js */ "./node_modules/core-js/modules/web.timers.js");
+/* harmony import */ var core_js_modules_web_timers_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_timers_js__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var core_js_modules_es_array_map_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.array.map.js */ "./node_modules/core-js/modules/es.array.map.js");
+/* harmony import */ var core_js_modules_es_array_map_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_map_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var core_js_modules_es_object_keys_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core-js/modules/es.object.keys.js */ "./node_modules/core-js/modules/es.object.keys.js");
+/* harmony import */ var core_js_modules_es_object_keys_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_keys_js__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var core_js_modules_es_array_concat_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core-js/modules/es.array.concat.js */ "./node_modules/core-js/modules/es.array.concat.js");
+/* harmony import */ var core_js_modules_es_array_concat_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_concat_js__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var core_js_modules_es_regexp_to_string_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core-js/modules/es.regexp.to-string.js */ "./node_modules/core-js/modules/es.regexp.to-string.js");
+/* harmony import */ var core_js_modules_es_regexp_to_string_js__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_regexp_to_string_js__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var core_js_modules_es_function_name_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core-js/modules/es.function.name.js */ "./node_modules/core-js/modules/es.function.name.js");
+/* harmony import */ var core_js_modules_es_function_name_js__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_function_name_js__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! core-js/modules/web.dom-collections.for-each.js */ "./node_modules/core-js/modules/web.dom-collections.for-each.js");
+/* harmony import */ var core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_9__);
+/* harmony import */ var jspdf__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! jspdf */ "jspdf");
+/* harmony import */ var jspdf__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(jspdf__WEBPACK_IMPORTED_MODULE_10__);
+/* harmony import */ var html2canvas__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! html2canvas */ "html2canvas");
+/* harmony import */ var html2canvas__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(html2canvas__WEBPACK_IMPORTED_MODULE_11__);
+/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./utils.js */ "./src/utils.js");
+
 
 
 
@@ -5112,7 +5153,7 @@ Worker.template = {
 
 Worker.prototype.from = function from(src, type) {
   function getType(src) {
-    switch ((0,_utils_js__WEBPACK_IMPORTED_MODULE_11__.objType)(src)) {
+    switch ((0,_utils_js__WEBPACK_IMPORTED_MODULE_12__.objType)(src)) {
       case 'string':
         return 'string';
 
@@ -5130,7 +5171,7 @@ Worker.prototype.from = function from(src, type) {
     switch (type) {
       case 'string':
         return this.set({
-          src: (0,_utils_js__WEBPACK_IMPORTED_MODULE_11__.createElement)('div', {
+          src: (0,_utils_js__WEBPACK_IMPORTED_MODULE_12__.createElement)('div', {
             innerHTML: src
           })
         });
@@ -5208,18 +5249,22 @@ Worker.prototype.toContainer = function toContainer() {
 
     overlayCSS.opacity = 0; // Create and attach the elements.
 
-    var source = (0,_utils_js__WEBPACK_IMPORTED_MODULE_11__.cloneNode)(this.prop.src, this.opt.html2canvas.javascriptEnabled);
-    this.prop.overlay = (0,_utils_js__WEBPACK_IMPORTED_MODULE_11__.createElement)('div', {
+    var source = (0,_utils_js__WEBPACK_IMPORTED_MODULE_12__.cloneNode)(this.prop.src, this.opt.html2canvas.javascriptEnabled);
+    this.prop.overlay = (0,_utils_js__WEBPACK_IMPORTED_MODULE_12__.createElement)('div', {
       className: 'html2pdf__overlay',
       style: overlayCSS
     });
-    this.prop.container = (0,_utils_js__WEBPACK_IMPORTED_MODULE_11__.createElement)('div', {
+    this.prop.container = (0,_utils_js__WEBPACK_IMPORTED_MODULE_12__.createElement)('div', {
       className: 'html2pdf__container',
       style: containerCSS
     });
     this.prop.container.appendChild(source);
     this.prop.overlay.appendChild(this.prop.container);
-    document.body.appendChild(this.prop.overlay);
+    document.body.appendChild(this.prop.overlay); // Delay to better ensure content is fully cloned and rendering before capturing.
+
+    return new Promise(function (resolve) {
+      return setTimeout(resolve, 10);
+    });
   });
 };
 
@@ -5233,7 +5278,7 @@ Worker.prototype.toCanvas = function toCanvas() {
     // Handle old-fashioned 'onrendered' argument.
     var options = Object.assign({}, this.opt.html2canvas);
     delete options.onrendered;
-    return html2canvas__WEBPACK_IMPORTED_MODULE_10___default()(this.prop.container, options);
+    return html2canvas__WEBPACK_IMPORTED_MODULE_11___default()(this.prop.container, options);
   }).then(function toCanvas_post(canvas) {
     // Handle old-fashioned 'onrendered' argument.
     var onRendered = this.opt.html2canvas.onrendered || function () {};
@@ -5281,7 +5326,7 @@ Worker.prototype.toPdf = function toPdf() {
     pageCanvas.width = canvas.width;
     pageCanvas.height = pxPageHeight; // Initialize the PDF.
 
-    this.prop.pdf = this.prop.pdf || new jspdf__WEBPACK_IMPORTED_MODULE_9__.jsPDF(opt.jsPDF);
+    this.prop.pdf = this.prop.pdf || new jspdf__WEBPACK_IMPORTED_MODULE_10__.jsPDF(opt.jsPDF);
 
     for (var page = 0; page < nPages; page++) {
       // Trim the final page to reduce file size.
@@ -5377,7 +5422,7 @@ Worker.prototype.save = function save(filename) {
 Worker.prototype.set = function set(opt) {
   // TODO: Implement ordered pairs?
   // Silently ignore invalid or empty input.
-  if ((0,_utils_js__WEBPACK_IMPORTED_MODULE_11__.objType)(opt) !== 'object') {
+  if ((0,_utils_js__WEBPACK_IMPORTED_MODULE_12__.objType)(opt) !== 'object') {
     return this;
   } // Build an array of setter functions to queue.
 
@@ -5428,7 +5473,7 @@ Worker.prototype.get = function get(key, cbk) {
 Worker.prototype.setMargin = function setMargin(margin) {
   return this.then(function setMargin_main() {
     // Parse the margin property: [top, left, bottom, right].
-    switch ((0,_utils_js__WEBPACK_IMPORTED_MODULE_11__.objType)(margin)) {
+    switch ((0,_utils_js__WEBPACK_IMPORTED_MODULE_12__.objType)(margin)) {
       case 'number':
         margin = [margin, margin, margin, margin];
 
@@ -5453,7 +5498,7 @@ Worker.prototype.setMargin = function setMargin(margin) {
 Worker.prototype.setPageSize = function setPageSize(pageSize) {
   return this.then(function setPageSize_main() {
     // Retrieve page-size based on jsPDF settings, if not explicitly provided.
-    pageSize = pageSize || jspdf__WEBPACK_IMPORTED_MODULE_9__.jsPDF.getPageSize(this.opt.jsPDF); // Add 'inner' field if not present.
+    pageSize = pageSize || jspdf__WEBPACK_IMPORTED_MODULE_10__.jsPDF.getPageSize(this.opt.jsPDF); // Add 'inner' field if not present.
 
     if (!pageSize.hasOwnProperty('inner')) {
       pageSize.inner = {
@@ -5461,8 +5506,8 @@ Worker.prototype.setPageSize = function setPageSize(pageSize) {
         height: pageSize.height - this.opt.margin[0] - this.opt.margin[2]
       };
       pageSize.inner.px = {
-        width: (0,_utils_js__WEBPACK_IMPORTED_MODULE_11__.toPx)(pageSize.inner.width, pageSize.k),
-        height: (0,_utils_js__WEBPACK_IMPORTED_MODULE_11__.toPx)(pageSize.inner.height, pageSize.k)
+        width: (0,_utils_js__WEBPACK_IMPORTED_MODULE_12__.toPx)(pageSize.inner.width, pageSize.k),
+        height: (0,_utils_js__WEBPACK_IMPORTED_MODULE_12__.toPx)(pageSize.inner.height, pageSize.k)
       };
       pageSize.inner.ratio = pageSize.inner.height / pageSize.inner.width;
     } // Attach pageSize to this.
