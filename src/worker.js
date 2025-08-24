@@ -122,6 +122,7 @@ Worker.prototype.toContainer = function toContainer() {
     this.prop.container.appendChild(source);
     this.prop.overlay.appendChild(this.prop.container);
     document.body.appendChild(this.prop.overlay);
+    return new Promise(resolve => setTimeout(resolve, 10));
   });
 };
 
