@@ -44,7 +44,7 @@
     "sinon": "^21.0.0",
     "webpack": "^5.101.0",
     "webpack-bundle-analyzer": "^4.4.2",
-    "webpack-cli": "^4.7.2"
+    "webpack-cli": "^6.0.1"
   },
   "scripts": {
     "build": "npm run clean && webpack --env=prod",
