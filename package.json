@@ -35,16 +35,15 @@
     "@brightspace-ui/core": "^3.156.4",
     "@brightspace-ui/testing": "^1.31.2",
     "@web/dev-server": "^0.4.6",
-    "babel-loader": "^8.2.2",
+    "babel-loader": "^10.0.0",
     "core-js": "^3.16.0",
     "lit": "^3.3.1",
-    "mocha": "^6.1.4",
     "pdfjs-dist": "^5.3.93",
-    "rimraf": "^2.6.2",
+    "rimraf": "^6.0.1",
     "sinon": "^21.0.0",
     "webpack": "^5.101.0",
     "webpack-bundle-analyzer": "^4.4.2",
-    "webpack-cli": "^4.7.2"
+    "webpack-cli": "^6.0.1"
   },
   "scripts": {
     "build": "npm run clean && webpack --env=prod",
