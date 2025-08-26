@@ -39,11 +39,11 @@
     "core-js": "^3.16.0",
     "lit": "^3.3.1",
     "pdfjs-dist": "^5.3.93",
-    "rimraf": "^2.6.2",
+    "rimraf": "^6.0.1",
     "sinon": "^21.0.0",
     "webpack": "^5.101.0",
     "webpack-bundle-analyzer": "^4.4.2",
-    "webpack-cli": "^4.7.2"
+    "webpack-cli": "^6.0.1"
   },
   "scripts": {
     "build": "npm run clean && webpack --env=prod",
