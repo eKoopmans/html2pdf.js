@@ -41,7 +41,7 @@ The simplest way to use html2pdf.js is to include it as a script in your HTML by
 
 Using a CDN URL will lock you to a specific version, which should ensure stability and give you control over when to change versions. cdnjs gives you access to [all past versions of html2pdf.js](https://cdnjs.com/libraries/html2pdf.js).
 
-*Note: [Read about dependences](#dependencies) for more information about using the unbundled version `dist/html2canvas.min.js`.*
+*Note: [Read about dependencies](#dependencies) for more information about using the unbundled version `dist/html2canvas.min.js`.*
 
 #### Raw JS
 
