@@ -130,7 +130,7 @@ export function deepClone(node, styleMap = new Map(), styleCache = new WeakMap()
   if (node.getAttribute("data-capture") === "placeholder") {
     const clone2 = node.cloneNode(false);
     nodeMap.set(clone2, node);
-    inlineAllStyles(node, clone2, styleMap, styleCache, compress);
+    if (!options.skipInlineStyles) inlineAllStyles(node, clone2, styleMap, styleCache, compress);
     const placeholder = document.createElement("div");
     placeholder.textContent = node.getAttribute("data-placeholder-text") || "";
     placeholder.style.cssText = `color:#666;font-size:12px;text-align:center;line-height:1.4;padding:0.5em;box-sizing:border-box;`;
@@ -146,7 +146,7 @@ export function deepClone(node, styleMap = new Map(), styleCache = new WeakMap()
     img.width = node.width;
     img.height = node.height;
     nodeMap.set(img, node);
-    inlineAllStyles(node, img, styleMap, styleCache, compress);
+    if (!options.skipInlineStyles) inlineAllStyles(node, img, styleMap, styleCache, compress);
     return img;
   }
 
@@ -192,7 +192,7 @@ export function deepClone(node, styleMap = new Map(), styleCache = new WeakMap()
   }
 
   // 11. Inline styles
-  inlineAllStyles(node, clone, styleMap, styleCache, compress);
+  if (!options.skipInlineStyles) inlineAllStyles(node, clone, styleMap, styleCache, compress);
 
   // 12. ShadowRoot logic
   if (node.shadowRoot) {
