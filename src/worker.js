@@ -1,6 +1,7 @@
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
-import { objType, createElement, cloneNode, toPx } from './utils.js';
+import { deepCloneBasic } from './snapdom/clone.js';
+import { objType, createElement, toPx } from './utils.js';
 
 /* ----- CONSTRUCTOR ----- */
 
@@ -116,7 +117,7 @@ Worker.prototype.toContainer = function toContainer() {
     overlayCSS.opacity = 0;
 
     // Create and attach the elements.
-    var source = cloneNode(this.prop.src, this.opt.html2canvas.javascriptEnabled);
+    var source = deepCloneBasic(this.prop.src);
     this.prop.overlay = createElement('div',   { className: 'html2pdf__overlay', style: overlayCSS });
     this.prop.container = createElement('div', { className: 'html2pdf__container', style: containerCSS });
     this.prop.container.appendChild(source);
