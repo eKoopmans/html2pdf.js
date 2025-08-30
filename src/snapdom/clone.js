@@ -27,7 +27,7 @@
  * @module clone
  */
 
-import { inlineAllStyles } from '../modules/styles.js';
+import { inlineAllStyles } from './styles.js';
 
 /**
  * Freeze the responsive selection of an <img> that has srcset/sizes.
@@ -63,8 +63,8 @@ function freezeImgSrcset(original, cloned) {
  * @returns {Node|null} Cloned node with styles and shadow DOM content, or null for empty text nodes or filtered elements
  */
 
- 
-export function deepClone(node, styleMap, styleCache, nodeMap, compress, options = {}, originalRoot) {
+
+export function deepClone(node, styleMap = new Map(), styleCache = new WeakMap(), nodeMap = new Map(), compress, options = {}, originalRoot) {
   if (!node) throw new Error('Invalid node');
 
   // Local set to avoid duplicates in slot processing
