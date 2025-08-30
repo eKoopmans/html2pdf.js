@@ -27,7 +27,6 @@
  * @module clone
  */
 
-import { inlineAllStyles } from './styles.js';
 
 /**
  * Freeze the responsive selection of an <img> that has srcset/sizes.
@@ -57,14 +56,11 @@ function freezeImgSrcset(original, cloned) {
  * Creates a deep clone of a DOM node, including styles, shadow DOM, and special handling for excluded/placeholder/canvas nodes.
  *
  * @param {Node} node - Node to clone
- * @param {boolean} compress - Whether to compress style keys
- * @param {Object} [options={}] - Capture options including exclude and filter 
- * @param {Node} [originalRoot] - Original root element being captured
  * @returns {Node|null} Cloned node with styles and shadow DOM content, or null for empty text nodes or filtered elements
  */
 
 
-export function deepClone(node, styleMap = new Map(), styleCache = new WeakMap(), nodeMap = new Map(), compress, options = {}, originalRoot) {
+export function deepCloneBasic(node) {
   if (!node) throw new Error('Invalid node');
 
   // Local set to avoid duplicates in slot processing
@@ -81,61 +77,11 @@ export function deepClone(node, styleMap = new Map(), styleCache = new WeakMap()
     return node.cloneNode(true);
   }
 
-  // 3. Exclude by attribute
-  if (node.getAttribute("data-capture") === "exclude") {
-    const spacer = document.createElement("div");
-    const rect = node.getBoundingClientRect();
-    spacer.style.cssText = `display:inline-block;width:${rect.width}px;height:${rect.height}px;visibility:hidden;`;
-    return spacer;
-  }
-
-  // 4. Exclude by selectors
-  if (options.exclude && Array.isArray(options.exclude)) {
-    for (const selector of options.exclude) {
-      try {
-        if (node.matches?.(selector)) {
-          const spacer = document.createElement("div");
-          const rect = node.getBoundingClientRect();
-          spacer.style.cssText = `display:inline-block;width:${rect.width}px;height:${rect.height}px;visibility:hidden;`;
-          return spacer;
-        }
-      } catch (err) {
-        console.warn(`Invalid selector in exclude option: ${selector}`, err);
-      }
-    }
-  }
-
-  // 5. Custom filter function
-  if (typeof options.filter === "function") {
-    try {
-      if (!options.filter(node, originalRoot || node)) {
-        const spacer = document.createElement("div");
-        const rect = node.getBoundingClientRect();
-        spacer.style.cssText = `display:inline-block;width:${rect.width}px;height:${rect.height}px;visibility:hidden;`;
-        return spacer;
-      }
-    } catch (err) {
-      console.warn("Error in filter function:", err);
-    }
-  }
-
   // 6. Special case: iframe → fallback pattern
   if (node.tagName === "IFRAME") {
     const fallback = document.createElement("div");
     fallback.style.cssText = `width:${node.offsetWidth}px;height:${node.offsetHeight}px;background-image:repeating-linear-gradient(45deg,#ddd,#ddd 5px,#f9f9f9 5px,#f9f9f9 10px);display:flex;align-items:center;justify-content:center;font-size:12px;color:#555;border:1px solid #aaa;`;
     return fallback;
-  }
-
-  // 7. Placeholder nodes
-  if (node.getAttribute("data-capture") === "placeholder") {
-    const clone2 = node.cloneNode(false);
-    nodeMap.set(clone2, node);
-    if (!options.skipInlineStyles) inlineAllStyles(node, clone2, styleMap, styleCache, compress);
-    const placeholder = document.createElement("div");
-    placeholder.textContent = node.getAttribute("data-placeholder-text") || "";
-    placeholder.style.cssText = `color:#666;font-size:12px;text-align:center;line-height:1.4;padding:0.5em;box-sizing:border-box;`;
-    clone2.appendChild(placeholder);
-    return clone2;
   }
 
   // 8. Canvas → convert to image
@@ -145,8 +91,6 @@ export function deepClone(node, styleMap = new Map(), styleCache = new WeakMap()
     img.src = dataURL;
     img.width = node.width;
     img.height = node.height;
-    nodeMap.set(img, node);
-    if (!options.skipInlineStyles) inlineAllStyles(node, img, styleMap, styleCache, compress);
     return img;
   }
 
@@ -154,8 +98,7 @@ export function deepClone(node, styleMap = new Map(), styleCache = new WeakMap()
   let clone;
   try {
     clone = node.cloneNode(false);
-    nodeMap.set(clone, node);
-    
+
     if (node.tagName === 'IMG') {
       freezeImgSrcset(node, clone);
     }
@@ -191,37 +134,19 @@ export function deepClone(node, styleMap = new Map(), styleCache = new WeakMap()
     pendingSelectValue = node.value;
   }
 
-  // 11. Inline styles
-  if (!options.skipInlineStyles) inlineAllStyles(node, clone, styleMap, styleCache, compress);
-
   // 12. ShadowRoot logic
   if (node.shadowRoot) {
     const hasSlot = Array.from(node.shadowRoot.querySelectorAll("slot")).length > 0;
 
     if (hasSlot) {
-      // ShadowRoot with slots: only store styles
-      for (const child of node.shadowRoot.childNodes) {
-        if (child.nodeType === Node.ELEMENT_NODE && child.tagName === "STYLE") {
-          const cssText = child.textContent || "";
-          if (cssText.trim() && compress) {
-            //if (!cache.preStyle) cache.preStyle = new WeakMap();
-            styleCache.set(child, cssText);
-         }
-        }
-      }
     } else {
       // ShadowRoot without slots: clone full content
       const shadowFrag = document.createDocumentFragment();
       for (const child of node.shadowRoot.childNodes) {
         if (child.nodeType === Node.ELEMENT_NODE && child.tagName === "STYLE") {
-          const cssText = child.textContent || "";
-          if (cssText.trim() && compress) {
-          //  if (!cache.preStyle) cache.preStyle = new WeakMap();
-            styleCache.set(child, cssText);
-          }
           continue;
         }
-        const clonedChild = deepClone(child, styleMap, styleCache, nodeMap, compress, options, originalRoot || node);
+        const clonedChild = deepCloneBasic(child);
         if (clonedChild) shadowFrag.appendChild(clonedChild);
       }
       clone.appendChild(shadowFrag);
@@ -235,7 +160,7 @@ export function deepClone(node, styleMap = new Map(), styleCache = new WeakMap()
     const fragment = document.createDocumentFragment();
 
     for (const child of nodesToClone) {
-      const clonedChild = deepClone(child, styleMap, styleCache, nodeMap, compress, options, originalRoot || node);
+      const clonedChild = deepCloneBasic(child);
       if (clonedChild) fragment.appendChild(clonedChild);
     }
     return fragment;
@@ -245,7 +170,7 @@ export function deepClone(node, styleMap = new Map(), styleCache = new WeakMap()
   for (const child of node.childNodes) {
     if (clonedAssignedNodes.has(child)) continue;
 
-    const clonedChild = deepClone(child, styleMap, styleCache, nodeMap, compress, options, originalRoot || node);
+    const clonedChild = deepCloneBasic(child);
     if (clonedChild) clone.appendChild(clonedChild);
   }
 
@@ -259,6 +184,25 @@ export function deepClone(node, styleMap = new Map(), styleCache = new WeakMap()
         opt.removeAttribute("selected");
       }
     }
+  }
+
+  // Fix scrolling (taken from prepareClone).
+  const scrollX = node.scrollLeft;
+  const scrollY = node.scrollTop;
+  const hasScroll = scrollX || scrollY;
+  if (hasScroll && clone instanceof HTMLElement) {
+    clone.style.overflow = "hidden";
+    clone.style.scrollbarWidth = "none";
+    clone.style.msOverflowStyle = "none";
+    const inner = document.createElement("div");
+    inner.style.transform = `translate(${-scrollX}px, ${-scrollY}px)`;
+    inner.style.willChange = "transform";
+    inner.style.display = "inline-block";
+    inner.style.width = "100%";
+    while (clone.firstChild) {
+      inner.appendChild(clone.firstChild);
+    }
+    clone.appendChild(inner);
   }
 
   return clone;
