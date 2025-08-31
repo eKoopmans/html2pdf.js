@@ -1,5 +1,5 @@
 /*!
- * html2pdf.js v0.11.3
+ * html2pdf.js v0.12.0
  * Copyright (c) 2025 Erik Koopmans
  * Released under the MIT License.
  */
@@ -7039,6 +7039,25 @@ module.exports = function (argument) {
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/a-set.js":
+/*!*************************************************!*\
+  !*** ./node_modules/core-js/internals/a-set.js ***!
+  \*************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var has = (__webpack_require__(/*! ../internals/set-helpers */ "./node_modules/core-js/internals/set-helpers.js").has);
+
+// Perform ? RequireInternalSlot(M, [[SetData]])
+module.exports = function (it) {
+  has(it);
+  return it;
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/add-to-unscopables.js":
 /*!**************************************************************!*\
   !*** ./node_modules/core-js/internals/add-to-unscopables.js ***!
@@ -7132,6 +7151,28 @@ module.exports = function (argument) {
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/array-buffer-non-extensible.js":
+/*!***********************************************************************!*\
+  !*** ./node_modules/core-js/internals/array-buffer-non-extensible.js ***!
+  \***********************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+// FF26- bug: ArrayBuffers are non-extensible, but Object.isExtensible does not report it
+var fails = __webpack_require__(/*! ../internals/fails */ "./node_modules/core-js/internals/fails.js");
+
+module.exports = fails(function () {
+  if (typeof ArrayBuffer == 'function') {
+    var buffer = new ArrayBuffer(8);
+    // eslint-disable-next-line es/no-object-isextensible, es/no-object-defineproperty -- safe
+    if (Object.isExtensible(buffer)) Object.defineProperty(buffer, 'a', { value: 8 });
+  }
+});
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/array-for-each.js":
 /*!**********************************************************!*\
   !*** ./node_modules/core-js/internals/array-for-each.js ***!
@@ -7151,6 +7192,63 @@ module.exports = !STRICT_METHOD ? function forEach(callbackfn /* , thisArg */) {
   return $forEach(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 // eslint-disable-next-line es/no-array-prototype-foreach -- safe
 } : [].forEach;
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/array-from.js":
+/*!******************************************************!*\
+  !*** ./node_modules/core-js/internals/array-from.js ***!
+  \******************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var bind = __webpack_require__(/*! ../internals/function-bind-context */ "./node_modules/core-js/internals/function-bind-context.js");
+var call = __webpack_require__(/*! ../internals/function-call */ "./node_modules/core-js/internals/function-call.js");
+var toObject = __webpack_require__(/*! ../internals/to-object */ "./node_modules/core-js/internals/to-object.js");
+var callWithSafeIterationClosing = __webpack_require__(/*! ../internals/call-with-safe-iteration-closing */ "./node_modules/core-js/internals/call-with-safe-iteration-closing.js");
+var isArrayIteratorMethod = __webpack_require__(/*! ../internals/is-array-iterator-method */ "./node_modules/core-js/internals/is-array-iterator-method.js");
+var isConstructor = __webpack_require__(/*! ../internals/is-constructor */ "./node_modules/core-js/internals/is-constructor.js");
+var lengthOfArrayLike = __webpack_require__(/*! ../internals/length-of-array-like */ "./node_modules/core-js/internals/length-of-array-like.js");
+var createProperty = __webpack_require__(/*! ../internals/create-property */ "./node_modules/core-js/internals/create-property.js");
+var getIterator = __webpack_require__(/*! ../internals/get-iterator */ "./node_modules/core-js/internals/get-iterator.js");
+var getIteratorMethod = __webpack_require__(/*! ../internals/get-iterator-method */ "./node_modules/core-js/internals/get-iterator-method.js");
+
+var $Array = Array;
+
+// `Array.from` method implementation
+// https://tc39.es/ecma262/#sec-array.from
+module.exports = function from(arrayLike /* , mapfn = undefined, thisArg = undefined */) {
+  var O = toObject(arrayLike);
+  var IS_CONSTRUCTOR = isConstructor(this);
+  var argumentsLength = arguments.length;
+  var mapfn = argumentsLength > 1 ? arguments[1] : undefined;
+  var mapping = mapfn !== undefined;
+  if (mapping) mapfn = bind(mapfn, argumentsLength > 2 ? arguments[2] : undefined);
+  var iteratorMethod = getIteratorMethod(O);
+  var index = 0;
+  var length, result, step, iterator, next, value;
+  // if the target is not iterable or it's an array with the default iterator - use a simple case
+  if (iteratorMethod && !(this === $Array && isArrayIteratorMethod(iteratorMethod))) {
+    result = IS_CONSTRUCTOR ? new this() : [];
+    iterator = getIterator(O, iteratorMethod);
+    next = iterator.next;
+    for (;!(step = call(next, iterator)).done; index++) {
+      value = mapping ? callWithSafeIterationClosing(iterator, mapfn, [step.value, index], true) : step.value;
+      createProperty(result, index, value);
+    }
+  } else {
+    length = lengthOfArrayLike(O);
+    result = IS_CONSTRUCTOR ? new this(length) : $Array(length);
+    for (;length > index; index++) {
+      value = mapping ? mapfn(O[index], index) : O[index];
+      createProperty(result, index, value);
+    }
+  }
+  result.length = index;
+  return result;
+};
 
 
 /***/ }),
@@ -7593,6 +7691,340 @@ module.exports = TO_STRING_TAG_SUPPORT ? classofRaw : function (it) {
     : CORRECT_ARGUMENTS ? classofRaw(O)
     // ES3 arguments fallback
     : (result = classofRaw(O)) === 'Object' && isCallable(O.callee) ? 'Arguments' : result;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/collection-strong.js":
+/*!*************************************************************!*\
+  !*** ./node_modules/core-js/internals/collection-strong.js ***!
+  \*************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var create = __webpack_require__(/*! ../internals/object-create */ "./node_modules/core-js/internals/object-create.js");
+var defineBuiltInAccessor = __webpack_require__(/*! ../internals/define-built-in-accessor */ "./node_modules/core-js/internals/define-built-in-accessor.js");
+var defineBuiltIns = __webpack_require__(/*! ../internals/define-built-ins */ "./node_modules/core-js/internals/define-built-ins.js");
+var bind = __webpack_require__(/*! ../internals/function-bind-context */ "./node_modules/core-js/internals/function-bind-context.js");
+var anInstance = __webpack_require__(/*! ../internals/an-instance */ "./node_modules/core-js/internals/an-instance.js");
+var isNullOrUndefined = __webpack_require__(/*! ../internals/is-null-or-undefined */ "./node_modules/core-js/internals/is-null-or-undefined.js");
+var iterate = __webpack_require__(/*! ../internals/iterate */ "./node_modules/core-js/internals/iterate.js");
+var defineIterator = __webpack_require__(/*! ../internals/iterator-define */ "./node_modules/core-js/internals/iterator-define.js");
+var createIterResultObject = __webpack_require__(/*! ../internals/create-iter-result-object */ "./node_modules/core-js/internals/create-iter-result-object.js");
+var setSpecies = __webpack_require__(/*! ../internals/set-species */ "./node_modules/core-js/internals/set-species.js");
+var DESCRIPTORS = __webpack_require__(/*! ../internals/descriptors */ "./node_modules/core-js/internals/descriptors.js");
+var fastKey = (__webpack_require__(/*! ../internals/internal-metadata */ "./node_modules/core-js/internals/internal-metadata.js").fastKey);
+var InternalStateModule = __webpack_require__(/*! ../internals/internal-state */ "./node_modules/core-js/internals/internal-state.js");
+
+var setInternalState = InternalStateModule.set;
+var internalStateGetterFor = InternalStateModule.getterFor;
+
+module.exports = {
+  getConstructor: function (wrapper, CONSTRUCTOR_NAME, IS_MAP, ADDER) {
+    var Constructor = wrapper(function (that, iterable) {
+      anInstance(that, Prototype);
+      setInternalState(that, {
+        type: CONSTRUCTOR_NAME,
+        index: create(null),
+        first: null,
+        last: null,
+        size: 0
+      });
+      if (!DESCRIPTORS) that.size = 0;
+      if (!isNullOrUndefined(iterable)) iterate(iterable, that[ADDER], { that: that, AS_ENTRIES: IS_MAP });
+    });
+
+    var Prototype = Constructor.prototype;
+
+    var getInternalState = internalStateGetterFor(CONSTRUCTOR_NAME);
+
+    var define = function (that, key, value) {
+      var state = getInternalState(that);
+      var entry = getEntry(that, key);
+      var previous, index;
+      // change existing entry
+      if (entry) {
+        entry.value = value;
+      // create new entry
+      } else {
+        state.last = entry = {
+          index: index = fastKey(key, true),
+          key: key,
+          value: value,
+          previous: previous = state.last,
+          next: null,
+          removed: false
+        };
+        if (!state.first) state.first = entry;
+        if (previous) previous.next = entry;
+        if (DESCRIPTORS) state.size++;
+        else that.size++;
+        // add to index
+        if (index !== 'F') state.index[index] = entry;
+      } return that;
+    };
+
+    var getEntry = function (that, key) {
+      var state = getInternalState(that);
+      // fast case
+      var index = fastKey(key);
+      var entry;
+      if (index !== 'F') return state.index[index];
+      // frozen object case
+      for (entry = state.first; entry; entry = entry.next) {
+        if (entry.key === key) return entry;
+      }
+    };
+
+    defineBuiltIns(Prototype, {
+      // `{ Map, Set }.prototype.clear()` methods
+      // https://tc39.es/ecma262/#sec-map.prototype.clear
+      // https://tc39.es/ecma262/#sec-set.prototype.clear
+      clear: function clear() {
+        var that = this;
+        var state = getInternalState(that);
+        var entry = state.first;
+        while (entry) {
+          entry.removed = true;
+          if (entry.previous) entry.previous = entry.previous.next = null;
+          entry = entry.next;
+        }
+        state.first = state.last = null;
+        state.index = create(null);
+        if (DESCRIPTORS) state.size = 0;
+        else that.size = 0;
+      },
+      // `{ Map, Set }.prototype.delete(key)` methods
+      // https://tc39.es/ecma262/#sec-map.prototype.delete
+      // https://tc39.es/ecma262/#sec-set.prototype.delete
+      'delete': function (key) {
+        var that = this;
+        var state = getInternalState(that);
+        var entry = getEntry(that, key);
+        if (entry) {
+          var next = entry.next;
+          var prev = entry.previous;
+          delete state.index[entry.index];
+          entry.removed = true;
+          if (prev) prev.next = next;
+          if (next) next.previous = prev;
+          if (state.first === entry) state.first = next;
+          if (state.last === entry) state.last = prev;
+          if (DESCRIPTORS) state.size--;
+          else that.size--;
+        } return !!entry;
+      },
+      // `{ Map, Set }.prototype.forEach(callbackfn, thisArg = undefined)` methods
+      // https://tc39.es/ecma262/#sec-map.prototype.foreach
+      // https://tc39.es/ecma262/#sec-set.prototype.foreach
+      forEach: function forEach(callbackfn /* , that = undefined */) {
+        var state = getInternalState(this);
+        var boundFunction = bind(callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+        var entry;
+        while (entry = entry ? entry.next : state.first) {
+          boundFunction(entry.value, entry.key, this);
+          // revert to the last existing entry
+          while (entry && entry.removed) entry = entry.previous;
+        }
+      },
+      // `{ Map, Set}.prototype.has(key)` methods
+      // https://tc39.es/ecma262/#sec-map.prototype.has
+      // https://tc39.es/ecma262/#sec-set.prototype.has
+      has: function has(key) {
+        return !!getEntry(this, key);
+      }
+    });
+
+    defineBuiltIns(Prototype, IS_MAP ? {
+      // `Map.prototype.get(key)` method
+      // https://tc39.es/ecma262/#sec-map.prototype.get
+      get: function get(key) {
+        var entry = getEntry(this, key);
+        return entry && entry.value;
+      },
+      // `Map.prototype.set(key, value)` method
+      // https://tc39.es/ecma262/#sec-map.prototype.set
+      set: function set(key, value) {
+        return define(this, key === 0 ? 0 : key, value);
+      }
+    } : {
+      // `Set.prototype.add(value)` method
+      // https://tc39.es/ecma262/#sec-set.prototype.add
+      add: function add(value) {
+        return define(this, value = value === 0 ? 0 : value, value);
+      }
+    });
+    if (DESCRIPTORS) defineBuiltInAccessor(Prototype, 'size', {
+      configurable: true,
+      get: function () {
+        return getInternalState(this).size;
+      }
+    });
+    return Constructor;
+  },
+  setStrong: function (Constructor, CONSTRUCTOR_NAME, IS_MAP) {
+    var ITERATOR_NAME = CONSTRUCTOR_NAME + ' Iterator';
+    var getInternalCollectionState = internalStateGetterFor(CONSTRUCTOR_NAME);
+    var getInternalIteratorState = internalStateGetterFor(ITERATOR_NAME);
+    // `{ Map, Set }.prototype.{ keys, values, entries, @@iterator }()` methods
+    // https://tc39.es/ecma262/#sec-map.prototype.entries
+    // https://tc39.es/ecma262/#sec-map.prototype.keys
+    // https://tc39.es/ecma262/#sec-map.prototype.values
+    // https://tc39.es/ecma262/#sec-map.prototype-@@iterator
+    // https://tc39.es/ecma262/#sec-set.prototype.entries
+    // https://tc39.es/ecma262/#sec-set.prototype.keys
+    // https://tc39.es/ecma262/#sec-set.prototype.values
+    // https://tc39.es/ecma262/#sec-set.prototype-@@iterator
+    defineIterator(Constructor, CONSTRUCTOR_NAME, function (iterated, kind) {
+      setInternalState(this, {
+        type: ITERATOR_NAME,
+        target: iterated,
+        state: getInternalCollectionState(iterated),
+        kind: kind,
+        last: null
+      });
+    }, function () {
+      var state = getInternalIteratorState(this);
+      var kind = state.kind;
+      var entry = state.last;
+      // revert to the last existing entry
+      while (entry && entry.removed) entry = entry.previous;
+      // get next entry
+      if (!state.target || !(state.last = entry = entry ? entry.next : state.state.first)) {
+        // or finish the iteration
+        state.target = null;
+        return createIterResultObject(undefined, true);
+      }
+      // return step by kind
+      if (kind === 'keys') return createIterResultObject(entry.key, false);
+      if (kind === 'values') return createIterResultObject(entry.value, false);
+      return createIterResultObject([entry.key, entry.value], false);
+    }, IS_MAP ? 'entries' : 'values', !IS_MAP, true);
+
+    // `{ Map, Set }.prototype[@@species]` accessors
+    // https://tc39.es/ecma262/#sec-get-map-@@species
+    // https://tc39.es/ecma262/#sec-get-set-@@species
+    setSpecies(CONSTRUCTOR_NAME);
+  }
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/collection.js":
+/*!******************************************************!*\
+  !*** ./node_modules/core-js/internals/collection.js ***!
+  \******************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var globalThis = __webpack_require__(/*! ../internals/global-this */ "./node_modules/core-js/internals/global-this.js");
+var uncurryThis = __webpack_require__(/*! ../internals/function-uncurry-this */ "./node_modules/core-js/internals/function-uncurry-this.js");
+var isForced = __webpack_require__(/*! ../internals/is-forced */ "./node_modules/core-js/internals/is-forced.js");
+var defineBuiltIn = __webpack_require__(/*! ../internals/define-built-in */ "./node_modules/core-js/internals/define-built-in.js");
+var InternalMetadataModule = __webpack_require__(/*! ../internals/internal-metadata */ "./node_modules/core-js/internals/internal-metadata.js");
+var iterate = __webpack_require__(/*! ../internals/iterate */ "./node_modules/core-js/internals/iterate.js");
+var anInstance = __webpack_require__(/*! ../internals/an-instance */ "./node_modules/core-js/internals/an-instance.js");
+var isCallable = __webpack_require__(/*! ../internals/is-callable */ "./node_modules/core-js/internals/is-callable.js");
+var isNullOrUndefined = __webpack_require__(/*! ../internals/is-null-or-undefined */ "./node_modules/core-js/internals/is-null-or-undefined.js");
+var isObject = __webpack_require__(/*! ../internals/is-object */ "./node_modules/core-js/internals/is-object.js");
+var fails = __webpack_require__(/*! ../internals/fails */ "./node_modules/core-js/internals/fails.js");
+var checkCorrectnessOfIteration = __webpack_require__(/*! ../internals/check-correctness-of-iteration */ "./node_modules/core-js/internals/check-correctness-of-iteration.js");
+var setToStringTag = __webpack_require__(/*! ../internals/set-to-string-tag */ "./node_modules/core-js/internals/set-to-string-tag.js");
+var inheritIfRequired = __webpack_require__(/*! ../internals/inherit-if-required */ "./node_modules/core-js/internals/inherit-if-required.js");
+
+module.exports = function (CONSTRUCTOR_NAME, wrapper, common) {
+  var IS_MAP = CONSTRUCTOR_NAME.indexOf('Map') !== -1;
+  var IS_WEAK = CONSTRUCTOR_NAME.indexOf('Weak') !== -1;
+  var ADDER = IS_MAP ? 'set' : 'add';
+  var NativeConstructor = globalThis[CONSTRUCTOR_NAME];
+  var NativePrototype = NativeConstructor && NativeConstructor.prototype;
+  var Constructor = NativeConstructor;
+  var exported = {};
+
+  var fixMethod = function (KEY) {
+    var uncurriedNativeMethod = uncurryThis(NativePrototype[KEY]);
+    defineBuiltIn(NativePrototype, KEY,
+      KEY === 'add' ? function add(value) {
+        uncurriedNativeMethod(this, value === 0 ? 0 : value);
+        return this;
+      } : KEY === 'delete' ? function (key) {
+        return IS_WEAK && !isObject(key) ? false : uncurriedNativeMethod(this, key === 0 ? 0 : key);
+      } : KEY === 'get' ? function get(key) {
+        return IS_WEAK && !isObject(key) ? undefined : uncurriedNativeMethod(this, key === 0 ? 0 : key);
+      } : KEY === 'has' ? function has(key) {
+        return IS_WEAK && !isObject(key) ? false : uncurriedNativeMethod(this, key === 0 ? 0 : key);
+      } : function set(key, value) {
+        uncurriedNativeMethod(this, key === 0 ? 0 : key, value);
+        return this;
+      }
+    );
+  };
+
+  var REPLACE = isForced(
+    CONSTRUCTOR_NAME,
+    !isCallable(NativeConstructor) || !(IS_WEAK || NativePrototype.forEach && !fails(function () {
+      new NativeConstructor().entries().next();
+    }))
+  );
+
+  if (REPLACE) {
+    // create collection constructor
+    Constructor = common.getConstructor(wrapper, CONSTRUCTOR_NAME, IS_MAP, ADDER);
+    InternalMetadataModule.enable();
+  } else if (isForced(CONSTRUCTOR_NAME, true)) {
+    var instance = new Constructor();
+    // early implementations not supports chaining
+    var HASNT_CHAINING = instance[ADDER](IS_WEAK ? {} : -0, 1) !== instance;
+    // V8 ~ Chromium 40- weak-collections throws on primitives, but should return false
+    var THROWS_ON_PRIMITIVES = fails(function () { instance.has(1); });
+    // most early implementations doesn't supports iterables, most modern - not close it correctly
+    // eslint-disable-next-line no-new -- required for testing
+    var ACCEPT_ITERABLES = checkCorrectnessOfIteration(function (iterable) { new NativeConstructor(iterable); });
+    // for early implementations -0 and +0 not the same
+    var BUGGY_ZERO = !IS_WEAK && fails(function () {
+      // V8 ~ Chromium 42- fails only with 5+ elements
+      var $instance = new NativeConstructor();
+      var index = 5;
+      while (index--) $instance[ADDER](index, index);
+      return !$instance.has(-0);
+    });
+
+    if (!ACCEPT_ITERABLES) {
+      Constructor = wrapper(function (dummy, iterable) {
+        anInstance(dummy, NativePrototype);
+        var that = inheritIfRequired(new NativeConstructor(), dummy, Constructor);
+        if (!isNullOrUndefined(iterable)) iterate(iterable, that[ADDER], { that: that, AS_ENTRIES: IS_MAP });
+        return that;
+      });
+      Constructor.prototype = NativePrototype;
+      NativePrototype.constructor = Constructor;
+    }
+
+    if (THROWS_ON_PRIMITIVES || BUGGY_ZERO) {
+      fixMethod('delete');
+      fixMethod('has');
+      IS_MAP && fixMethod('get');
+    }
+
+    if (BUGGY_ZERO || HASNT_CHAINING) fixMethod(ADDER);
+
+    // weak collections should not contains .clear method
+    if (IS_WEAK && NativePrototype.clear) delete NativePrototype.clear;
+  }
+
+  exported[CONSTRUCTOR_NAME] = Constructor;
+  $({ global: true, constructor: true, forced: Constructor !== NativeConstructor }, exported);
+
+  setToStringTag(Constructor, CONSTRUCTOR_NAME);
+
+  if (!IS_WEAK) common.setStrong(Constructor, CONSTRUCTOR_NAME, IS_MAP);
+
+  return Constructor;
 };
 
 
@@ -8350,6 +8782,24 @@ module.exports = function (KEY, exec, FORCED, SHAM) {
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/freezing.js":
+/*!****************************************************!*\
+  !*** ./node_modules/core-js/internals/freezing.js ***!
+  \****************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var fails = __webpack_require__(/*! ../internals/fails */ "./node_modules/core-js/internals/fails.js");
+
+module.exports = !fails(function () {
+  // eslint-disable-next-line es/no-object-isextensible, es/no-object-preventextensions -- required for testing
+  return Object.isExtensible(Object.preventExtensions({}));
+});
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/function-apply.js":
 /*!**********************************************************!*\
   !*** ./node_modules/core-js/internals/function-apply.js ***!
@@ -8686,6 +9136,57 @@ module.exports = function (V, P) {
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/get-set-record.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/core-js/internals/get-set-record.js ***!
+  \**********************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var aCallable = __webpack_require__(/*! ../internals/a-callable */ "./node_modules/core-js/internals/a-callable.js");
+var anObject = __webpack_require__(/*! ../internals/an-object */ "./node_modules/core-js/internals/an-object.js");
+var call = __webpack_require__(/*! ../internals/function-call */ "./node_modules/core-js/internals/function-call.js");
+var toIntegerOrInfinity = __webpack_require__(/*! ../internals/to-integer-or-infinity */ "./node_modules/core-js/internals/to-integer-or-infinity.js");
+var getIteratorDirect = __webpack_require__(/*! ../internals/get-iterator-direct */ "./node_modules/core-js/internals/get-iterator-direct.js");
+
+var INVALID_SIZE = 'Invalid size';
+var $RangeError = RangeError;
+var $TypeError = TypeError;
+var max = Math.max;
+
+var SetRecord = function (set, intSize) {
+  this.set = set;
+  this.size = max(intSize, 0);
+  this.has = aCallable(set.has);
+  this.keys = aCallable(set.keys);
+};
+
+SetRecord.prototype = {
+  getIterator: function () {
+    return getIteratorDirect(anObject(call(this.keys, this.set)));
+  },
+  includes: function (it) {
+    return call(this.has, this.set, it);
+  }
+};
+
+// `GetSetRecord` abstract operation
+// https://tc39.es/proposal-set-methods/#sec-getsetrecord
+module.exports = function (obj) {
+  anObject(obj);
+  var numSize = +obj.size;
+  // NOTE: If size is undefined, then numSize will be NaN
+  // eslint-disable-next-line no-self-compare -- NaN check
+  if (numSize !== numSize) throw new $TypeError(INVALID_SIZE);
+  var intSize = toIntegerOrInfinity(numSize);
+  if (intSize < 0) throw new $RangeError(INVALID_SIZE);
+  return new SetRecord(obj, intSize);
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/get-substitution.js":
 /*!************************************************************!*\
   !*** ./node_modules/core-js/internals/get-substitution.js ***!
@@ -8945,6 +9446,107 @@ module.exports = store.inspectSource;
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/internal-metadata.js":
+/*!*************************************************************!*\
+  !*** ./node_modules/core-js/internals/internal-metadata.js ***!
+  \*************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var uncurryThis = __webpack_require__(/*! ../internals/function-uncurry-this */ "./node_modules/core-js/internals/function-uncurry-this.js");
+var hiddenKeys = __webpack_require__(/*! ../internals/hidden-keys */ "./node_modules/core-js/internals/hidden-keys.js");
+var isObject = __webpack_require__(/*! ../internals/is-object */ "./node_modules/core-js/internals/is-object.js");
+var hasOwn = __webpack_require__(/*! ../internals/has-own-property */ "./node_modules/core-js/internals/has-own-property.js");
+var defineProperty = (__webpack_require__(/*! ../internals/object-define-property */ "./node_modules/core-js/internals/object-define-property.js").f);
+var getOwnPropertyNamesModule = __webpack_require__(/*! ../internals/object-get-own-property-names */ "./node_modules/core-js/internals/object-get-own-property-names.js");
+var getOwnPropertyNamesExternalModule = __webpack_require__(/*! ../internals/object-get-own-property-names-external */ "./node_modules/core-js/internals/object-get-own-property-names-external.js");
+var isExtensible = __webpack_require__(/*! ../internals/object-is-extensible */ "./node_modules/core-js/internals/object-is-extensible.js");
+var uid = __webpack_require__(/*! ../internals/uid */ "./node_modules/core-js/internals/uid.js");
+var FREEZING = __webpack_require__(/*! ../internals/freezing */ "./node_modules/core-js/internals/freezing.js");
+
+var REQUIRED = false;
+var METADATA = uid('meta');
+var id = 0;
+
+var setMetadata = function (it) {
+  defineProperty(it, METADATA, { value: {
+    objectID: 'O' + id++, // object ID
+    weakData: {}          // weak collections IDs
+  } });
+};
+
+var fastKey = function (it, create) {
+  // return a primitive with prefix
+  if (!isObject(it)) return typeof it == 'symbol' ? it : (typeof it == 'string' ? 'S' : 'P') + it;
+  if (!hasOwn(it, METADATA)) {
+    // can't set metadata to uncaught frozen object
+    if (!isExtensible(it)) return 'F';
+    // not necessary to add metadata
+    if (!create) return 'E';
+    // add missing metadata
+    setMetadata(it);
+  // return object ID
+  } return it[METADATA].objectID;
+};
+
+var getWeakData = function (it, create) {
+  if (!hasOwn(it, METADATA)) {
+    // can't set metadata to uncaught frozen object
+    if (!isExtensible(it)) return true;
+    // not necessary to add metadata
+    if (!create) return false;
+    // add missing metadata
+    setMetadata(it);
+  // return the store of weak collections IDs
+  } return it[METADATA].weakData;
+};
+
+// add metadata on freeze-family methods calling
+var onFreeze = function (it) {
+  if (FREEZING && REQUIRED && isExtensible(it) && !hasOwn(it, METADATA)) setMetadata(it);
+  return it;
+};
+
+var enable = function () {
+  meta.enable = function () { /* empty */ };
+  REQUIRED = true;
+  var getOwnPropertyNames = getOwnPropertyNamesModule.f;
+  var splice = uncurryThis([].splice);
+  var test = {};
+  test[METADATA] = 1;
+
+  // prevent exposing of metadata key
+  if (getOwnPropertyNames(test).length) {
+    getOwnPropertyNamesModule.f = function (it) {
+      var result = getOwnPropertyNames(it);
+      for (var i = 0, length = result.length; i < length; i++) {
+        if (result[i] === METADATA) {
+          splice(result, i, 1);
+          break;
+        }
+      } return result;
+    };
+
+    $({ target: 'Object', stat: true, forced: true }, {
+      getOwnPropertyNames: getOwnPropertyNamesExternalModule.f
+    });
+  }
+};
+
+var meta = module.exports = {
+  enable: enable,
+  fastKey: fastKey,
+  getWeakData: getWeakData,
+  onFreeze: onFreeze
+};
+
+hiddenKeys[METADATA] = true;
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/internal-state.js":
 /*!**********************************************************!*\
   !*** ./node_modules/core-js/internals/internal-state.js ***!
@@ -9189,6 +9791,34 @@ module.exports = isForced;
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/is-iterable.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/core-js/internals/is-iterable.js ***!
+  \*******************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var classof = __webpack_require__(/*! ../internals/classof */ "./node_modules/core-js/internals/classof.js");
+var hasOwn = __webpack_require__(/*! ../internals/has-own-property */ "./node_modules/core-js/internals/has-own-property.js");
+var isNullOrUndefined = __webpack_require__(/*! ../internals/is-null-or-undefined */ "./node_modules/core-js/internals/is-null-or-undefined.js");
+var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
+var Iterators = __webpack_require__(/*! ../internals/iterators */ "./node_modules/core-js/internals/iterators.js");
+
+var ITERATOR = wellKnownSymbol('iterator');
+var $Object = Object;
+
+module.exports = function (it) {
+  if (isNullOrUndefined(it)) return false;
+  var O = $Object(it);
+  return O[ITERATOR] !== undefined
+    || '@@iterator' in O
+    || hasOwn(Iterators, classof(O));
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/is-null-or-undefined.js":
 /*!****************************************************************!*\
   !*** ./node_modules/core-js/internals/is-null-or-undefined.js ***!
@@ -9297,6 +9927,29 @@ module.exports = USE_SYMBOL_AS_UID ? function (it) {
 } : function (it) {
   var $Symbol = getBuiltIn('Symbol');
   return isCallable($Symbol) && isPrototypeOf($Symbol.prototype, $Object(it));
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/iterate-simple.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/core-js/internals/iterate-simple.js ***!
+  \**********************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var call = __webpack_require__(/*! ../internals/function-call */ "./node_modules/core-js/internals/function-call.js");
+
+module.exports = function (record, fn, ITERATOR_INSTEAD_OF_RECORD) {
+  var iterator = ITERATOR_INSTEAD_OF_RECORD ? record : record.iterator;
+  var next = record.next;
+  var step, result;
+  while (!(step = call(next, iterator)).done) {
+    result = fn(step.value);
+    if (result !== undefined) return result;
+  }
 };
 
 
@@ -10452,6 +11105,34 @@ module.exports = CORRECT_PROTOTYPE_GETTER ? $Object.getPrototypeOf : function (O
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/object-is-extensible.js":
+/*!****************************************************************!*\
+  !*** ./node_modules/core-js/internals/object-is-extensible.js ***!
+  \****************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var fails = __webpack_require__(/*! ../internals/fails */ "./node_modules/core-js/internals/fails.js");
+var isObject = __webpack_require__(/*! ../internals/is-object */ "./node_modules/core-js/internals/is-object.js");
+var classof = __webpack_require__(/*! ../internals/classof-raw */ "./node_modules/core-js/internals/classof-raw.js");
+var ARRAY_BUFFER_NON_EXTENSIBLE = __webpack_require__(/*! ../internals/array-buffer-non-extensible */ "./node_modules/core-js/internals/array-buffer-non-extensible.js");
+
+// eslint-disable-next-line es/no-object-isextensible -- safe
+var $isExtensible = Object.isExtensible;
+var FAILS_ON_PRIMITIVES = fails(function () { $isExtensible(1); });
+
+// `Object.isExtensible` method
+// https://tc39.es/ecma262/#sec-object.isextensible
+module.exports = (FAILS_ON_PRIMITIVES || ARRAY_BUFFER_NON_EXTENSIBLE) ? function isExtensible(it) {
+  if (!isObject(it)) return false;
+  if (ARRAY_BUFFER_NON_EXTENSIBLE && classof(it) === 'ArrayBuffer') return false;
+  return $isExtensible ? $isExtensible(it) : true;
+} : $isExtensible;
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/object-is-prototype-of.js":
 /*!******************************************************************!*\
   !*** ./node_modules/core-js/internals/object-is-prototype-of.js ***!
@@ -11293,6 +11974,268 @@ module.exports = function (scheduler, hasTimeArg) {
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/set-clone.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/core-js/internals/set-clone.js ***!
+  \*****************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var SetHelpers = __webpack_require__(/*! ../internals/set-helpers */ "./node_modules/core-js/internals/set-helpers.js");
+var iterate = __webpack_require__(/*! ../internals/set-iterate */ "./node_modules/core-js/internals/set-iterate.js");
+
+var Set = SetHelpers.Set;
+var add = SetHelpers.add;
+
+module.exports = function (set) {
+  var result = new Set();
+  iterate(set, function (it) {
+    add(result, it);
+  });
+  return result;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/set-difference.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/core-js/internals/set-difference.js ***!
+  \**********************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var aSet = __webpack_require__(/*! ../internals/a-set */ "./node_modules/core-js/internals/a-set.js");
+var SetHelpers = __webpack_require__(/*! ../internals/set-helpers */ "./node_modules/core-js/internals/set-helpers.js");
+var clone = __webpack_require__(/*! ../internals/set-clone */ "./node_modules/core-js/internals/set-clone.js");
+var size = __webpack_require__(/*! ../internals/set-size */ "./node_modules/core-js/internals/set-size.js");
+var getSetRecord = __webpack_require__(/*! ../internals/get-set-record */ "./node_modules/core-js/internals/get-set-record.js");
+var iterateSet = __webpack_require__(/*! ../internals/set-iterate */ "./node_modules/core-js/internals/set-iterate.js");
+var iterateSimple = __webpack_require__(/*! ../internals/iterate-simple */ "./node_modules/core-js/internals/iterate-simple.js");
+
+var has = SetHelpers.has;
+var remove = SetHelpers.remove;
+
+// `Set.prototype.difference` method
+// https://tc39.es/ecma262/#sec-set.prototype.difference
+module.exports = function difference(other) {
+  var O = aSet(this);
+  var otherRec = getSetRecord(other);
+  var result = clone(O);
+  if (size(O) <= otherRec.size) iterateSet(O, function (e) {
+    if (otherRec.includes(e)) remove(result, e);
+  });
+  else iterateSimple(otherRec.getIterator(), function (e) {
+    if (has(result, e)) remove(result, e);
+  });
+  return result;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/set-helpers.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/core-js/internals/set-helpers.js ***!
+  \*******************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var uncurryThis = __webpack_require__(/*! ../internals/function-uncurry-this */ "./node_modules/core-js/internals/function-uncurry-this.js");
+
+// eslint-disable-next-line es/no-set -- safe
+var SetPrototype = Set.prototype;
+
+module.exports = {
+  // eslint-disable-next-line es/no-set -- safe
+  Set: Set,
+  add: uncurryThis(SetPrototype.add),
+  has: uncurryThis(SetPrototype.has),
+  remove: uncurryThis(SetPrototype['delete']),
+  proto: SetPrototype
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/set-intersection.js":
+/*!************************************************************!*\
+  !*** ./node_modules/core-js/internals/set-intersection.js ***!
+  \************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var aSet = __webpack_require__(/*! ../internals/a-set */ "./node_modules/core-js/internals/a-set.js");
+var SetHelpers = __webpack_require__(/*! ../internals/set-helpers */ "./node_modules/core-js/internals/set-helpers.js");
+var size = __webpack_require__(/*! ../internals/set-size */ "./node_modules/core-js/internals/set-size.js");
+var getSetRecord = __webpack_require__(/*! ../internals/get-set-record */ "./node_modules/core-js/internals/get-set-record.js");
+var iterateSet = __webpack_require__(/*! ../internals/set-iterate */ "./node_modules/core-js/internals/set-iterate.js");
+var iterateSimple = __webpack_require__(/*! ../internals/iterate-simple */ "./node_modules/core-js/internals/iterate-simple.js");
+
+var Set = SetHelpers.Set;
+var add = SetHelpers.add;
+var has = SetHelpers.has;
+
+// `Set.prototype.intersection` method
+// https://tc39.es/ecma262/#sec-set.prototype.intersection
+module.exports = function intersection(other) {
+  var O = aSet(this);
+  var otherRec = getSetRecord(other);
+  var result = new Set();
+
+  if (size(O) > otherRec.size) {
+    iterateSimple(otherRec.getIterator(), function (e) {
+      if (has(O, e)) add(result, e);
+    });
+  } else {
+    iterateSet(O, function (e) {
+      if (otherRec.includes(e)) add(result, e);
+    });
+  }
+
+  return result;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/set-is-disjoint-from.js":
+/*!****************************************************************!*\
+  !*** ./node_modules/core-js/internals/set-is-disjoint-from.js ***!
+  \****************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var aSet = __webpack_require__(/*! ../internals/a-set */ "./node_modules/core-js/internals/a-set.js");
+var has = (__webpack_require__(/*! ../internals/set-helpers */ "./node_modules/core-js/internals/set-helpers.js").has);
+var size = __webpack_require__(/*! ../internals/set-size */ "./node_modules/core-js/internals/set-size.js");
+var getSetRecord = __webpack_require__(/*! ../internals/get-set-record */ "./node_modules/core-js/internals/get-set-record.js");
+var iterateSet = __webpack_require__(/*! ../internals/set-iterate */ "./node_modules/core-js/internals/set-iterate.js");
+var iterateSimple = __webpack_require__(/*! ../internals/iterate-simple */ "./node_modules/core-js/internals/iterate-simple.js");
+var iteratorClose = __webpack_require__(/*! ../internals/iterator-close */ "./node_modules/core-js/internals/iterator-close.js");
+
+// `Set.prototype.isDisjointFrom` method
+// https://tc39.es/ecma262/#sec-set.prototype.isdisjointfrom
+module.exports = function isDisjointFrom(other) {
+  var O = aSet(this);
+  var otherRec = getSetRecord(other);
+  if (size(O) <= otherRec.size) return iterateSet(O, function (e) {
+    if (otherRec.includes(e)) return false;
+  }, true) !== false;
+  var iterator = otherRec.getIterator();
+  return iterateSimple(iterator, function (e) {
+    if (has(O, e)) return iteratorClose(iterator, 'normal', false);
+  }) !== false;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/set-is-subset-of.js":
+/*!************************************************************!*\
+  !*** ./node_modules/core-js/internals/set-is-subset-of.js ***!
+  \************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var aSet = __webpack_require__(/*! ../internals/a-set */ "./node_modules/core-js/internals/a-set.js");
+var size = __webpack_require__(/*! ../internals/set-size */ "./node_modules/core-js/internals/set-size.js");
+var iterate = __webpack_require__(/*! ../internals/set-iterate */ "./node_modules/core-js/internals/set-iterate.js");
+var getSetRecord = __webpack_require__(/*! ../internals/get-set-record */ "./node_modules/core-js/internals/get-set-record.js");
+
+// `Set.prototype.isSubsetOf` method
+// https://tc39.es/ecma262/#sec-set.prototype.issubsetof
+module.exports = function isSubsetOf(other) {
+  var O = aSet(this);
+  var otherRec = getSetRecord(other);
+  if (size(O) > otherRec.size) return false;
+  return iterate(O, function (e) {
+    if (!otherRec.includes(e)) return false;
+  }, true) !== false;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/set-is-superset-of.js":
+/*!**************************************************************!*\
+  !*** ./node_modules/core-js/internals/set-is-superset-of.js ***!
+  \**************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var aSet = __webpack_require__(/*! ../internals/a-set */ "./node_modules/core-js/internals/a-set.js");
+var has = (__webpack_require__(/*! ../internals/set-helpers */ "./node_modules/core-js/internals/set-helpers.js").has);
+var size = __webpack_require__(/*! ../internals/set-size */ "./node_modules/core-js/internals/set-size.js");
+var getSetRecord = __webpack_require__(/*! ../internals/get-set-record */ "./node_modules/core-js/internals/get-set-record.js");
+var iterateSimple = __webpack_require__(/*! ../internals/iterate-simple */ "./node_modules/core-js/internals/iterate-simple.js");
+var iteratorClose = __webpack_require__(/*! ../internals/iterator-close */ "./node_modules/core-js/internals/iterator-close.js");
+
+// `Set.prototype.isSupersetOf` method
+// https://tc39.es/ecma262/#sec-set.prototype.issupersetof
+module.exports = function isSupersetOf(other) {
+  var O = aSet(this);
+  var otherRec = getSetRecord(other);
+  if (size(O) < otherRec.size) return false;
+  var iterator = otherRec.getIterator();
+  return iterateSimple(iterator, function (e) {
+    if (!has(O, e)) return iteratorClose(iterator, 'normal', false);
+  }) !== false;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/set-iterate.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/core-js/internals/set-iterate.js ***!
+  \*******************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var uncurryThis = __webpack_require__(/*! ../internals/function-uncurry-this */ "./node_modules/core-js/internals/function-uncurry-this.js");
+var iterateSimple = __webpack_require__(/*! ../internals/iterate-simple */ "./node_modules/core-js/internals/iterate-simple.js");
+var SetHelpers = __webpack_require__(/*! ../internals/set-helpers */ "./node_modules/core-js/internals/set-helpers.js");
+
+var Set = SetHelpers.Set;
+var SetPrototype = SetHelpers.proto;
+var forEach = uncurryThis(SetPrototype.forEach);
+var keys = uncurryThis(SetPrototype.keys);
+var next = keys(new Set()).next;
+
+module.exports = function (set, fn, interruptible) {
+  return interruptible ? iterateSimple({ iterator: keys(set), next: next }, fn) : forEach(set, fn);
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/set-size.js":
+/*!****************************************************!*\
+  !*** ./node_modules/core-js/internals/set-size.js ***!
+  \****************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var uncurryThisAccessor = __webpack_require__(/*! ../internals/function-uncurry-this-accessor */ "./node_modules/core-js/internals/function-uncurry-this-accessor.js");
+var SetHelpers = __webpack_require__(/*! ../internals/set-helpers */ "./node_modules/core-js/internals/set-helpers.js");
+
+module.exports = uncurryThisAccessor(SetHelpers.proto, 'size', 'get') || function (set) {
+  return set.size;
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/set-species.js":
 /*!*******************************************************!*\
   !*** ./node_modules/core-js/internals/set-species.js ***!
@@ -11322,6 +12265,40 @@ module.exports = function (CONSTRUCTOR_NAME) {
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/set-symmetric-difference.js":
+/*!********************************************************************!*\
+  !*** ./node_modules/core-js/internals/set-symmetric-difference.js ***!
+  \********************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var aSet = __webpack_require__(/*! ../internals/a-set */ "./node_modules/core-js/internals/a-set.js");
+var SetHelpers = __webpack_require__(/*! ../internals/set-helpers */ "./node_modules/core-js/internals/set-helpers.js");
+var clone = __webpack_require__(/*! ../internals/set-clone */ "./node_modules/core-js/internals/set-clone.js");
+var getSetRecord = __webpack_require__(/*! ../internals/get-set-record */ "./node_modules/core-js/internals/get-set-record.js");
+var iterateSimple = __webpack_require__(/*! ../internals/iterate-simple */ "./node_modules/core-js/internals/iterate-simple.js");
+
+var add = SetHelpers.add;
+var has = SetHelpers.has;
+var remove = SetHelpers.remove;
+
+// `Set.prototype.symmetricDifference` method
+// https://tc39.es/ecma262/#sec-set.prototype.symmetricdifference
+module.exports = function symmetricDifference(other) {
+  var O = aSet(this);
+  var keysIter = getSetRecord(other).getIterator();
+  var result = clone(O);
+  iterateSimple(keysIter, function (e) {
+    if (has(O, e)) remove(result, e);
+    else add(result, e);
+  });
+  return result;
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/set-to-string-tag.js":
 /*!*************************************************************!*\
   !*** ./node_modules/core-js/internals/set-to-string-tag.js ***!
@@ -11341,6 +12318,35 @@ module.exports = function (target, TAG, STATIC) {
   if (target && !hasOwn(target, TO_STRING_TAG)) {
     defineProperty(target, TO_STRING_TAG, { configurable: true, value: TAG });
   }
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/internals/set-union.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/core-js/internals/set-union.js ***!
+  \*****************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var aSet = __webpack_require__(/*! ../internals/a-set */ "./node_modules/core-js/internals/a-set.js");
+var add = (__webpack_require__(/*! ../internals/set-helpers */ "./node_modules/core-js/internals/set-helpers.js").add);
+var clone = __webpack_require__(/*! ../internals/set-clone */ "./node_modules/core-js/internals/set-clone.js");
+var getSetRecord = __webpack_require__(/*! ../internals/get-set-record */ "./node_modules/core-js/internals/get-set-record.js");
+var iterateSimple = __webpack_require__(/*! ../internals/iterate-simple */ "./node_modules/core-js/internals/iterate-simple.js");
+
+// `Set.prototype.union` method
+// https://tc39.es/ecma262/#sec-set.prototype.union
+module.exports = function union(other) {
+  var O = aSet(this);
+  var keysIter = getSetRecord(other).getIterator();
+  var result = clone(O);
+  iterateSimple(keysIter, function (it) {
+    add(result, it);
+  });
+  return result;
 };
 
 
@@ -11962,6 +12968,37 @@ module.exports = function (argument) {
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/to-set-like.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/core-js/internals/to-set-like.js ***!
+  \*******************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var getBuiltIn = __webpack_require__(/*! ../internals/get-built-in */ "./node_modules/core-js/internals/get-built-in.js");
+var isCallable = __webpack_require__(/*! ../internals/is-callable */ "./node_modules/core-js/internals/is-callable.js");
+var isIterable = __webpack_require__(/*! ../internals/is-iterable */ "./node_modules/core-js/internals/is-iterable.js");
+var isObject = __webpack_require__(/*! ../internals/is-object */ "./node_modules/core-js/internals/is-object.js");
+
+var Set = getBuiltIn('Set');
+
+var isSetLike = function (it) {
+  return isObject(it)
+    && typeof it.size == 'number'
+    && isCallable(it.has)
+    && isCallable(it.keys);
+};
+
+// fallback old -> new set methods proposal arguments
+module.exports = function (it) {
+  if (isSetLike(it)) return it;
+  return isIterable(it) ? new Set(it) : it;
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/to-string-tag-support.js":
 /*!*****************************************************************!*\
   !*** ./node_modules/core-js/internals/to-string-tag-support.js ***!
@@ -12269,6 +13306,32 @@ $({ target: 'Array', proto: true, arity: 1, forced: FORCED }, {
     A.length = n;
     return A;
   }
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/es.array.from.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/core-js/modules/es.array.from.js ***!
+  \*******************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var from = __webpack_require__(/*! ../internals/array-from */ "./node_modules/core-js/internals/array-from.js");
+var checkCorrectnessOfIteration = __webpack_require__(/*! ../internals/check-correctness-of-iteration */ "./node_modules/core-js/internals/check-correctness-of-iteration.js");
+
+var INCORRECT_ITERATION = !checkCorrectnessOfIteration(function (iterable) {
+  // eslint-disable-next-line es/no-array-from -- required for testing
+  Array.from(iterable);
+});
+
+// `Array.from` method
+// https://tc39.es/ecma262/#sec-array.from
+$({ target: 'Array', stat: true, forced: INCORRECT_ITERATION }, {
+  from: from
 });
 
 
@@ -13599,6 +14662,52 @@ $({ target: 'RegExp', proto: true, forced: /./.exec !== exec }, {
 
 /***/ }),
 
+/***/ "./node_modules/core-js/modules/es.regexp.test.js":
+/*!********************************************************!*\
+  !*** ./node_modules/core-js/modules/es.regexp.test.js ***!
+  \********************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+// TODO: Remove from `core-js@4` since it's moved to entry points
+__webpack_require__(/*! ../modules/es.regexp.exec */ "./node_modules/core-js/modules/es.regexp.exec.js");
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var call = __webpack_require__(/*! ../internals/function-call */ "./node_modules/core-js/internals/function-call.js");
+var isCallable = __webpack_require__(/*! ../internals/is-callable */ "./node_modules/core-js/internals/is-callable.js");
+var anObject = __webpack_require__(/*! ../internals/an-object */ "./node_modules/core-js/internals/an-object.js");
+var toString = __webpack_require__(/*! ../internals/to-string */ "./node_modules/core-js/internals/to-string.js");
+
+var DELEGATES_TO_EXEC = function () {
+  var execCalled = false;
+  var re = /[ac]/;
+  re.exec = function () {
+    execCalled = true;
+    return /./.exec.apply(this, arguments);
+  };
+  return re.test('abc') === true && execCalled;
+}();
+
+var nativeTest = /./.test;
+
+// `RegExp.prototype.test` method
+// https://tc39.es/ecma262/#sec-regexp.prototype.test
+$({ target: 'RegExp', proto: true, forced: !DELEGATES_TO_EXEC }, {
+  test: function (S) {
+    var R = anObject(this);
+    var string = toString(S);
+    var exec = R.exec;
+    if (!isCallable(exec)) return call(nativeTest, R, string);
+    var result = call(exec, R, string);
+    if (result === null) return false;
+    anObject(result);
+    return true;
+  }
+});
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/modules/es.regexp.to-string.js":
 /*!*************************************************************!*\
   !*** ./node_modules/core-js/modules/es.regexp.to-string.js ***!
@@ -13632,6 +14741,40 @@ if (NOT_GENERIC || INCORRECT_NAME) {
     return '/' + pattern + '/' + flags;
   }, { unsafe: true });
 }
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/es.set.constructor.js":
+/*!************************************************************!*\
+  !*** ./node_modules/core-js/modules/es.set.constructor.js ***!
+  \************************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var collection = __webpack_require__(/*! ../internals/collection */ "./node_modules/core-js/internals/collection.js");
+var collectionStrong = __webpack_require__(/*! ../internals/collection-strong */ "./node_modules/core-js/internals/collection-strong.js");
+
+// `Set` constructor
+// https://tc39.es/ecma262/#sec-set-objects
+collection('Set', function (init) {
+  return function Set() { return init(this, arguments.length ? arguments[0] : undefined); };
+}, collectionStrong);
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/es.set.js":
+/*!************************************************!*\
+  !*** ./node_modules/core-js/modules/es.set.js ***!
+  \************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+// TODO: Remove this module from `core-js@4` since it's replaced to module below
+__webpack_require__(/*! ../modules/es.set.constructor */ "./node_modules/core-js/modules/es.set.constructor.js");
 
 
 /***/ }),
@@ -14667,6 +15810,462 @@ __webpack_require__(/*! ../modules/es.iterator.for-each */ "./node_modules/core-
 
 // TODO: Remove from `core-js@4`
 __webpack_require__(/*! ../modules/es.iterator.map */ "./node_modules/core-js/modules/es.iterator.map.js");
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/esnext.set.add-all.js":
+/*!************************************************************!*\
+  !*** ./node_modules/core-js/modules/esnext.set.add-all.js ***!
+  \************************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var aSet = __webpack_require__(/*! ../internals/a-set */ "./node_modules/core-js/internals/a-set.js");
+var add = (__webpack_require__(/*! ../internals/set-helpers */ "./node_modules/core-js/internals/set-helpers.js").add);
+
+// `Set.prototype.addAll` method
+// https://github.com/tc39/proposal-collection-methods
+$({ target: 'Set', proto: true, real: true, forced: true }, {
+  addAll: function addAll(/* ...elements */) {
+    var set = aSet(this);
+    for (var k = 0, len = arguments.length; k < len; k++) {
+      add(set, arguments[k]);
+    } return set;
+  }
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/esnext.set.delete-all.js":
+/*!***************************************************************!*\
+  !*** ./node_modules/core-js/modules/esnext.set.delete-all.js ***!
+  \***************************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var aSet = __webpack_require__(/*! ../internals/a-set */ "./node_modules/core-js/internals/a-set.js");
+var remove = (__webpack_require__(/*! ../internals/set-helpers */ "./node_modules/core-js/internals/set-helpers.js").remove);
+
+// `Set.prototype.deleteAll` method
+// https://github.com/tc39/proposal-collection-methods
+$({ target: 'Set', proto: true, real: true, forced: true }, {
+  deleteAll: function deleteAll(/* ...elements */) {
+    var collection = aSet(this);
+    var allDeleted = true;
+    var wasDeleted;
+    for (var k = 0, len = arguments.length; k < len; k++) {
+      wasDeleted = remove(collection, arguments[k]);
+      allDeleted = allDeleted && wasDeleted;
+    } return !!allDeleted;
+  }
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/esnext.set.difference.js":
+/*!***************************************************************!*\
+  !*** ./node_modules/core-js/modules/esnext.set.difference.js ***!
+  \***************************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var call = __webpack_require__(/*! ../internals/function-call */ "./node_modules/core-js/internals/function-call.js");
+var toSetLike = __webpack_require__(/*! ../internals/to-set-like */ "./node_modules/core-js/internals/to-set-like.js");
+var $difference = __webpack_require__(/*! ../internals/set-difference */ "./node_modules/core-js/internals/set-difference.js");
+
+// `Set.prototype.difference` method
+// https://github.com/tc39/proposal-set-methods
+// TODO: Obsolete version, remove from `core-js@4`
+$({ target: 'Set', proto: true, real: true, forced: true }, {
+  difference: function difference(other) {
+    return call($difference, this, toSetLike(other));
+  }
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/esnext.set.every.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/core-js/modules/esnext.set.every.js ***!
+  \**********************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var bind = __webpack_require__(/*! ../internals/function-bind-context */ "./node_modules/core-js/internals/function-bind-context.js");
+var aSet = __webpack_require__(/*! ../internals/a-set */ "./node_modules/core-js/internals/a-set.js");
+var iterate = __webpack_require__(/*! ../internals/set-iterate */ "./node_modules/core-js/internals/set-iterate.js");
+
+// `Set.prototype.every` method
+// https://github.com/tc39/proposal-collection-methods
+$({ target: 'Set', proto: true, real: true, forced: true }, {
+  every: function every(callbackfn /* , thisArg */) {
+    var set = aSet(this);
+    var boundFunction = bind(callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+    return iterate(set, function (value) {
+      if (!boundFunction(value, value, set)) return false;
+    }, true) !== false;
+  }
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/esnext.set.filter.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/core-js/modules/esnext.set.filter.js ***!
+  \***********************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var bind = __webpack_require__(/*! ../internals/function-bind-context */ "./node_modules/core-js/internals/function-bind-context.js");
+var aSet = __webpack_require__(/*! ../internals/a-set */ "./node_modules/core-js/internals/a-set.js");
+var SetHelpers = __webpack_require__(/*! ../internals/set-helpers */ "./node_modules/core-js/internals/set-helpers.js");
+var iterate = __webpack_require__(/*! ../internals/set-iterate */ "./node_modules/core-js/internals/set-iterate.js");
+
+var Set = SetHelpers.Set;
+var add = SetHelpers.add;
+
+// `Set.prototype.filter` method
+// https://github.com/tc39/proposal-collection-methods
+$({ target: 'Set', proto: true, real: true, forced: true }, {
+  filter: function filter(callbackfn /* , thisArg */) {
+    var set = aSet(this);
+    var boundFunction = bind(callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+    var newSet = new Set();
+    iterate(set, function (value) {
+      if (boundFunction(value, value, set)) add(newSet, value);
+    });
+    return newSet;
+  }
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/esnext.set.find.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/core-js/modules/esnext.set.find.js ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var bind = __webpack_require__(/*! ../internals/function-bind-context */ "./node_modules/core-js/internals/function-bind-context.js");
+var aSet = __webpack_require__(/*! ../internals/a-set */ "./node_modules/core-js/internals/a-set.js");
+var iterate = __webpack_require__(/*! ../internals/set-iterate */ "./node_modules/core-js/internals/set-iterate.js");
+
+// `Set.prototype.find` method
+// https://github.com/tc39/proposal-collection-methods
+$({ target: 'Set', proto: true, real: true, forced: true }, {
+  find: function find(callbackfn /* , thisArg */) {
+    var set = aSet(this);
+    var boundFunction = bind(callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+    var result = iterate(set, function (value) {
+      if (boundFunction(value, value, set)) return { value: value };
+    }, true);
+    return result && result.value;
+  }
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/esnext.set.intersection.js":
+/*!*****************************************************************!*\
+  !*** ./node_modules/core-js/modules/esnext.set.intersection.js ***!
+  \*****************************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var call = __webpack_require__(/*! ../internals/function-call */ "./node_modules/core-js/internals/function-call.js");
+var toSetLike = __webpack_require__(/*! ../internals/to-set-like */ "./node_modules/core-js/internals/to-set-like.js");
+var $intersection = __webpack_require__(/*! ../internals/set-intersection */ "./node_modules/core-js/internals/set-intersection.js");
+
+// `Set.prototype.intersection` method
+// https://github.com/tc39/proposal-set-methods
+// TODO: Obsolete version, remove from `core-js@4`
+$({ target: 'Set', proto: true, real: true, forced: true }, {
+  intersection: function intersection(other) {
+    return call($intersection, this, toSetLike(other));
+  }
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/esnext.set.is-disjoint-from.js":
+/*!*********************************************************************!*\
+  !*** ./node_modules/core-js/modules/esnext.set.is-disjoint-from.js ***!
+  \*********************************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var call = __webpack_require__(/*! ../internals/function-call */ "./node_modules/core-js/internals/function-call.js");
+var toSetLike = __webpack_require__(/*! ../internals/to-set-like */ "./node_modules/core-js/internals/to-set-like.js");
+var $isDisjointFrom = __webpack_require__(/*! ../internals/set-is-disjoint-from */ "./node_modules/core-js/internals/set-is-disjoint-from.js");
+
+// `Set.prototype.isDisjointFrom` method
+// https://github.com/tc39/proposal-set-methods
+// TODO: Obsolete version, remove from `core-js@4`
+$({ target: 'Set', proto: true, real: true, forced: true }, {
+  isDisjointFrom: function isDisjointFrom(other) {
+    return call($isDisjointFrom, this, toSetLike(other));
+  }
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/esnext.set.is-subset-of.js":
+/*!*****************************************************************!*\
+  !*** ./node_modules/core-js/modules/esnext.set.is-subset-of.js ***!
+  \*****************************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var call = __webpack_require__(/*! ../internals/function-call */ "./node_modules/core-js/internals/function-call.js");
+var toSetLike = __webpack_require__(/*! ../internals/to-set-like */ "./node_modules/core-js/internals/to-set-like.js");
+var $isSubsetOf = __webpack_require__(/*! ../internals/set-is-subset-of */ "./node_modules/core-js/internals/set-is-subset-of.js");
+
+// `Set.prototype.isSubsetOf` method
+// https://github.com/tc39/proposal-set-methods
+// TODO: Obsolete version, remove from `core-js@4`
+$({ target: 'Set', proto: true, real: true, forced: true }, {
+  isSubsetOf: function isSubsetOf(other) {
+    return call($isSubsetOf, this, toSetLike(other));
+  }
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/esnext.set.is-superset-of.js":
+/*!*******************************************************************!*\
+  !*** ./node_modules/core-js/modules/esnext.set.is-superset-of.js ***!
+  \*******************************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var call = __webpack_require__(/*! ../internals/function-call */ "./node_modules/core-js/internals/function-call.js");
+var toSetLike = __webpack_require__(/*! ../internals/to-set-like */ "./node_modules/core-js/internals/to-set-like.js");
+var $isSupersetOf = __webpack_require__(/*! ../internals/set-is-superset-of */ "./node_modules/core-js/internals/set-is-superset-of.js");
+
+// `Set.prototype.isSupersetOf` method
+// https://github.com/tc39/proposal-set-methods
+// TODO: Obsolete version, remove from `core-js@4`
+$({ target: 'Set', proto: true, real: true, forced: true }, {
+  isSupersetOf: function isSupersetOf(other) {
+    return call($isSupersetOf, this, toSetLike(other));
+  }
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/esnext.set.join.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/core-js/modules/esnext.set.join.js ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var uncurryThis = __webpack_require__(/*! ../internals/function-uncurry-this */ "./node_modules/core-js/internals/function-uncurry-this.js");
+var aSet = __webpack_require__(/*! ../internals/a-set */ "./node_modules/core-js/internals/a-set.js");
+var iterate = __webpack_require__(/*! ../internals/set-iterate */ "./node_modules/core-js/internals/set-iterate.js");
+var toString = __webpack_require__(/*! ../internals/to-string */ "./node_modules/core-js/internals/to-string.js");
+
+var arrayJoin = uncurryThis([].join);
+var push = uncurryThis([].push);
+
+// `Set.prototype.join` method
+// https://github.com/tc39/proposal-collection-methods
+$({ target: 'Set', proto: true, real: true, forced: true }, {
+  join: function join(separator) {
+    var set = aSet(this);
+    var sep = separator === undefined ? ',' : toString(separator);
+    var array = [];
+    iterate(set, function (value) {
+      push(array, value);
+    });
+    return arrayJoin(array, sep);
+  }
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/esnext.set.map.js":
+/*!********************************************************!*\
+  !*** ./node_modules/core-js/modules/esnext.set.map.js ***!
+  \********************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var bind = __webpack_require__(/*! ../internals/function-bind-context */ "./node_modules/core-js/internals/function-bind-context.js");
+var aSet = __webpack_require__(/*! ../internals/a-set */ "./node_modules/core-js/internals/a-set.js");
+var SetHelpers = __webpack_require__(/*! ../internals/set-helpers */ "./node_modules/core-js/internals/set-helpers.js");
+var iterate = __webpack_require__(/*! ../internals/set-iterate */ "./node_modules/core-js/internals/set-iterate.js");
+
+var Set = SetHelpers.Set;
+var add = SetHelpers.add;
+
+// `Set.prototype.map` method
+// https://github.com/tc39/proposal-collection-methods
+$({ target: 'Set', proto: true, real: true, forced: true }, {
+  map: function map(callbackfn /* , thisArg */) {
+    var set = aSet(this);
+    var boundFunction = bind(callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+    var newSet = new Set();
+    iterate(set, function (value) {
+      add(newSet, boundFunction(value, value, set));
+    });
+    return newSet;
+  }
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/esnext.set.reduce.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/core-js/modules/esnext.set.reduce.js ***!
+  \***********************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var aCallable = __webpack_require__(/*! ../internals/a-callable */ "./node_modules/core-js/internals/a-callable.js");
+var aSet = __webpack_require__(/*! ../internals/a-set */ "./node_modules/core-js/internals/a-set.js");
+var iterate = __webpack_require__(/*! ../internals/set-iterate */ "./node_modules/core-js/internals/set-iterate.js");
+
+var $TypeError = TypeError;
+
+// `Set.prototype.reduce` method
+// https://github.com/tc39/proposal-collection-methods
+$({ target: 'Set', proto: true, real: true, forced: true }, {
+  reduce: function reduce(callbackfn /* , initialValue */) {
+    var set = aSet(this);
+    var noInitial = arguments.length < 2;
+    var accumulator = noInitial ? undefined : arguments[1];
+    aCallable(callbackfn);
+    iterate(set, function (value) {
+      if (noInitial) {
+        noInitial = false;
+        accumulator = value;
+      } else {
+        accumulator = callbackfn(accumulator, value, value, set);
+      }
+    });
+    if (noInitial) throw new $TypeError('Reduce of empty set with no initial value');
+    return accumulator;
+  }
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/esnext.set.some.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/core-js/modules/esnext.set.some.js ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var bind = __webpack_require__(/*! ../internals/function-bind-context */ "./node_modules/core-js/internals/function-bind-context.js");
+var aSet = __webpack_require__(/*! ../internals/a-set */ "./node_modules/core-js/internals/a-set.js");
+var iterate = __webpack_require__(/*! ../internals/set-iterate */ "./node_modules/core-js/internals/set-iterate.js");
+
+// `Set.prototype.some` method
+// https://github.com/tc39/proposal-collection-methods
+$({ target: 'Set', proto: true, real: true, forced: true }, {
+  some: function some(callbackfn /* , thisArg */) {
+    var set = aSet(this);
+    var boundFunction = bind(callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+    return iterate(set, function (value) {
+      if (boundFunction(value, value, set)) return true;
+    }, true) === true;
+  }
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/esnext.set.symmetric-difference.js":
+/*!*************************************************************************!*\
+  !*** ./node_modules/core-js/modules/esnext.set.symmetric-difference.js ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var call = __webpack_require__(/*! ../internals/function-call */ "./node_modules/core-js/internals/function-call.js");
+var toSetLike = __webpack_require__(/*! ../internals/to-set-like */ "./node_modules/core-js/internals/to-set-like.js");
+var $symmetricDifference = __webpack_require__(/*! ../internals/set-symmetric-difference */ "./node_modules/core-js/internals/set-symmetric-difference.js");
+
+// `Set.prototype.symmetricDifference` method
+// https://github.com/tc39/proposal-set-methods
+// TODO: Obsolete version, remove from `core-js@4`
+$({ target: 'Set', proto: true, real: true, forced: true }, {
+  symmetricDifference: function symmetricDifference(other) {
+    return call($symmetricDifference, this, toSetLike(other));
+  }
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/esnext.set.union.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/core-js/modules/esnext.set.union.js ***!
+  \**********************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var call = __webpack_require__(/*! ../internals/function-call */ "./node_modules/core-js/internals/function-call.js");
+var toSetLike = __webpack_require__(/*! ../internals/to-set-like */ "./node_modules/core-js/internals/to-set-like.js");
+var $union = __webpack_require__(/*! ../internals/set-union */ "./node_modules/core-js/internals/set-union.js");
+
+// `Set.prototype.union` method
+// https://github.com/tc39/proposal-set-methods
+// TODO: Obsolete version, remove from `core-js@4`
+$({ target: 'Set', proto: true, real: true, forced: true }, {
+  union: function union(other) {
+    return call($union, this, toSetLike(other));
+  }
+});
 
 
 /***/ }),
@@ -37657,6 +39256,358 @@ _worker_js__WEBPACK_IMPORTED_MODULE_8__["default"].prototype.toContainer = funct
 
 /***/ }),
 
+/***/ "./src/snapdom/clone.js":
+/*!******************************!*\
+  !*** ./src/snapdom/clone.js ***!
+  \******************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   deepCloneBasic: function() { return /* binding */ deepCloneBasic; }
+/* harmony export */ });
+/* harmony import */ var core_js_modules_es_symbol_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.symbol.js */ "./node_modules/core-js/modules/es.symbol.js");
+/* harmony import */ var core_js_modules_es_symbol_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_es_symbol_description_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.symbol.description.js */ "./node_modules/core-js/modules/es.symbol.description.js");
+/* harmony import */ var core_js_modules_es_symbol_description_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_description_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var core_js_modules_es_symbol_iterator_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.symbol.iterator.js */ "./node_modules/core-js/modules/es.symbol.iterator.js");
+/* harmony import */ var core_js_modules_es_symbol_iterator_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_iterator_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var core_js_modules_es_array_concat_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/es.array.concat.js */ "./node_modules/core-js/modules/es.array.concat.js");
+/* harmony import */ var core_js_modules_es_array_concat_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_concat_js__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var core_js_modules_es_array_from_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.array.from.js */ "./node_modules/core-js/modules/es.array.from.js");
+/* harmony import */ var core_js_modules_es_array_from_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_from_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var core_js_modules_es_array_iterator_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core-js/modules/es.array.iterator.js */ "./node_modules/core-js/modules/es.array.iterator.js");
+/* harmony import */ var core_js_modules_es_array_iterator_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_iterator_js__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var core_js_modules_es_array_slice_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core-js/modules/es.array.slice.js */ "./node_modules/core-js/modules/es.array.slice.js");
+/* harmony import */ var core_js_modules_es_array_slice_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_slice_js__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var core_js_modules_es_function_name_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core-js/modules/es.function.name.js */ "./node_modules/core-js/modules/es.function.name.js");
+/* harmony import */ var core_js_modules_es_function_name_js__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_function_name_js__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core-js/modules/es.object.to-string.js */ "./node_modules/core-js/modules/es.object.to-string.js");
+/* harmony import */ var core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var core_js_modules_es_regexp_exec_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! core-js/modules/es.regexp.exec.js */ "./node_modules/core-js/modules/es.regexp.exec.js");
+/* harmony import */ var core_js_modules_es_regexp_exec_js__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_regexp_exec_js__WEBPACK_IMPORTED_MODULE_9__);
+/* harmony import */ var core_js_modules_es_regexp_test_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! core-js/modules/es.regexp.test.js */ "./node_modules/core-js/modules/es.regexp.test.js");
+/* harmony import */ var core_js_modules_es_regexp_test_js__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_regexp_test_js__WEBPACK_IMPORTED_MODULE_10__);
+/* harmony import */ var core_js_modules_es_regexp_to_string_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! core-js/modules/es.regexp.to-string.js */ "./node_modules/core-js/modules/es.regexp.to-string.js");
+/* harmony import */ var core_js_modules_es_regexp_to_string_js__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_regexp_to_string_js__WEBPACK_IMPORTED_MODULE_11__);
+/* harmony import */ var core_js_modules_es_set_js__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! core-js/modules/es.set.js */ "./node_modules/core-js/modules/es.set.js");
+/* harmony import */ var core_js_modules_es_set_js__WEBPACK_IMPORTED_MODULE_12___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_js__WEBPACK_IMPORTED_MODULE_12__);
+/* harmony import */ var core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! core-js/modules/es.string.iterator.js */ "./node_modules/core-js/modules/es.string.iterator.js");
+/* harmony import */ var core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_13___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_13__);
+/* harmony import */ var core_js_modules_esnext_set_add_all_js__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! core-js/modules/esnext.set.add-all.js */ "./node_modules/core-js/modules/esnext.set.add-all.js");
+/* harmony import */ var core_js_modules_esnext_set_add_all_js__WEBPACK_IMPORTED_MODULE_14___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_esnext_set_add_all_js__WEBPACK_IMPORTED_MODULE_14__);
+/* harmony import */ var core_js_modules_esnext_set_delete_all_js__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! core-js/modules/esnext.set.delete-all.js */ "./node_modules/core-js/modules/esnext.set.delete-all.js");
+/* harmony import */ var core_js_modules_esnext_set_delete_all_js__WEBPACK_IMPORTED_MODULE_15___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_esnext_set_delete_all_js__WEBPACK_IMPORTED_MODULE_15__);
+/* harmony import */ var core_js_modules_esnext_set_difference_js__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! core-js/modules/esnext.set.difference.js */ "./node_modules/core-js/modules/esnext.set.difference.js");
+/* harmony import */ var core_js_modules_esnext_set_difference_js__WEBPACK_IMPORTED_MODULE_16___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_esnext_set_difference_js__WEBPACK_IMPORTED_MODULE_16__);
+/* harmony import */ var core_js_modules_esnext_set_every_js__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! core-js/modules/esnext.set.every.js */ "./node_modules/core-js/modules/esnext.set.every.js");
+/* harmony import */ var core_js_modules_esnext_set_every_js__WEBPACK_IMPORTED_MODULE_17___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_esnext_set_every_js__WEBPACK_IMPORTED_MODULE_17__);
+/* harmony import */ var core_js_modules_esnext_set_filter_js__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! core-js/modules/esnext.set.filter.js */ "./node_modules/core-js/modules/esnext.set.filter.js");
+/* harmony import */ var core_js_modules_esnext_set_filter_js__WEBPACK_IMPORTED_MODULE_18___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_esnext_set_filter_js__WEBPACK_IMPORTED_MODULE_18__);
+/* harmony import */ var core_js_modules_esnext_set_find_js__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! core-js/modules/esnext.set.find.js */ "./node_modules/core-js/modules/esnext.set.find.js");
+/* harmony import */ var core_js_modules_esnext_set_find_js__WEBPACK_IMPORTED_MODULE_19___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_esnext_set_find_js__WEBPACK_IMPORTED_MODULE_19__);
+/* harmony import */ var core_js_modules_esnext_set_intersection_js__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! core-js/modules/esnext.set.intersection.js */ "./node_modules/core-js/modules/esnext.set.intersection.js");
+/* harmony import */ var core_js_modules_esnext_set_intersection_js__WEBPACK_IMPORTED_MODULE_20___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_esnext_set_intersection_js__WEBPACK_IMPORTED_MODULE_20__);
+/* harmony import */ var core_js_modules_esnext_set_is_disjoint_from_js__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! core-js/modules/esnext.set.is-disjoint-from.js */ "./node_modules/core-js/modules/esnext.set.is-disjoint-from.js");
+/* harmony import */ var core_js_modules_esnext_set_is_disjoint_from_js__WEBPACK_IMPORTED_MODULE_21___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_esnext_set_is_disjoint_from_js__WEBPACK_IMPORTED_MODULE_21__);
+/* harmony import */ var core_js_modules_esnext_set_is_subset_of_js__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! core-js/modules/esnext.set.is-subset-of.js */ "./node_modules/core-js/modules/esnext.set.is-subset-of.js");
+/* harmony import */ var core_js_modules_esnext_set_is_subset_of_js__WEBPACK_IMPORTED_MODULE_22___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_esnext_set_is_subset_of_js__WEBPACK_IMPORTED_MODULE_22__);
+/* harmony import */ var core_js_modules_esnext_set_is_superset_of_js__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! core-js/modules/esnext.set.is-superset-of.js */ "./node_modules/core-js/modules/esnext.set.is-superset-of.js");
+/* harmony import */ var core_js_modules_esnext_set_is_superset_of_js__WEBPACK_IMPORTED_MODULE_23___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_esnext_set_is_superset_of_js__WEBPACK_IMPORTED_MODULE_23__);
+/* harmony import */ var core_js_modules_esnext_set_join_js__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! core-js/modules/esnext.set.join.js */ "./node_modules/core-js/modules/esnext.set.join.js");
+/* harmony import */ var core_js_modules_esnext_set_join_js__WEBPACK_IMPORTED_MODULE_24___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_esnext_set_join_js__WEBPACK_IMPORTED_MODULE_24__);
+/* harmony import */ var core_js_modules_esnext_set_map_js__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! core-js/modules/esnext.set.map.js */ "./node_modules/core-js/modules/esnext.set.map.js");
+/* harmony import */ var core_js_modules_esnext_set_map_js__WEBPACK_IMPORTED_MODULE_25___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_esnext_set_map_js__WEBPACK_IMPORTED_MODULE_25__);
+/* harmony import */ var core_js_modules_esnext_set_reduce_js__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! core-js/modules/esnext.set.reduce.js */ "./node_modules/core-js/modules/esnext.set.reduce.js");
+/* harmony import */ var core_js_modules_esnext_set_reduce_js__WEBPACK_IMPORTED_MODULE_26___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_esnext_set_reduce_js__WEBPACK_IMPORTED_MODULE_26__);
+/* harmony import */ var core_js_modules_esnext_set_some_js__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! core-js/modules/esnext.set.some.js */ "./node_modules/core-js/modules/esnext.set.some.js");
+/* harmony import */ var core_js_modules_esnext_set_some_js__WEBPACK_IMPORTED_MODULE_27___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_esnext_set_some_js__WEBPACK_IMPORTED_MODULE_27__);
+/* harmony import */ var core_js_modules_esnext_set_symmetric_difference_js__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! core-js/modules/esnext.set.symmetric-difference.js */ "./node_modules/core-js/modules/esnext.set.symmetric-difference.js");
+/* harmony import */ var core_js_modules_esnext_set_symmetric_difference_js__WEBPACK_IMPORTED_MODULE_28___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_esnext_set_symmetric_difference_js__WEBPACK_IMPORTED_MODULE_28__);
+/* harmony import */ var core_js_modules_esnext_set_union_js__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! core-js/modules/esnext.set.union.js */ "./node_modules/core-js/modules/esnext.set.union.js");
+/* harmony import */ var core_js_modules_esnext_set_union_js__WEBPACK_IMPORTED_MODULE_29___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_esnext_set_union_js__WEBPACK_IMPORTED_MODULE_29__);
+/* harmony import */ var core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! core-js/modules/web.dom-collections.iterator.js */ "./node_modules/core-js/modules/web.dom-collections.iterator.js");
+/* harmony import */ var core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_30___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_30__);
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// https://github.com/zumerlab/snapdom
+//
+// MIT License
+//
+// Copyright (c) 2025 ZumerLab
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+/**
+ * Deep cloning utilities for DOM elements, including styles and shadow DOM.
+ * @module clone
+ */
+
+/**
+ * Freeze the responsive selection of an <img> that has srcset/sizes.
+ * Copies a concrete URL into `src` and removes `srcset`/`sizes` so the clone
+ * doesn't need layout to resolve a candidate.
+ * Works with <picture> because currentSrc reflects the chosen source.
+ * @param {HTMLImageElement} original - Image in the live DOM.
+ * @param {HTMLImageElement} cloned - Just-created cloned <img>.
+ */
+function freezeImgSrcset(original, cloned) {
+  try {
+    var chosen = original.currentSrc || original.src || '';
+    if (!chosen) return;
+    cloned.setAttribute('src', chosen);
+    cloned.removeAttribute('srcset');
+    cloned.removeAttribute('sizes');
+    // Hint deterministic decode/load for capture
+    cloned.loading = 'eager';
+    cloned.decoding = 'sync';
+  } catch (_unused) {
+    // no-op
+  }
+}
+
+/**
+ * Creates a deep clone of a DOM node, including styles, shadow DOM, and special handling for excluded/placeholder/canvas nodes.
+ *
+ * @param {Node} node - Node to clone
+ * @returns {Node|null} Cloned node with styles and shadow DOM content, or null for empty text nodes or filtered elements
+ */
+
+function deepCloneBasic(node) {
+  if (!node) throw new Error('Invalid node');
+
+  // Local set to avoid duplicates in slot processing
+  var clonedAssignedNodes = new Set();
+  var pendingSelectValue = null; // Track select value for later fix
+
+  // 1. Text nodes
+  if (node.nodeType === Node.TEXT_NODE) {
+    return node.cloneNode(true);
+  }
+
+  // 2. Non-element nodes (comments, etc.)
+  if (node.nodeType !== Node.ELEMENT_NODE) {
+    return node.cloneNode(true);
+  }
+
+  // 6. Special case: iframe → fallback pattern
+  if (node.tagName === "IFRAME") {
+    var fallback = document.createElement("div");
+    fallback.style.cssText = "width:".concat(node.offsetWidth, "px;height:").concat(node.offsetHeight, "px;background-image:repeating-linear-gradient(45deg,#ddd,#ddd 5px,#f9f9f9 5px,#f9f9f9 10px);display:flex;align-items:center;justify-content:center;font-size:12px;color:#555;border:1px solid #aaa;");
+    return fallback;
+  }
+
+  // 8. Canvas → convert to image
+  if (node.tagName === "CANVAS") {
+    var dataURL = node.toDataURL();
+    var img = document.createElement("img");
+    img.src = dataURL;
+    img.width = node.width;
+    img.height = node.height;
+    return img;
+  }
+
+  // 9. Base clone (without children)
+  var clone;
+  try {
+    clone = node.cloneNode(false);
+    if (node.tagName === 'IMG') {
+      freezeImgSrcset(node, clone);
+    }
+  } catch (err) {
+    console.error("[Snapdom] Failed to clone node:", node, err);
+    throw err;
+  }
+
+  // Special handling: textarea (keep size and value)
+  if (node instanceof HTMLTextAreaElement) {
+    clone.textContent = node.value;
+    clone.value = node.value;
+    var rect = node.getBoundingClientRect();
+    clone.style.boxSizing = 'border-box';
+    clone.style.width = "".concat(rect.width, "px");
+    clone.style.height = "".concat(rect.height, "px");
+    return clone;
+  }
+
+  // Special handling: input
+  if (node instanceof HTMLInputElement) {
+    if (node.hasAttribute("value")) {
+      clone.value = node.value;
+      clone.setAttribute("value", node.value);
+    }
+    if (node.checked !== void 0) {
+      clone.checked = node.checked;
+      if (node.checked) clone.setAttribute("checked", "");
+      if (node.indeterminate) clone.indeterminate = node.indeterminate;
+    }
+    // return clone;
+  }
+
+  // Special handling: select → postpone value adjustment
+  if (node instanceof HTMLSelectElement) {
+    pendingSelectValue = node.value;
+  }
+
+  // 12. ShadowRoot logic
+  if (node.shadowRoot) {
+    var hasSlot = Array.from(node.shadowRoot.querySelectorAll("slot")).length > 0;
+    if (hasSlot) {} else {
+      // ShadowRoot without slots: clone full content
+      var shadowFrag = document.createDocumentFragment();
+      var _iterator = _createForOfIteratorHelper(node.shadowRoot.childNodes),
+        _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var child = _step.value;
+          if (child.nodeType === Node.ELEMENT_NODE && child.tagName === "STYLE") {
+            continue;
+          }
+          var clonedChild = deepCloneBasic(child);
+          if (clonedChild) shadowFrag.appendChild(clonedChild);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+      clone.appendChild(shadowFrag);
+    }
+  }
+
+  // 13. Slot outside ShadowRoot
+  if (node.tagName === "SLOT") {
+    var _node$assignedNodes;
+    var assigned = ((_node$assignedNodes = node.assignedNodes) === null || _node$assignedNodes === void 0 ? void 0 : _node$assignedNodes.call(node, {
+      flatten: true
+    })) || [];
+    var nodesToClone = assigned.length > 0 ? assigned : Array.from(node.childNodes);
+    var fragment = document.createDocumentFragment();
+    var _iterator2 = _createForOfIteratorHelper(nodesToClone),
+      _step2;
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var _child = _step2.value;
+        var _clonedChild = deepCloneBasic(_child);
+        if (_clonedChild) fragment.appendChild(_clonedChild);
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
+    }
+    return fragment;
+  }
+
+  // 14. Clone children (light DOM), skipping duplicates
+  var _iterator3 = _createForOfIteratorHelper(node.childNodes),
+    _step3;
+  try {
+    for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+      var _child2 = _step3.value;
+      if (clonedAssignedNodes.has(_child2)) continue;
+      var _clonedChild2 = deepCloneBasic(_child2);
+      if (_clonedChild2) clone.appendChild(_clonedChild2);
+    }
+
+    // Adjust select value after children are cloned
+  } catch (err) {
+    _iterator3.e(err);
+  } finally {
+    _iterator3.f();
+  }
+  if (pendingSelectValue !== null && clone instanceof HTMLSelectElement) {
+    clone.value = pendingSelectValue;
+    var _iterator4 = _createForOfIteratorHelper(clone.options),
+      _step4;
+    try {
+      for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+        var opt = _step4.value;
+        if (opt.value === pendingSelectValue) {
+          opt.setAttribute("selected", "");
+        } else {
+          opt.removeAttribute("selected");
+        }
+      }
+    } catch (err) {
+      _iterator4.e(err);
+    } finally {
+      _iterator4.f();
+    }
+  }
+
+  // Fix scrolling (taken from prepareClone).
+  var scrollX = node.scrollLeft;
+  var scrollY = node.scrollTop;
+  var hasScroll = scrollX || scrollY;
+  if (hasScroll && clone instanceof HTMLElement) {
+    clone.style.overflow = "hidden";
+    clone.style.scrollbarWidth = "none";
+    clone.style.msOverflowStyle = "none";
+    var inner = document.createElement("div");
+    inner.style.transform = "translate(".concat(-scrollX, "px, ").concat(-scrollY, "px)");
+    inner.style.willChange = "transform";
+    inner.style.display = "inline-block";
+    inner.style.width = "100%";
+    while (clone.firstChild) {
+      inner.appendChild(clone.firstChild);
+    }
+    clone.appendChild(inner);
+  }
+  return clone;
+}
+
+/***/ }),
+
 /***/ "./src/utils.js":
 /*!**********************!*\
   !*** ./src/utils.js ***!
@@ -37666,7 +39617,6 @@ _worker_js__WEBPACK_IMPORTED_MODULE_8__["default"].prototype.toContainer = funct
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   cloneNode: function() { return /* binding */ cloneNode; },
 /* harmony export */   createElement: function() { return /* binding */ createElement; },
 /* harmony export */   objType: function() { return /* binding */ objType; },
 /* harmony export */   toPx: function() { return /* binding */ toPx; },
@@ -37718,36 +39668,6 @@ var createElement = function createElement(tagName, opt) {
     el.style[key] = opt.style[key];
   }
   return el;
-};
-
-// Deep-clone a node and preserve contents/properties.
-var cloneNode = function cloneNode(node, javascriptEnabled) {
-  // Recursively clone the node.
-  var clone = node.nodeType === 3 ? document.createTextNode(node.nodeValue) : node.cloneNode(false);
-  for (var child = node.firstChild; child; child = child.nextSibling) {
-    if (javascriptEnabled === true || child.nodeType !== 1 || child.nodeName !== 'SCRIPT') {
-      clone.appendChild(cloneNode(child, javascriptEnabled));
-    }
-  }
-  if (node.nodeType === 1) {
-    // Preserve contents/properties of special nodes.
-    if (node.nodeName === 'CANVAS') {
-      clone.width = node.width;
-      clone.height = node.height;
-      clone.getContext('2d').drawImage(node, 0, 0);
-    } else if (node.nodeName === 'TEXTAREA' || node.nodeName === 'SELECT') {
-      clone.value = node.value;
-    }
-
-    // Preserve the node's scroll position when it loads.
-    clone.addEventListener('load', function () {
-      clone.scrollTop = node.scrollTop;
-      clone.scrollLeft = node.scrollLeft;
-    }, true);
-  }
-
-  // Return the cloned node.
-  return clone;
 };
 
 // Convert units from px using the conversion value 'k' from jsPDF.
@@ -37809,7 +39729,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var jspdf__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! jspdf */ "./node_modules/jspdf/dist/jspdf.es.min.js");
 /* harmony import */ var html2canvas__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! html2canvas */ "./node_modules/html2canvas/dist/html2canvas.js");
 /* harmony import */ var html2canvas__WEBPACK_IMPORTED_MODULE_15___default = /*#__PURE__*/__webpack_require__.n(html2canvas__WEBPACK_IMPORTED_MODULE_15__);
-/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./utils.js */ "./src/utils.js");
+/* harmony import */ var _snapdom_clone_js__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./snapdom/clone.js */ "./src/snapdom/clone.js");
+/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./utils.js */ "./src/utils.js");
+
 
 
 
@@ -37884,7 +39806,7 @@ Worker.template = {
 
 Worker.prototype.from = function from(src, type) {
   function getType(src) {
-    switch ((0,_utils_js__WEBPACK_IMPORTED_MODULE_16__.objType)(src)) {
+    switch ((0,_utils_js__WEBPACK_IMPORTED_MODULE_17__.objType)(src)) {
       case 'string':
         return 'string';
       case 'element':
@@ -37898,7 +39820,7 @@ Worker.prototype.from = function from(src, type) {
     switch (type) {
       case 'string':
         return this.set({
-          src: (0,_utils_js__WEBPACK_IMPORTED_MODULE_16__.createElement)('div', {
+          src: (0,_utils_js__WEBPACK_IMPORTED_MODULE_17__.createElement)('div', {
             innerHTML: src
           })
         });
@@ -37968,12 +39890,12 @@ Worker.prototype.toContainer = function toContainer() {
     overlayCSS.opacity = 0;
 
     // Create and attach the elements.
-    var source = (0,_utils_js__WEBPACK_IMPORTED_MODULE_16__.cloneNode)(this.prop.src, this.opt.html2canvas.javascriptEnabled);
-    this.prop.overlay = (0,_utils_js__WEBPACK_IMPORTED_MODULE_16__.createElement)('div', {
+    var source = (0,_snapdom_clone_js__WEBPACK_IMPORTED_MODULE_16__.deepCloneBasic)(this.prop.src);
+    this.prop.overlay = (0,_utils_js__WEBPACK_IMPORTED_MODULE_17__.createElement)('div', {
       className: 'html2pdf__overlay',
       style: overlayCSS
     });
-    this.prop.container = (0,_utils_js__WEBPACK_IMPORTED_MODULE_16__.createElement)('div', {
+    this.prop.container = (0,_utils_js__WEBPACK_IMPORTED_MODULE_17__.createElement)('div', {
       className: 'html2pdf__container',
       style: containerCSS
     });
@@ -38142,7 +40064,7 @@ Worker.prototype.set = function set(opt) {
   // TODO: Implement ordered pairs?
 
   // Silently ignore invalid or empty input.
-  if ((0,_utils_js__WEBPACK_IMPORTED_MODULE_16__.objType)(opt) !== 'object') {
+  if ((0,_utils_js__WEBPACK_IMPORTED_MODULE_17__.objType)(opt) !== 'object') {
     return this;
   }
 
@@ -38188,7 +40110,7 @@ Worker.prototype.get = function get(key, cbk) {
 Worker.prototype.setMargin = function setMargin(margin) {
   return this.then(function setMargin_main() {
     // Parse the margin property: [top, left, bottom, right].
-    switch ((0,_utils_js__WEBPACK_IMPORTED_MODULE_16__.objType)(margin)) {
+    switch ((0,_utils_js__WEBPACK_IMPORTED_MODULE_17__.objType)(margin)) {
       case 'number':
         margin = [margin, margin, margin, margin];
       case 'array':
@@ -38218,8 +40140,8 @@ Worker.prototype.setPageSize = function setPageSize(pageSize) {
         height: pageSize.height - this.opt.margin[0] - this.opt.margin[2]
       };
       pageSize.inner.px = {
-        width: (0,_utils_js__WEBPACK_IMPORTED_MODULE_16__.toPx)(pageSize.inner.width, pageSize.k),
-        height: (0,_utils_js__WEBPACK_IMPORTED_MODULE_16__.toPx)(pageSize.inner.height, pageSize.k)
+        width: (0,_utils_js__WEBPACK_IMPORTED_MODULE_17__.toPx)(pageSize.inner.width, pageSize.k),
+        height: (0,_utils_js__WEBPACK_IMPORTED_MODULE_17__.toPx)(pageSize.inner.height, pageSize.k)
       };
       pageSize.inner.ratio = pageSize.inner.height / pageSize.inner.width;
     }
