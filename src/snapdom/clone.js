@@ -112,6 +112,7 @@ export function deepCloneBasic(node) {
     clone.textContent = node.value;
     clone.value = node.value;
     const rect = node.getBoundingClientRect();
+    clone.style.boxSizing = 'border-box';
     clone.style.width = `${rect.width}px`;
     clone.style.height = `${rect.height}px`;
     return clone;
