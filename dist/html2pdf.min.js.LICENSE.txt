@@ -1,5 +1,5 @@
 /*!
- * html2pdf.js v0.11.2
+ * html2pdf.js v0.11.3
  * Copyright (c) 2025 Erik Koopmans
  * Released under the MIT License.
  */
