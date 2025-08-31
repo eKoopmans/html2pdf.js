@@ -120,8 +120,10 @@ export function deepCloneBasic(node) {
 
   // Special handling: input
   if (node instanceof HTMLInputElement) {
-    clone.value = node.value;
-    clone.setAttribute("value", node.value);
+    if (node.hasAttribute("value")) {
+      clone.value = node.value;
+      clone.setAttribute("value", node.value);
+    }
     if (node.checked !== void 0) {
       clone.checked = node.checked;
       if (node.checked) clone.setAttribute("checked", "");
