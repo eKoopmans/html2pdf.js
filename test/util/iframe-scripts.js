@@ -30,5 +30,5 @@ async function renderPdfPage(pdfObject, pageNumber, canvas, scale) {
     canvas.height = viewport.height;
     canvas.width = viewport.width;
 
-    page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport });
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise;
 }
