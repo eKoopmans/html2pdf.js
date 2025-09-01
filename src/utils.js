@@ -28,37 +28,6 @@ export const createElement = function createElement(tagName, opt) {
   return el;
 };
 
-// Deep-clone a node and preserve contents/properties.
-export const cloneNode = function cloneNode(node, javascriptEnabled) {
-  // Recursively clone the node.
-  var clone = node.nodeType === 3 ? document.createTextNode(node.nodeValue) : node.cloneNode(false);
-  for (var child = node.firstChild; child; child = child.nextSibling) {
-    if (javascriptEnabled === true || child.nodeType !== 1 || child.nodeName !== 'SCRIPT') {
-      clone.appendChild(cloneNode(child, javascriptEnabled));
-    }
-  }
-
-  if (node.nodeType === 1) {
-    // Preserve contents/properties of special nodes.
-    if (node.nodeName === 'CANVAS') {
-      clone.width = node.width;
-      clone.height = node.height;
-      clone.getContext('2d').drawImage(node, 0, 0);
-    } else if (node.nodeName === 'TEXTAREA' || node.nodeName === 'SELECT') {
-      clone.value = node.value;
-    }
-
-    // Preserve the node's scroll position when it loads.
-    clone.addEventListener('load', function() {
-      clone.scrollTop = node.scrollTop;
-      clone.scrollLeft = node.scrollLeft;
-    }, true);
-  }
-
-  // Return the cloned node.
-  return clone;
-}
-
 // Convert units from px using the conversion value 'k' from jsPDF.
 export const unitConvert = function unitConvert(obj, k) {
   if (objType(obj) === 'number') {
