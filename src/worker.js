@@ -46,6 +46,7 @@ Worker.template = {
   },
   opt: {
     filename: 'file.pdf',
+    trimPages: false,
     margin: [0,0,0,0],
     image: { type: 'jpeg', quality: 0.95 },
     enableLinks: true,
@@ -212,10 +213,19 @@ Worker.prototype.toPdf = function toPdf() {
       pageCtx.drawImage(canvas, 0, page*pxPageHeight, w, h, 0, 0, w, h);
 
       // Add the page to the PDF.
-      if (page)  this.prop.pdf.addPage();
+      var pageWidth = this.prop.pageSize.inner.width;
+      if (opt.trimPages) {
+        this.prop.pdf.addPage([pageWidth, pageHeight], pageWidth > pageHeight ? 'l' : 'p');
+        if (!page && !this.prop._firstPageDeleted) {
+          this.prop.pdf.deletePage(1);
+          this.prop._firstPageDeleted = true;
+        }
+      } else {
+        if (page)  this.prop.pdf.addPage();
+      }
+      
       var imgData = pageCanvas.toDataURL('image/' + opt.image.type, opt.image.quality);
-      this.prop.pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0],
-                        this.prop.pageSize.inner.width, pageHeight);
+      this.prop.pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0], pageWidth, pageHeight);
     }
   });
 };
