@@ -6,7 +6,8 @@
   "types": "./type.d.ts",
   "files": [
     "/src",
-    "/dist"
+    "/dist",
+    "./type.d.ts"
   ],
   "repository": "git@github.com:eKoopmans/html2pdf.js.git",
   "keywords": [
