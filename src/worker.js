@@ -214,12 +214,16 @@ Worker.prototype.toPdf = function toPdf() {
 
       // Add the page to the PDF.
       var pageWidth = this.prop.pageSize.inner.width;
+      const [mTop, mLeft, mBottom, mRight] = opt.margin || [];
+      const adjustedPageWidth = pageWidth + mLeft + mRight;
+      const adjustedPageHeight = pageHeight + mTop + mBottom;
+
       this.prop.pdf.addPage(
-        ...(opt.trimPages ? [[pageWidth, pageHeight], pageWidth > pageHeight ? 'l' : 'p'] : [])
+        ...(opt.trimPages ? [[adjustedPageWidth, adjustedPageHeight], adjustedPageWidth > adjustedPageHeight ? 'l' : 'p'] : [])
       );
       
       var imgData = pageCanvas.toDataURL('image/' + opt.image.type, opt.image.quality);
-      this.prop.pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0], pageWidth, pageHeight);
+      this.prop.pdf.addImage(imgData, opt.image.type, mLeft, mTop, pageWidth, pageHeight);
     }
 
     if (!this.prop._firstPageDeleted) {
