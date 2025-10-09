@@ -114,9 +114,12 @@ Worker.prototype.toContainer = function toContainer() {
 
       // Before: Create a padding div to push the element to the next page.
       if (rules.before) {
+        var height = clientRect.top >= 0
+                      ? pxPageHeight - (clientRect.top % pxPageHeight)
+                      : Math.abs(clientRect.top);
         var pad = createElement('div', {style: {
           display: 'block',
-          height: pxPageHeight - (clientRect.top % pxPageHeight) + 'px'
+          height: height + 'px'
         }});
         el.parentNode.insertBefore(pad, el);
       }
