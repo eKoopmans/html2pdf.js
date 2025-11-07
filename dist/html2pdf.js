@@ -6427,7 +6427,7 @@ var copyConstructorProperties = function (target, source) {
   for (var keys = DESCRIPTORS ? getOwnPropertyNames(source) : (
     // ES3:
     'MAX_VALUE,MIN_VALUE,NaN,NEGATIVE_INFINITY,POSITIVE_INFINITY,' +
-    // ES2015 (in case, if modules with ES2015 Number statics required before):
+    // ES2015 (in case, if modules with ES2015 Number statistics required before):
     'EPSILON,MAX_SAFE_INTEGER,MIN_SAFE_INTEGER,isFinite,isInteger,isNaN,isSafeInteger,parseFloat,parseInt,' +
     // ESNext
     'fromString,range'
