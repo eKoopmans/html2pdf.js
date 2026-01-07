@@ -13,9 +13,15 @@ const iframeHtmlInitial = `<html>
 const h2pOptionsDefault = '{ }';
 const h2cOptionsDefault = '{ windowWidth: 816 }'; // 816 pt = 612 px = 8.5"
 
+function getHtml2pdfSrc(version, isBundle) {
+  const bundleStr = isBundle ? '.bundle' : '';
+  return `https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/${version}/html2pdf${bundleStr}.js`
+}
+
 Vue.component('h2p-select', {
   template: `
     <select class="form-select" v-model="$root.html2pdfVersion" @change="$root.h2pUpdateVersion">
+      <option value="local">Local (latest)</option>
       <option v-for="version in h2pVersions" :value="version">v{{ version }} (cdnjs)</option>
       <option value="custom">Custom source</option>
     </select>`,
@@ -79,8 +85,8 @@ const app = new Vue({
     isReady: false,
     isBundle: true,
     isCustom: false,
-    html2pdfVersion: '0.10.1',
-    html2pdfSrc: 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.js',
+    html2pdfVersion: 'local',
+    html2pdfSrc: './html2pdf.js',
     html2canvasSrc: 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.js',
     jspdfSrc: 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.js',
     h2pVersions: h2pVersions,
@@ -98,10 +104,10 @@ const app = new Vue({
     h2pUpdateVersion () {
       const version = this.html2pdfVersion;
       this.isCustom = version === 'custom';
-      if (!this.isCustom) {
-        const bundleStr = this.isBundle ? '.bundle' : '';
-        this.html2pdfSrc = `https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/${version}/html2pdf${bundleStr}.js`
-      }
+      if (this.isCustom) return;
+
+      const isLocal = version === 'local';
+      this.html2pdfSrc = isLocal ? './html2pdf.js' : getHtml2pdfSrc(version, this.isBundle);
     },
     loadHtml () {
       this.iframe.onload = this.attachScripts.bind(this);
@@ -116,6 +122,7 @@ const app = new Vue({
       scriptsToAttach.forEach(scriptSrc => {
         const script = _document.createElement('script');
         script.src = scriptSrc;
+        script.type = 'module';
         script.defer = true;
         _document.body.appendChild(script);
       });
