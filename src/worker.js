@@ -1,4 +1,4 @@
-import { jsPDF } from 'jspdf';
+import { jsPDF } from 'jspdf/dist/jspdf.es.min.js';
 import html2canvas from 'html2canvas';
 import { deepCloneBasic } from './snapdom/clone.js';
 import { objType, createElement, toPx } from './utils.js';

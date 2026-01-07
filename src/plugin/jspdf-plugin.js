@@ -1,5 +1,5 @@
 // Import dependencies.
-import { jsPDF } from 'jspdf';
+import { jsPDF } from 'jspdf/dist/jspdf.es.min.js';
 
 // Get dimensions of a PDF page, as determined by jsPDF.
 jsPDF.getPageSize = function(orientation, unit, format) {
