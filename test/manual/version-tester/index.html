@@ -117,20 +117,25 @@
             </div>
 
             <div class="col-auto">
-              <button type="button" class="btn btn-secondary w-100" @click="makeCanvas">Run custom<br />JS...</button>
+              <button type="button" class="btn btn-secondary w-100" @click="customJsShowModal">Run custom<br />JS...</button>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Modals -->
+      <custom-modal id="customJsModal" title="Run Custom JS">
+        <p>Instructions:</p>
+        <p>Right-click on iframe -> Inspect -> Run custom JS in console</p>
+      </custom-modal>
+
       <custom-modal id="h2pModal" title="html2pdf Custom Settings">
-        <p>Testing</p>
+        <p>Not yet implemented</p>
         <template v-slot:buttons><button type="button" class="btn btn-primary" @click="makePdf">Run</button></template>
       </custom-modal>
 
       <custom-modal id="h2cModal" title="html2canvas Custom Settings">
-        <p>Testing</p>
+        <p>Not yet implemented</p>
         <template v-slot:buttons><button type="button" class="btn btn-primary" @click="makeCanvas">Run</button></template>
       </custom-modal>
 
