@@ -1,3 +1,6 @@
+import Vue from 'vue/dist/vue.esm.browser.js';
+import { Modal } from 'bootstrap';
+
 function looseJsonParse(obj) {
   return Function('"use strict";return (' + obj + ')')();
 }
@@ -22,7 +25,7 @@ Vue.component('h2p-select', {
   template: `
     <select class="form-select" v-model="$root.html2pdfVersion" @change="$root.h2pUpdateVersion">
       <option value="local">Local (latest)</option>
-      <option v-for="version in h2pVersions" :value="version">v{{ version }} (cdnjs)</option>
+      <option v-for="version in $root.h2pVersions" :value="version">v{{ version }} (cdnjs)</option>
       <option value="custom">Custom source</option>
     </select>`,
 });
@@ -128,13 +131,13 @@ const app = new Vue({
       });
     },
     customJsShowModal () {
-      new bootstrap.Modal(document.querySelector('#customJsModal')).show();
+      new Modal(document.querySelector('#customJsModal')).show();
     },
     h2pShowModal () {
-      new bootstrap.Modal(document.querySelector('#h2pModal')).show();
+      new Modal(document.querySelector('#h2pModal')).show();
     },
     h2cShowModal () {
-      new bootstrap.Modal(document.querySelector('#h2cModal')).show();
+      new Modal(document.querySelector('#h2cModal')).show();
     },
     setupMake (scriptName) {
       const _window = this.iframe.contentWindow;
@@ -160,7 +163,7 @@ const app = new Vue({
         canvas.style.height = '';
         document.querySelector('#canvas-target').replaceChildren(canvas);
 
-        new bootstrap.Modal(document.querySelector('#canvasModal')).show();
+        new Modal(document.querySelector('#canvasModal')).show();
       });
     },
     saveCanvas () {
