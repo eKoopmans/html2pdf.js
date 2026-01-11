@@ -1,9 +1,6 @@
-import Vue from 'vue/dist/vue.esm.browser.js';
+import JSON5 from 'json5';
 import { Modal } from 'bootstrap';
-
-function looseJsonParse(obj) {
-  return Function('"use strict";return (' + obj + ')')();
-}
+import Vue from 'vue/dist/vue.esm.browser.js';
 
 const h2pVersions = [ '0.12.1', '0.12.0', '0.11.3', '0.11.2', '0.11.1', '0.11.0', '0.10.3', '0.10.2', '0.10.1', '0.10.0', '0.9.3' ];
 const iframeHtmlInitial = `<html>
@@ -149,13 +146,13 @@ const app = new Vue({
     },
     makePdf ({ isDefault } = {}) {
       const { html2pdf, target } = this.setupMake('html2pdf');
-      const h2pOptions = looseJsonParse(isDefault ? h2pOptionsDefault : this.h2pOptions);
+      const h2pOptions = JSON5.parse(isDefault ? h2pOptionsDefault : this.h2pOptions);
 
       html2pdf(target, h2pOptions);
     },
     makeCanvas ({ isDefault } = {}) {
       const { html2canvas, target } = this.setupMake('html2canvas');
-      const h2cOptions = looseJsonParse(isDefault ? h2cOptionsDefault : this.h2cOptions);
+      const h2cOptions = JSON5.parse(isDefault ? h2cOptionsDefault : this.h2cOptions);
 
       html2canvas(target, h2cOptions).then(canvas => {
         this.canvas = canvas;
