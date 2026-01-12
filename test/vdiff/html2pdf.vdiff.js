@@ -15,10 +15,11 @@ const conditions = {
   pagebreakCss: { settings: 'pagebreakCss' },
   pagebreakAvoidAll: { settings: 'pagebreakAvoidAll' },
   pagebreakSpecify: { settings: 'pagebreakSpecify' },
+  textSource: { textSource: true },
 };
 
 const fileConditions = {
-  'blank': ['default'],
+  'blank': ['default', 'textSource'],
   'lorem-ipsum': ['default', 'legacy', 'margin'],
   'all-tags': ['default', 'selectCanvas'],
   'css-selectors': ['default', 'selectMainId'],
@@ -38,6 +39,7 @@ describe('html2pdf', () => {
           selector=${ifDefined(condition.selector)}
           settings=${ifDefined(condition.settings)}
           show="pdf"
+          text-source=${ifDefined(condition.textSource)}
         ></test-harness>
       `, { viewport });
 

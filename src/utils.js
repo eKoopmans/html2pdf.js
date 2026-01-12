@@ -1,3 +1,5 @@
+import DOMPurify from 'dompurify';
+
 // Determine the type of a variable/object.
 export const objType = function objType(obj) {
   var type = typeof obj;
@@ -14,14 +16,9 @@ export const objType = function objType(obj) {
 // Create an HTML element with optional className, innerHTML, and style.
 export const createElement = function createElement(tagName, opt) {
   var el = document.createElement(tagName);
-  if (opt.className)  el.className = opt.className;
-  if (opt.innerHTML) {
-    el.innerHTML = opt.innerHTML;
-    var scripts = el.getElementsByTagName('script');
-    for (var i = scripts.length; i-- > 0; null) {
-      scripts[i].parentNode.removeChild(scripts[i]);
-    }
-  }
+  if (opt.className) el.className = opt.className;
+  if (opt.innerHTML) el.innerHTML = DOMPurify.sanitize(opt.innerHTML);
+
   for (var key in opt.style) {
     el.style[key] = opt.style[key];
   }
