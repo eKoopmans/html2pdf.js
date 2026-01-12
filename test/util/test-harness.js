@@ -2,6 +2,11 @@ import { css, html, LitElement, nothing } from 'lit';
 import { LoadingCompleteMixin } from '@brightspace-ui/core/mixins/loading-complete/loading-complete-mixin.js';
 
 const IFRAME_SCRIPTS_URL = new URL('./iframe-scripts.js', import.meta.url).href;
+const TEXT_SOURCE = `
+    <span id="target">Safe</span> text
+    <img src=x onerror="document.querySelector('#target').innerHTML = 'Onerror'">
+    <script>document.querySelector('#target').innerHTML = 'Script'</script>
+`;
 const stub = (object, method, fake) => {
     const original = object[method];
     object[method] = fake;
@@ -9,10 +14,10 @@ const stub = (object, method, fake) => {
 };
 
 const commands = {
-    default: (window, element, settings) => window.html2pdf().set(settings).from(element).outputPdf('arraybuffer'),
-    legacy: async (window, element, settings) => {
+    default: (window, src, settings) => window.html2pdf().set(settings).from(src).outputPdf('arraybuffer'),
+    legacy: async (window, src, settings) => {
         const restore = stub(window.html2pdf.Worker.prototype, 'save', function () { return this.then(function save() { }); });
-        const arrayBuffer = await window.html2pdf(element, settings).outputPdf('arraybuffer');
+        const arrayBuffer = await window.html2pdf(src, settings).outputPdf('arraybuffer');
         restore();
         return arrayBuffer;
     },
@@ -41,6 +46,7 @@ class TestHarness extends LoadingCompleteMixin(LitElement) {
         selector: { type: String },
         settings: { type: String },
         show: { type: String, reflect: true },
+        textSource: { type: Boolean, attribute: 'text-source' },
         _arrayBuffer: { state: true },
     };
 
@@ -140,10 +146,10 @@ class TestHarness extends LoadingCompleteMixin(LitElement) {
     }
 
     async _handleScriptLoad() {
-        const element = this._pdfIframeWindow.document.querySelector(this.selector);
+        const src = this.textSource ? TEXT_SOURCE : this._pdfIframeWindow.document.querySelector(this.selector);
 
         const command = commands[this.command || 'default'];
-        const arrayBuffer = await command(this._pdfIframeWindow, element, settings[this.settings || 'default']);
+        const arrayBuffer = await command(this._pdfIframeWindow, src, settings[this.settings || 'default']);
         await this._pdfIframeWindow.renderPdf(arrayBuffer);
 
         this._resizeIframe(this._pdfIframe, true);

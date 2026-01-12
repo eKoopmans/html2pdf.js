@@ -15,6 +15,7 @@ const conditions = {
   pagebreakCss: { settings: 'pagebreakCss' },
   pagebreakAvoidAll: { settings: 'pagebreakAvoidAll' },
   pagebreakSpecify: { settings: 'pagebreakSpecify' },
+  textSource: { textSource: true },
 };
 
 const fileConditions = {
@@ -38,6 +39,7 @@ describe('html2pdf', () => {
           selector=${ifDefined(condition.selector)}
           settings=${ifDefined(condition.settings)}
           show="pdf"
+          text-source=${ifDefined(condition.textSource)}
         ></test-harness>
       `, { viewport });
 
