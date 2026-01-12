@@ -19,7 +19,7 @@ const conditions = {
 };
 
 const fileConditions = {
-  'blank': ['default'],
+  'blank': ['default', 'textSource'],
   'lorem-ipsum': ['default', 'legacy', 'margin'],
   'all-tags': ['default', 'selectCanvas'],
   'css-selectors': ['default', 'selectMainId'],
