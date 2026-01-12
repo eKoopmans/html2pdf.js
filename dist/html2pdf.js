@@ -1,5 +1,5 @@
 /*!
- * html2pdf.js v0.13.0
+ * html2pdf.js v0.14.0
  * Copyright (c) 2026 Erik Koopmans
  * Released under the MIT License.
  */
@@ -16556,7 +16556,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": function() { return /* binding */ purify; }
 /* harmony export */ });
-/*! @license DOMPurify 3.3.0 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/3.3.0/LICENSE */
+/*! @license DOMPurify 3.3.1 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/3.3.1/LICENSE */
 
 const {
   entries,
@@ -16863,7 +16863,7 @@ const _createHooksMap = function _createHooksMap() {
 function createDOMPurify() {
   let window = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : getGlobal();
   const DOMPurify = root => createDOMPurify(root);
-  DOMPurify.version = '3.3.0';
+  DOMPurify.version = '3.3.1';
   DOMPurify.removed = [];
   if (!window || !window.document || window.document.nodeType !== NODE_TYPE.document || !window.Element) {
     // Not running in a browser, provide a factory function
@@ -17208,6 +17208,12 @@ function createDOMPurify() {
         FORBID_CONTENTS = clone(FORBID_CONTENTS);
       }
       addToSet(FORBID_CONTENTS, cfg.FORBID_CONTENTS, transformCaseFunc);
+    }
+    if (cfg.ADD_FORBID_CONTENTS) {
+      if (FORBID_CONTENTS === DEFAULT_FORBID_CONTENTS) {
+        FORBID_CONTENTS = clone(FORBID_CONTENTS);
+      }
+      addToSet(FORBID_CONTENTS, cfg.ADD_FORBID_CONTENTS, transformCaseFunc);
     }
     /* Add #text in case KEEP_CONTENT is set to true */
     if (KEEP_CONTENT) {
@@ -31965,6 +31971,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_6__);
 /* harmony import */ var core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core-js/modules/web.dom-collections.iterator.js */ "./node_modules/core-js/modules/web.dom-collections.iterator.js");
 /* harmony import */ var core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var dompurify__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! dompurify */ "./node_modules/dompurify/dist/purify.es.mjs");
 
 
 
@@ -31974,6 +31981,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+
+
 // Determine the type of a variable/object.
 var objType = function objType(obj) {
   var type = _typeof(obj);
@@ -31984,13 +31993,7 @@ var objType = function objType(obj) {
 var createElement = function createElement(tagName, opt) {
   var el = document.createElement(tagName);
   if (opt.className) el.className = opt.className;
-  if (opt.innerHTML) {
-    el.innerHTML = opt.innerHTML;
-    var scripts = el.getElementsByTagName('script');
-    for (var i = scripts.length; i-- > 0; null) {
-      scripts[i].parentNode.removeChild(scripts[i]);
-    }
-  }
+  if (opt.innerHTML) el.innerHTML = dompurify__WEBPACK_IMPORTED_MODULE_8__["default"].sanitize(opt.innerHTML);
   for (var key in opt.style) {
     el.style[key] = opt.style[key];
   }
@@ -32598,6 +32601,12 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_html2canvas__;
 /******/ 		var cachedModule = __webpack_module_cache__[moduleId];
 /******/ 		if (cachedModule !== undefined) {
 /******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Check if module exists (development only)
+/******/ 		if (__webpack_modules__[moduleId] === undefined) {
+/******/ 			var e = new Error("Cannot find module '" + moduleId + "'");
+/******/ 			e.code = 'MODULE_NOT_FOUND';
+/******/ 			throw e;
 /******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {
