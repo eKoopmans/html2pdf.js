@@ -48,7 +48,7 @@
     "sinon": "^21.0.0",
     "vue": "^2.7.16",
     "webpack": "^5.101.0",
-    "webpack-bundle-analyzer": "^4.4.2",
+    "webpack-bundle-analyzer": "^5.1.1",
     "webpack-cli": "^6.0.1"
   },
   "scripts": {
