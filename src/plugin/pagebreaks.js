@@ -1,5 +1,5 @@
 import Worker from '../worker.js';
-import { objType, createElement } from '../utils.js';
+import { createElement, loadImages } from '../utils.js';
 
 /* Pagebreak plugin:
 
@@ -37,7 +37,18 @@ Worker.template.opt.pagebreak = {
 };
 
 Worker.prototype.toContainer = function toContainer() {
-  return orig.toContainer.call(this).then(function toContainer_pagebreak() {
+  var prereqs = [
+    function waitLoadImages() {
+      var root = this.prop.container;
+      var images = root.querySelectorAll("img");
+
+      return loadImages(images);
+    }
+];
+
+  return orig.toContainer.call(this)
+  .thenList(prereqs)
+  .then(function toContainer_pagebreak() {
     // Setup root element and inner page height.
     var root = this.prop.container;
     var pxPageHeight = this.prop.pageSize.inner.px.height;
