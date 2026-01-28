@@ -46,7 +46,7 @@
     "pdfjs-dist": "^5.3.93",
     "rimraf": "^6.0.1",
     "sinon": "^21.0.0",
-    "vue": "^2.7.16",
+    "vue": "^3.5.27",
     "webpack": "^5.101.0",
     "webpack-bundle-analyzer": "^4.4.2",
     "webpack-cli": "^6.0.1"
