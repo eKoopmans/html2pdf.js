@@ -25,7 +25,7 @@ runs:
     - name: Installing semantic-release
       run: |
         echo "Installing semantic-release..."
-        npm install semantic-release@19 @semantic-release/git@10 --no-save
+        npm install semantic-release@25 @semantic-release/git@10 --no-save
       shell: bash
     - name: Run semantic-release
       id: semantic-release
