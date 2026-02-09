@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - main
+permissions:
+  id-token: write
 jobs:
   release:
     timeout-minutes: 2
@@ -30,4 +32,3 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ steps.gh-token.outputs.token }}
           NPM: true
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
