@@ -1,6 +1,6 @@
 /*!
- * html2pdf-dom-to-image-more v0.9.6
- * Copyright (c) 2025 Erik Koopmans
+ * html2pdf-dom-to-image-more v0.9.7
+ * Copyright (c) 2026 Erik Koopmans
  * Released under the MIT License.
  */
 (function webpackUniversalModuleDefinition(root, factory) {

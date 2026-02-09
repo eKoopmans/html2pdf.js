@@ -1,6 +1,6 @@
 {
   "name": "html2pdf-dom-to-image-more",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "description": "Client-side HTML-to-PDF rendering using pure JS",
   "main": "dist/html2pdf.js",
   "files": [
@@ -29,7 +29,7 @@
   "dependencies": {
     "dom-to-image-more": "^3.5.0",
     "es6-promise": "^4.2.8",
-    "jspdf": "^3.0.0"
+    "jspdf": "^4.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.17.8",
