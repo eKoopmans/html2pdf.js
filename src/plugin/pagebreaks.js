@@ -33,7 +33,9 @@ Worker.template.opt.pagebreak = {
   mode: ['css', 'legacy'],
   before: [],
   after: [],
-  avoid: []
+  avoid: [],
+  elementType: 'div',  //default element to create
+  className: ''       //by default no class
 };
 
 Worker.prototype.toContainer = function toContainer() {
@@ -114,10 +116,10 @@ Worker.prototype.toContainer = function toContainer() {
 
       // Before: Create a padding div to push the element to the next page.
       if (rules.before) {
-        var pad = createElement('div', {style: {
+        var pad = createElement(self.opt.pagebreak.elementType, {style: {  //allow for creating any type of element e.g. 'tr' (this is useful for tables and other cases where a 'div' will ruin the styling and cannot be handled by simply using the div selector as thats too broad.
           display: 'block',
           height: pxPageHeight - (clientRect.top % pxPageHeight) + 'px'
-        }});
+        }, className: self.opt.pagebreak.className}); //allow control of styling of added sections
         el.parentNode.insertBefore(pad, el);
       }
 
