@@ -6,7 +6,7 @@ declare module "html2pdf.js" {
       type?: "jpeg" | "png" | "webp";
       quality?: number;
     };
-    enableLinks?: boolean;
+    enableLinks?: boolean | { id: string, page: number }[];
     html2canvas?: object;
     jsPDF?: {
       unit?: string;
