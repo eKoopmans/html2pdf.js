@@ -1,6 +1,7 @@
 import Worker from './worker.js';
 import './plugin/jspdf-plugin.js';
 import './plugin/pagebreaks.js';
+import './plugin/ios-pdf-fix.js';
 import './plugin/hyperlinks.js';
 
 /**
