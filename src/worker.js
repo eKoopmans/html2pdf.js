@@ -23,7 +23,7 @@ function resolveOklchColors(container) {
     var computed = getComputedStyle(el);
     colorProps.forEach(function (prop) {
       var val = computed.getPropertyValue(prop);
-      if (val && val.indexOf('oklch') !== -1) {
+      if (val && val.toLowerCase().indexOf('oklch') !== -1) {
         ctx.fillStyle = val;
         el.style.setProperty(prop, ctx.fillStyle);
       }
