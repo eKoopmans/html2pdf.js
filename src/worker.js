@@ -3,12 +3,40 @@ import html2canvas from 'html2canvas';
 import { deepCloneBasic } from './snapdom/clone.js';
 import { objType, createElement, toPx } from './utils.js';
 
+/* ----- OKLCH PREPROCESSING ----- */
+
+// html2canvas cannot parse oklch() colors. This function walks the container
+// tree, reads each element's computed style, and for any property that still
+// carries an oklch() value it uses a canvas 2D context (browser-native color
+// conversion) to resolve it to an sRGB value and writes it back as an inline
+// style so that html2canvas only ever sees rgb/rgba/hex colours.
+function resolveOklchColors(container) {
+  var colorProps = [
+    'color', 'background-color',
+    'border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color',
+    'outline-color', 'text-decoration-color', 'column-rule-color',
+    'fill', 'stroke',
+  ];
+  var ctx = document.createElement('canvas').getContext('2d');
+  var elements = [container].concat(Array.prototype.slice.call(container.querySelectorAll('*')));
+  elements.forEach(function (el) {
+    var computed = getComputedStyle(el);
+    colorProps.forEach(function (prop) {
+      var val = computed.getPropertyValue(prop);
+      if (val && val.toLowerCase().indexOf('oklch') !== -1) {
+        ctx.fillStyle = val;
+        el.style.setProperty(prop, ctx.fillStyle);
+      }
+    });
+  });
+}
+
 /* ----- CONSTRUCTOR ----- */
 
 var Worker = function Worker(opt) {
   // Create the root parent for the proto chain, and the starting Worker.
   var root = Object.assign(Worker.convert(Promise.resolve()),
-                           JSON.parse(JSON.stringify(Worker.template)));
+    JSON.parse(JSON.stringify(Worker.template)));
   var self = Worker.convert(Promise.resolve(), root);
 
   // Set progress, optional settings, and return.
@@ -46,7 +74,7 @@ Worker.template = {
   },
   opt: {
     filename: 'file.pdf',
-    margin: [0,0,0,0],
+    margin: [0, 0, 0, 0],
     image: { type: 'jpeg', quality: 0.95 },
     enableLinks: true,
     html2canvas: {},
@@ -59,20 +87,20 @@ Worker.template = {
 Worker.prototype.from = function from(src, type) {
   function getType(src) {
     switch (objType(src)) {
-      case 'string':  return 'string';
+      case 'string': return 'string';
       case 'element': return src.nodeName.toLowerCase && src.nodeName.toLowerCase() === 'canvas' ? 'canvas' : 'element';
-      default:        return 'unknown';
+      default: return 'unknown';
     }
   }
 
   return this.then(function from_main() {
     type = type || getType(src);
     switch (type) {
-      case 'string':  return this.set({ src: createElement('div', {innerHTML: src}) });
+      case 'string': return this.set({ src: createElement('div', { innerHTML: src }) });
       case 'element': return this.set({ src: src });
-      case 'canvas':  return this.set({ canvas: src });
-      case 'img':     return this.set({ img: src });
-      default:        return this.error('Unknown source type.');
+      case 'canvas': return this.set({ canvas: src });
+      case 'img': return this.set({ img: src });
+      default: return this.error('Unknown source type.');
     }
   });
 };
@@ -118,7 +146,7 @@ Worker.prototype.toContainer = function toContainer() {
 
     // Create and attach the elements.
     var source = deepCloneBasic(this.prop.src);
-    this.prop.overlay = createElement('div',   { className: 'html2pdf__overlay', style: overlayCSS });
+    this.prop.overlay = createElement('div', { className: 'html2pdf__overlay', style: overlayCSS });
     this.prop.container = createElement('div', { className: 'html2pdf__container', style: containerCSS });
     this.prop.container.appendChild(source);
     this.prop.overlay.appendChild(this.prop.container);
@@ -132,8 +160,10 @@ Worker.prototype.toContainer = function toContainer() {
 Worker.prototype.toCanvas = function toCanvas() {
   // Set up function prerequisites.
   var prereqs = [
-    function checkContainer() { return document.body.contains(this.prop.container)
-                               || this.toContainer(); }
+    function checkContainer() {
+      return document.body.contains(this.prop.container)
+        || this.toContainer();
+    }
   ];
 
   // Fulfill prereqs then create the canvas.
@@ -142,10 +172,13 @@ Worker.prototype.toCanvas = function toCanvas() {
     var options = Object.assign({}, this.opt.html2canvas);
     delete options.onrendered;
 
+    // Pre-convert oklch() colours to rgb so html2canvas can parse them.
+    resolveOklchColors(this.prop.container);
+
     return html2canvas(this.prop.container, options);
   }).then(function toCanvas_post(canvas) {
     // Handle old-fashioned 'onrendered' argument.
-    var onRendered = this.opt.html2canvas.onrendered || function () {};
+    var onRendered = this.opt.html2canvas.onrendered || function () { };
     onRendered(canvas);
 
     this.prop.canvas = canvas;
@@ -197,9 +230,9 @@ Worker.prototype.toPdf = function toPdf() {
     // Initialize the PDF.
     this.prop.pdf = this.prop.pdf || new jsPDF(opt.jsPDF);
 
-    for (var page=0; page<nPages; page++) {
+    for (var page = 0; page < nPages; page++) {
       // Trim the final page to reduce file size.
-      if (page === nPages-1 && pxFullHeight % pxPageHeight !== 0) {
+      if (page === nPages - 1 && pxFullHeight % pxPageHeight !== 0) {
         pageCanvas.height = pxFullHeight % pxPageHeight;
         pageHeight = pageCanvas.height * this.prop.pageSize.inner.width / pageCanvas.width;
       }
@@ -209,13 +242,13 @@ Worker.prototype.toPdf = function toPdf() {
       var h = pageCanvas.height;
       pageCtx.fillStyle = 'white';
       pageCtx.fillRect(0, 0, w, h);
-      pageCtx.drawImage(canvas, 0, page*pxPageHeight, w, h, 0, 0, w, h);
+      pageCtx.drawImage(canvas, 0, page * pxPageHeight, w, h, 0, 0, w, h);
 
       // Add the page to the PDF.
-      if (page)  this.prop.pdf.addPage();
+      if (page) this.prop.pdf.addPage();
       var imgData = pageCanvas.toDataURL('image/' + opt.image.type, opt.image.quality);
       this.prop.pdf.addImage(imgData, opt.image.type, opt.margin[1], opt.margin[0],
-                        this.prop.pageSize.inner.width, pageHeight);
+        this.prop.pageSize.inner.width, pageHeight);
     }
   });
 };
@@ -362,11 +395,11 @@ Worker.prototype.setPageSize = function setPageSize(pageSize) {
     // Add 'inner' field if not present.
     if (!pageSize.hasOwnProperty('inner')) {
       pageSize.inner = {
-        width:  pageSize.width - this.opt.margin[1] - this.opt.margin[3],
+        width: pageSize.width - this.opt.margin[1] - this.opt.margin[3],
         height: pageSize.height - this.opt.margin[0] - this.opt.margin[2]
       };
       pageSize.inner.px = {
-        width:  toPx(pageSize.inner.width, pageSize.k),
+        width: toPx(pageSize.inner.width, pageSize.k),
         height: toPx(pageSize.inner.height, pageSize.k)
       };
       pageSize.inner.ratio = pageSize.inner.height / pageSize.inner.width;
@@ -379,10 +412,10 @@ Worker.prototype.setPageSize = function setPageSize(pageSize) {
 
 Worker.prototype.setProgress = function setProgress(val, state, n, stack) {
   // Immediately update all progress values.
-  if (val != null)    this.progress.val = val;
-  if (state != null)  this.progress.state = state;
-  if (n != null)      this.progress.n = n;
-  if (stack != null)  this.progress.stack = stack;
+  if (val != null) this.progress.val = val;
+  if (state != null) this.progress.state = state;
+  if (n != null) this.progress.n = n;
+  if (stack != null) this.progress.stack = stack;
   this.progress.ratio = this.progress.val / this.progress.state;
 
   // Return this for command chaining.
@@ -424,8 +457,8 @@ Worker.prototype.thenCore = function thenCore(onFulfilled, onRejected, thenBase)
 
   // Wrap `this` for encapsulation and bind it to the promise handlers.
   var self = this;
-  if (onFulfilled)  { onFulfilled = onFulfilled.bind(self); }
-  if (onRejected)   { onRejected = onRejected.bind(self); }
+  if (onFulfilled) { onFulfilled = onFulfilled.bind(self); }
+  if (onRejected) { onRejected = onRejected.bind(self); }
 
   // Cast self into a Promise to avoid polyfills recursively defining `then`.
   var isNative = Promise.toString().indexOf('[native code]') !== -1 && Promise.name === 'Promise';
@@ -452,7 +485,7 @@ Worker.prototype.thenList = function thenList(fns) {
 
 Worker.prototype['catch'] = function (onRejected) {
   // Bind `this` to the promise handler, call `catch`, and return a Worker.
-  if (onRejected)   { onRejected = onRejected.bind(this); }
+  if (onRejected) { onRejected = onRejected.bind(this); }
   var returnVal = Promise.prototype['catch'].call(this, onRejected);
   return Worker.convert(returnVal, this);
 };
