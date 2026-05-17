@@ -118,6 +118,14 @@ Worker.prototype.toContainer = function toContainer() {
 
     // Create and attach the elements.
     var source = deepCloneBasic(this.prop.src);
+    
+    // Force positioned element to static to avoid rendering issues
+    function resetPositioning(element) {
+      if (element.style) {
+        element.style.setProperty('position', 'static', 'important');
+      }
+    }
+    resetPositioning(source);
     this.prop.overlay = createElement('div',   { className: 'html2pdf__overlay', style: overlayCSS });
     this.prop.container = createElement('div', { className: 'html2pdf__container', style: containerCSS });
     this.prop.container.appendChild(source);
