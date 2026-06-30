@@ -3,7 +3,7 @@ const webpack = require('webpack');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const pkg = require('./package.json');
 
-const externals = [ 'jspdf', 'html2canvas' ];
+const externals = [ 'jspdf', 'html2canvas-pro' ];
 const banner = `${pkg.name} v${pkg.version}
 Copyright (c) ${(new Date).getFullYear()} Erik Koopmans
 Released under the ${pkg.license} License.`;
