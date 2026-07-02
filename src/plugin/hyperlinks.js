@@ -40,13 +40,13 @@ Worker.prototype.toContainer = function toContainer() {
   });
 };
 
-Worker.prototype.toPdf = function toPdf() {
+Worker.prototype.toPdf = function toPdf(forcePage) {
   return orig.toPdf.call(this).then(function toPdf_hyperlink() {
     // Add hyperlinks if the option is enabled.
     if (this.opt.enableLinks) {
       // Attach each anchor tag based on info from toContainer().
       linkInfo.forEach(function(l) {
-        this.prop.pdf.setPage(l.page);
+        this.prop.pdf.setPage(forcePage || l.page);
         this.prop.pdf.link(l.left, l.top, l.clientRect.width, l.clientRect.height,
                            { url: l.link.href });
       }, this);
